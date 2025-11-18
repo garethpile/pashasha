@@ -1,0 +1,942 @@
+{
+  "Resources": {
+    "BackendVpcC09D5BB7": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.0.0.0/16",
+        "EnableDnsHostnames": true,
+        "EnableDnsSupport": true,
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/Resource"
+      }
+    },
+    "BackendVpcPublicSubnet1Subnet9D3515AA": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "eu-west-1a",
+        "CidrBlock": "10.0.0.0/18",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1/Subnet"
+      }
+    },
+    "BackendVpcPublicSubnet1RouteTableBA4FDE64": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1/RouteTable"
+      }
+    },
+    "BackendVpcPublicSubnet1RouteTableAssociation720D9165": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "BackendVpcPublicSubnet1RouteTableBA4FDE64"
+        },
+        "SubnetId": {
+          "Ref": "BackendVpcPublicSubnet1Subnet9D3515AA"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1/RouteTableAssociation"
+      }
+    },
+    "BackendVpcPublicSubnet1DefaultRouteE5AEA3E8": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "BackendVpcIGW541B5672"
+        },
+        "RouteTableId": {
+          "Ref": "BackendVpcPublicSubnet1RouteTableBA4FDE64"
+        }
+      },
+      "DependsOn": ["BackendVpcVPCGWE6A2470E"],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1/DefaultRoute"
+      }
+    },
+    "BackendVpcPublicSubnet1EIP58477CDB": {
+      "Type": "AWS::EC2::EIP",
+      "Properties": {
+        "Domain": "vpc",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1/EIP"
+      }
+    },
+    "BackendVpcPublicSubnet1NATGateway86D87B29": {
+      "Type": "AWS::EC2::NatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": ["BackendVpcPublicSubnet1EIP58477CDB", "AllocationId"]
+        },
+        "SubnetId": {
+          "Ref": "BackendVpcPublicSubnet1Subnet9D3515AA"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1"
+          }
+        ]
+      },
+      "DependsOn": [
+        "BackendVpcPublicSubnet1DefaultRouteE5AEA3E8",
+        "BackendVpcPublicSubnet1RouteTableAssociation720D9165"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet1/NATGateway"
+      }
+    },
+    "BackendVpcPublicSubnet2Subnet5D82DB54": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "eu-west-1b",
+        "CidrBlock": "10.0.64.0/18",
+        "MapPublicIpOnLaunch": true,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Public"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Public"
+          },
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet2/Subnet"
+      }
+    },
+    "BackendVpcPublicSubnet2RouteTable8C2AB804": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet2/RouteTable"
+      }
+    },
+    "BackendVpcPublicSubnet2RouteTableAssociation1D2E03F3": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "BackendVpcPublicSubnet2RouteTable8C2AB804"
+        },
+        "SubnetId": {
+          "Ref": "BackendVpcPublicSubnet2Subnet5D82DB54"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet2/RouteTableAssociation"
+      }
+    },
+    "BackendVpcPublicSubnet2DefaultRoute53B0EE2B": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "BackendVpcIGW541B5672"
+        },
+        "RouteTableId": {
+          "Ref": "BackendVpcPublicSubnet2RouteTable8C2AB804"
+        }
+      },
+      "DependsOn": ["BackendVpcVPCGWE6A2470E"],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PublicSubnet2/DefaultRoute"
+      }
+    },
+    "BackendVpcPrivateSubnet1Subnet911DA327": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "eu-west-1a",
+        "CidrBlock": "10.0.128.0/18",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet1/Subnet"
+      }
+    },
+    "BackendVpcPrivateSubnet1RouteTable50577220": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet1/RouteTable"
+      }
+    },
+    "BackendVpcPrivateSubnet1RouteTableAssociationFC788464": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "BackendVpcPrivateSubnet1RouteTable50577220"
+        },
+        "SubnetId": {
+          "Ref": "BackendVpcPrivateSubnet1Subnet911DA327"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet1/RouteTableAssociation"
+      }
+    },
+    "BackendVpcPrivateSubnet1DefaultRouteD5FFC862": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "BackendVpcPublicSubnet1NATGateway86D87B29"
+        },
+        "RouteTableId": {
+          "Ref": "BackendVpcPrivateSubnet1RouteTable50577220"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet1/DefaultRoute"
+      }
+    },
+    "BackendVpcPrivateSubnet2Subnet7AF7AF1A": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": "eu-west-1b",
+        "CidrBlock": "10.0.192.0/18",
+        "MapPublicIpOnLaunch": false,
+        "Tags": [
+          {
+            "Key": "aws-cdk:subnet-name",
+            "Value": "Private"
+          },
+          {
+            "Key": "aws-cdk:subnet-type",
+            "Value": "Private"
+          },
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet2/Subnet"
+      }
+    },
+    "BackendVpcPrivateSubnet2RouteTableBDCAB3B1": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet2"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet2/RouteTable"
+      }
+    },
+    "BackendVpcPrivateSubnet2RouteTableAssociationFCC45200": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "BackendVpcPrivateSubnet2RouteTableBDCAB3B1"
+        },
+        "SubnetId": {
+          "Ref": "BackendVpcPrivateSubnet2Subnet7AF7AF1A"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet2/RouteTableAssociation"
+      }
+    },
+    "BackendVpcPrivateSubnet2DefaultRoute2AF832BC": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "BackendVpcPublicSubnet1NATGateway86D87B29"
+        },
+        "RouteTableId": {
+          "Ref": "BackendVpcPrivateSubnet2RouteTableBDCAB3B1"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/PrivateSubnet2/DefaultRoute"
+      }
+    },
+    "BackendVpcIGW541B5672": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "SecurityGuardPaymentsBackendStack/BackendVpc"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/IGW"
+      }
+    },
+    "BackendVpcVPCGWE6A2470E": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "BackendVpcIGW541B5672"
+        },
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendVpc/VPCGW"
+      }
+    },
+    "BackendCluster5086059C": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {
+        "ClusterSettings": [
+          {
+            "Name": "containerInsights",
+            "Value": "enabled"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendCluster/Resource"
+      }
+    },
+    "BackendLogGroupDA10F1B2": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/security-guard-payments/backend",
+        "RetentionInDays": 30
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendLogGroup/Resource"
+      }
+    },
+    "BackendFargateServiceLBA38260FE": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "false"
+          }
+        ],
+        "Scheme": "internet-facing",
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": ["BackendFargateServiceLBSecurityGroup1849D2B2", "GroupId"]
+          }
+        ],
+        "Subnets": [
+          {
+            "Ref": "BackendVpcPublicSubnet1Subnet9D3515AA"
+          },
+          {
+            "Ref": "BackendVpcPublicSubnet2Subnet5D82DB54"
+          }
+        ],
+        "Type": "application"
+      },
+      "DependsOn": [
+        "BackendVpcPublicSubnet1DefaultRouteE5AEA3E8",
+        "BackendVpcPublicSubnet1RouteTableAssociation720D9165",
+        "BackendVpcPublicSubnet2DefaultRoute53B0EE2B",
+        "BackendVpcPublicSubnet2RouteTableAssociation1D2E03F3"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/LB/Resource"
+      }
+    },
+    "BackendFargateServiceLBSecurityGroup1849D2B2": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Automatically created Security Group for ELB SecurityGuardPaymentsBackendStackBackendFargateServiceLBEDE36FD8",
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow from anyone on port 80",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/LB/SecurityGroup/Resource"
+      }
+    },
+    "BackendFargateServiceLBSecurityGrouptoSecurityGuardPaymentsBackendStackBackendFargateServiceSecurityGroup64B5E8C2400049D4330C": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "Description": "Load balancer to target",
+        "DestinationSecurityGroupId": {
+          "Fn::GetAtt": ["BackendFargateServiceSecurityGroup52160937", "GroupId"]
+        },
+        "FromPort": 4000,
+        "GroupId": {
+          "Fn::GetAtt": ["BackendFargateServiceLBSecurityGroup1849D2B2", "GroupId"]
+        },
+        "IpProtocol": "tcp",
+        "ToPort": 4000
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/LB/SecurityGroup/to SecurityGuardPaymentsBackendStackBackendFargateServiceSecurityGroup64B5E8C2:4000"
+      }
+    },
+    "BackendFargateServiceLBPublicListener36B53DB0": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "TargetGroupArn": {
+              "Ref": "BackendFargateServiceLBPublicListenerECSGroup56AB4EF1"
+            },
+            "Type": "forward"
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "BackendFargateServiceLBA38260FE"
+        },
+        "Port": 80,
+        "Protocol": "HTTP"
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/LB/PublicListener/Resource"
+      }
+    },
+    "BackendFargateServiceLBPublicListenerECSGroup56AB4EF1": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "HealthCheckIntervalSeconds": 30,
+        "HealthCheckPath": "/health",
+        "HealthCheckTimeoutSeconds": 5,
+        "Matcher": {
+          "HttpCode": "200"
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "stickiness.enabled",
+            "Value": "false"
+          }
+        ],
+        "TargetType": "ip",
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/LB/PublicListener/ECSGroup/Resource"
+      }
+    },
+    "BackendFargateServiceTaskDefTaskRole75B7E3C0": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/TaskDef/TaskRole/Resource"
+      }
+    },
+    "BackendFargateServiceTaskDef2265C2A7": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "ContainerDefinitions": [
+          {
+            "Environment": [
+              {
+                "Name": "NODE_ENV",
+                "Value": "production"
+              },
+              {
+                "Name": "PORT",
+                "Value": "4000"
+              }
+            ],
+            "Essential": true,
+            "Image": {
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:0cc15e328be8accad74b9309f5b05b67da630650649cd0dbd0ffa66605eb0a65"
+            },
+            "LogConfiguration": {
+              "LogDriver": "awslogs",
+              "Options": {
+                "awslogs-group": {
+                  "Ref": "BackendLogGroupDA10F1B2"
+                },
+                "awslogs-stream-prefix": "backend",
+                "awslogs-region": "eu-west-1"
+              }
+            },
+            "Name": "web",
+            "PortMappings": [
+              {
+                "ContainerPort": 4000,
+                "Protocol": "tcp"
+              }
+            ]
+          }
+        ],
+        "Cpu": "512",
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": ["BackendFargateServiceTaskDefExecutionRoleAEEBC172", "Arn"]
+        },
+        "Family": "SecurityGuardPaymentsBackendStackBackendFargateServiceTaskDef8BD4B29A",
+        "Memory": "1024",
+        "NetworkMode": "awsvpc",
+        "RequiresCompatibilities": ["FARGATE"],
+        "TaskRoleArn": {
+          "Fn::GetAtt": ["BackendFargateServiceTaskDefTaskRole75B7E3C0", "Arn"]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/TaskDef/Resource"
+      }
+    },
+    "BackendFargateServiceTaskDefExecutionRoleAEEBC172": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/TaskDef/ExecutionRole/Resource"
+      }
+    },
+    "BackendFargateServiceTaskDefExecutionRoleDefaultPolicyF7D40C73": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":ecr:eu-west-1:732439976770:repository/cdk-hnb659fds-container-assets-732439976770-eu-west-1"
+                  ]
+                ]
+              }
+            },
+            {
+              "Action": "ecr:GetAuthorizationToken",
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": ["BackendLogGroupDA10F1B2", "Arn"]
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "BackendFargateServiceTaskDefExecutionRoleDefaultPolicyF7D40C73",
+        "Roles": [
+          {
+            "Ref": "BackendFargateServiceTaskDefExecutionRoleAEEBC172"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+      }
+    },
+    "BackendFargateService29076574": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "Cluster": {
+          "Ref": "BackendCluster5086059C"
+        },
+        "DeploymentConfiguration": {
+          "Alarms": {
+            "AlarmNames": [],
+            "Enable": false,
+            "Rollback": false
+          },
+          "DeploymentCircuitBreaker": {
+            "Enable": true,
+            "Rollback": true
+          },
+          "MaximumPercent": 200,
+          "MinimumHealthyPercent": 50
+        },
+        "DeploymentController": {
+          "Type": "ECS"
+        },
+        "DesiredCount": 2,
+        "EnableECSManagedTags": false,
+        "HealthCheckGracePeriodSeconds": 60,
+        "LaunchType": "FARGATE",
+        "LoadBalancers": [
+          {
+            "ContainerName": "web",
+            "ContainerPort": 4000,
+            "TargetGroupArn": {
+              "Ref": "BackendFargateServiceLBPublicListenerECSGroup56AB4EF1"
+            }
+          }
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "DISABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": ["BackendFargateServiceSecurityGroup52160937", "GroupId"]
+              }
+            ],
+            "Subnets": [
+              {
+                "Ref": "BackendVpcPrivateSubnet1Subnet911DA327"
+              },
+              {
+                "Ref": "BackendVpcPrivateSubnet2Subnet7AF7AF1A"
+              }
+            ]
+          }
+        },
+        "TaskDefinition": {
+          "Ref": "BackendFargateServiceTaskDef2265C2A7"
+        }
+      },
+      "DependsOn": [
+        "BackendFargateServiceLBPublicListenerECSGroup56AB4EF1",
+        "BackendFargateServiceLBPublicListener36B53DB0",
+        "BackendFargateServiceTaskDefTaskRole75B7E3C0"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/Service/Service"
+      }
+    },
+    "BackendFargateServiceSecurityGroup52160937": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "SecurityGuardPaymentsBackendStack/BackendFargateService/Service/SecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "BackendVpcC09D5BB7"
+        }
+      },
+      "DependsOn": ["BackendFargateServiceTaskDefTaskRole75B7E3C0"],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/Service/SecurityGroup/Resource"
+      }
+    },
+    "BackendFargateServiceSecurityGroupfromSecurityGuardPaymentsBackendStackBackendFargateServiceLBSecurityGroup2CA839214000ADAB93F7": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": "Load balancer to target",
+        "FromPort": 4000,
+        "GroupId": {
+          "Fn::GetAtt": ["BackendFargateServiceSecurityGroup52160937", "GroupId"]
+        },
+        "IpProtocol": "tcp",
+        "SourceSecurityGroupId": {
+          "Fn::GetAtt": ["BackendFargateServiceLBSecurityGroup1849D2B2", "GroupId"]
+        },
+        "ToPort": 4000
+      },
+      "DependsOn": ["BackendFargateServiceTaskDefTaskRole75B7E3C0"],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/Service/SecurityGroup/from SecurityGuardPaymentsBackendStackBackendFargateServiceLBSecurityGroup2CA83921:4000"
+      }
+    },
+    "BackendFargateServiceTaskCountTarget19FACCD0": {
+      "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+      "Properties": {
+        "MaxCapacity": 8,
+        "MinCapacity": 2,
+        "ResourceId": {
+          "Fn::Join": [
+            "",
+            [
+              "service/",
+              {
+                "Ref": "BackendCluster5086059C"
+              },
+              "/",
+              {
+                "Fn::GetAtt": ["BackendFargateService29076574", "Name"]
+              }
+            ]
+          ]
+        },
+        "RoleARN": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":iam::732439976770:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
+            ]
+          ]
+        },
+        "ScalableDimension": "ecs:service:DesiredCount",
+        "ServiceNamespace": "ecs"
+      },
+      "DependsOn": ["BackendFargateServiceTaskDefTaskRole75B7E3C0"],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/Service/TaskCount/Target/Resource"
+      }
+    },
+    "BackendFargateServiceTaskCountTargetCpuScalingBEA95DD4": {
+      "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+      "Properties": {
+        "PolicyName": "SecurityGuardPaymentsBackendStackBackendFargateServiceTaskCountTargetCpuScalingE4B8D26C",
+        "PolicyType": "TargetTrackingScaling",
+        "ScalingTargetId": {
+          "Ref": "BackendFargateServiceTaskCountTarget19FACCD0"
+        },
+        "TargetTrackingScalingPolicyConfiguration": {
+          "PredefinedMetricSpecification": {
+            "PredefinedMetricType": "ECSServiceAverageCPUUtilization"
+          },
+          "ScaleInCooldown": 60,
+          "ScaleOutCooldown": 30,
+          "TargetValue": 55
+        }
+      },
+      "DependsOn": ["BackendFargateServiceTaskDefTaskRole75B7E3C0"],
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendFargateService/Service/TaskCount/Target/CpuScaling/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/31SUW8aMQz+LX0PWUGbtFdKuwqp2k4c6isywc1cQnKKHRA63X+fkgPu2k178ucvn+PPTmZ6+u27vr+DE0/Mbj9xtNVtLWD2Ck68adHMdPvaGLV486/VQlVp68jUaetRMjegVUiCa9g6HPiBmzMHQyAU/E2cwdOyyuEnyDMInuCsqkhHEBwuXnrB6PEm6J1csrkImN8H9KJqNCmSnJ9jSE3x8F/iyUZk/ote+sJ3Cg3rduESC8asusIfEC3kqXj/iG/k6TrTZyZ4AfIYR9yltsZ4JNPv6QJrAy7vKV+yCMlLp1ywrNuXYG/+r7iY2zQgeTGs503jyJTdvgTYPYADb3D3qRk6YCHjAuy2RUHeHme6/Xd17PuN8rGOWNBfNFc8Ol9DtCg326O0UwQH3a5C/0tKrIIjU561R3m6uAFmFNaPwewxLg9g8xdCyWd6hU1gkhDPD8CoYOgMSQIbcOStboed5v5l2x+ZPqwjmD15W/d1g50PRNepFXJIsX+3X0maJKp4qgUseVsGukg65cMO9Tt/Oc6+6ulU39+9M9EkJi90QL3q4x+OcYmwfgMAAA=="
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/CDKMetadata/Default"
+      }
+    }
+  },
+  "Outputs": {
+    "BackendFargateServiceLoadBalancerDNS912E557F": {
+      "Value": {
+        "Fn::GetAtt": ["BackendFargateServiceLBA38260FE", "DNSName"]
+      }
+    },
+    "BackendFargateServiceServiceURL180FC193": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": ["BackendFargateServiceLBA38260FE", "DNSName"]
+            }
+          ]
+        ]
+      }
+    },
+    "BackendLoadBalancerDns": {
+      "Value": {
+        "Fn::GetAtt": ["BackendFargateServiceLBA38260FE", "DNSName"]
+      },
+      "Export": {
+        "Name": "SecurityGuardPaymentsBackendAlbDns"
+      }
+    },
+    "BackendServiceSecurityGroup": {
+      "Value": {
+        "Fn::GetAtt": ["BackendFargateServiceSecurityGroup52160937", "GroupId"]
+      }
+    },
+    "BackendListenerArn": {
+      "Value": {
+        "Ref": "BackendFargateServiceLBPublicListener36B53DB0"
+      }
+    },
+    "BackendApiEndpoint": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "http://",
+            {
+              "Fn::GetAtt": ["BackendFargateServiceLBA38260FE", "DNSName"]
+            }
+          ]
+        ]
+      }
+    },
+    "ExportsOutputFnGetAttBackendFargateServiceLBA38260FEDNSNameC594C614": {
+      "Value": {
+        "Fn::GetAtt": ["BackendFargateServiceLBA38260FE", "DNSName"]
+      },
+      "Export": {
+        "Name": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendFargateServiceLBA38260FEDNSNameC594C614"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  ["1", "2", "3", "4", "5"],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

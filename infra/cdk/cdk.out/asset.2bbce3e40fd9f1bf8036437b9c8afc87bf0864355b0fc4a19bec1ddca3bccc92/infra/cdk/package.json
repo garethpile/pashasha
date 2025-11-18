@@ -1,0 +1,29 @@
+{
+  "name": "securityguardpayments-infra",
+  "version": "0.1.0",
+  "private": true,
+  "bin": {
+    "sgp-infra": "bin/securityguardpayments.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "synth": "cdk synth",
+    "deploy:backend": "cdk deploy SecurityGuardPaymentsBackendStack",
+    "deploy:frontend": "cdk deploy SecurityGuardPaymentsFrontendStack",
+    "destroy:backend": "cdk destroy SecurityGuardPaymentsBackendStack",
+    "destroy:frontend": "cdk destroy SecurityGuardPaymentsFrontendStack"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "aws-cdk": "2.158.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-amplify-alpha": "2.158.0-alpha.0",
+    "aws-cdk-lib": "2.158.0",
+    "constructs": "^10.3.0",
+    "source-map-support": "^0.5.21"
+  }
+}

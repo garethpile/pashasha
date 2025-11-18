@@ -1,0 +1,151 @@
+{
+  "Resources": {
+    "AmplifyAppRole0364E92A": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "amplify.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsFrontendStack/AmplifyApp/Role/Resource"
+      }
+    },
+    "AmplifyApp6046A70F": {
+      "Type": "AWS::Amplify::App",
+      "Properties": {
+        "BasicAuthConfig": {
+          "EnableBasicAuth": false
+        },
+        "BuildSpec": "{\n  \"version\": \"1.0\",\n  \"applications\": [\n    {\n      \"appRoot\": \".\",\n      \"frontend\": {\n        \"phases\": {\n          \"preBuild\": {\n            \"commands\": [\n              \"npm install\"\n            ]\n          },\n          \"build\": {\n            \"commands\": [\n              \"npm run build --workspace frontend\"\n            ]\n          }\n        },\n        \"artifacts\": {\n          \"baseDirectory\": \"apps/frontend/out\",\n          \"files\": [\n            \"**/*\"\n          ]\n        },\n        \"cache\": {\n          \"paths\": [\n            \"node_modules/**/*\",\n            \"apps/frontend/node_modules/**/*\"\n          ]\n        }\n      },\n      \"customRules\": [\n        {\n          \"source\": \"/<*>\",\n          \"target\": \"/index.html\",\n          \"status\": \"200\"\n        }\n      ]\n    }\n  ]\n}",
+        "Description": "Amplify hosted Next.js frontend for the Security Guard tip platform.",
+        "EnableBranchAutoDeletion": true,
+        "EnvironmentVariables": [
+          {
+            "Name": "NEXT_PUBLIC_API_BASE_URL",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "http://",
+                  {
+                    "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendFargateServiceLBA38260FEDNSNameC594C614"
+                  }
+                ]
+              ]
+            }
+          }
+        ],
+        "IAMServiceRole": {
+          "Fn::GetAtt": ["AmplifyAppRole0364E92A", "Arn"]
+        },
+        "Name": "security-guard-payments-frontend",
+        "Platform": "WEB"
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsFrontendStack/AmplifyApp/Resource"
+      }
+    },
+    "AmplifyAppPrimaryBranch02455E21": {
+      "Type": "AWS::Amplify::Branch",
+      "Properties": {
+        "AppId": {
+          "Fn::GetAtt": ["AmplifyApp6046A70F", "AppId"]
+        },
+        "BranchName": "main",
+        "EnableAutoBuild": true,
+        "EnablePullRequestPreview": true,
+        "EnvironmentVariables": [
+          {
+            "Name": "NEXT_PUBLIC_API_BASE_URL",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "http://",
+                  {
+                    "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendFargateServiceLBA38260FEDNSNameC594C614"
+                  }
+                ]
+              ]
+            }
+          }
+        ],
+        "Stage": "PRODUCTION"
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsFrontendStack/AmplifyApp/PrimaryBranch/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2NQQ6DIBBFz+IeRjRt0mVbD2BiD9BMESOKSARqGsLdGyzp6iX/z7xfQ3W+QGAF7pbyfqZKviA8HPKZ4G6fQeICoVuVIM2gEyPBxSg5fCA0g74Zk4r7hpqPMZJO2NVv/LhuvTPeHX85jYRRVGZEYMU1L5aJWZnLkKx/pV57AZMt3/UJqgpYMVkp6ea1k4uA7scvWVHywcgAAAA="
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsFrontendStack/CDKMetadata/Default"
+      }
+    }
+  },
+  "Outputs": {
+    "AmplifyAppId": {
+      "Value": {
+        "Fn::GetAtt": ["AmplifyApp6046A70F", "AppId"]
+      }
+    },
+    "AmplifyDefaultDomain": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": ["AmplifyAppPrimaryBranch02455E21", "BranchName"]
+            },
+            ".",
+            {
+              "Fn::GetAtt": ["AmplifyApp6046A70F", "DefaultDomain"]
+            }
+          ]
+        ]
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  ["1", "2", "3", "4", "5"],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}
