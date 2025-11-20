@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/eedff56eed5ed86f022272f2244f37d7151c3e88d906e6c13bf50931569b933a.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/8bc00bf76e2498fa41d625981e1678256ee476a81e5af877c2ffa848f79cd429.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -162,6 +162,134 @@
             "data": "BackendCluster5086059C"
           }
         ],
+        "/SecurityGuardPaymentsBackendStack/UserPool/smsRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPoolsmsRole4EA729DD"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/UserPool/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPool6BA7E5F2"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/UserPool/WebClient/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPoolWebClient4C9370B0"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AdministratorsGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AdministratorsGroup"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomersGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomersGroup"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CivilServantsGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CivilServantsGroup"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomersTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "CustomersTableB554B793"
+            }
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomersTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomersTableB554B793"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CivilServantsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "CivilServantsTableC16F2C77"
+            }
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CivilServantsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CivilServantsTableC16F2C77"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/PaymentsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "PaymentsTable48A42630"
+            }
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/PaymentsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentsTable48A42630"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AccountCounterTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "AccountCounterTable225C6EF1"
+            }
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AccountCounterTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AccountCounterTable225C6EF1"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/UserAssetsBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserAssetsBucket8B59E294"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/UserAssetsBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserAssetsBucketPolicy42427AB7"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/UserAssetsBucket/AutoDeleteObjectsCustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserAssetsBucketAutoDeleteObjectsCustomResource11BFF435"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/Custom::S3AutoDeleteObjectsCustomResourceProvider": [
+          {
+            "type": "aws:cdk:is-custom-resource-handler-customResourceProvider",
+            "data": true
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomS3AutoDeleteObjectsCustomResourceProviderHandler9D90184F"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/BackendLogGroup/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -216,6 +344,12 @@
             "data": "BackendFargateServiceTaskDefTaskRole75B7E3C0"
           }
         ],
+        "/SecurityGuardPaymentsBackendStack/BackendFargateService/TaskDef/TaskRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendFargateServiceTaskDefTaskRoleDefaultPolicy083DCFFD"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/BackendFargateService/TaskDef/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -264,6 +398,12 @@
             "data": "BackendFargateServiceTaskCountTargetCpuScalingBEA95DD4"
           }
         ],
+        "/SecurityGuardPaymentsBackendStack/BackendDistribution/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendDistribution025C1152"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/BackendLoadBalancerDns": [
           {
             "type": "aws:cdk:logicalId",
@@ -288,10 +428,70 @@
             "data": "BackendApiEndpoint"
           }
         ],
+        "/SecurityGuardPaymentsBackendStack/BackendSecureApiEndpoint": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendSecureApiEndpoint"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/BackendCloudFrontDomain": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BackendCloudFrontDomain"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/UserPoolId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPoolId"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/UserPoolClientId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserPoolClientId"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomersTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomersTableName"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CivilServantsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CivilServantsTableName"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/PaymentsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentsTableName"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/UserAssetsBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UserAssetsBucketName"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AccountCounterTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AccountCounterTableName"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/CDKMetadata/Default": [
           {
             "type": "aws:cdk:logicalId",
             "data": "CDKMetadata"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/Exports/Output{\"Fn::GetAtt\":[\"BackendDistribution025C1152\",\"DomainName\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
           }
         ],
         "/SecurityGuardPaymentsBackendStack/Exports/Output{\"Fn::GetAtt\":[\"BackendFargateServiceLBA38260FE\",\"DNSName\"]}": [
@@ -332,7 +532,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/c160e6958e6f78c6dbace0624427d72313e45ddbc9601975537ee0ad29ea9f05.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/ada7ada2cf7c8e52f314695898266b6fce778aafab05b073fe6d4cc160a99f83.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsFrontendStack.assets"],

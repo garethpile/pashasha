@@ -1,7 +1,21 @@
 {
   "version": "36.3.0",
   "files": {
-    "eedff56eed5ed86f022272f2244f37d7151c3e88d906e6c13bf50931569b933a": {
+    "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6": {
+      "source": {
+        "path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "732439976770-eu-west-1": {
+          "bucketName": "cdk-hnb659fds-assets-732439976770-eu-west-1",
+          "objectKey": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip",
+          "region": "eu-west-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-file-publishing-role-732439976770-eu-west-1"
+        }
+      }
+    },
+    "8bc00bf76e2498fa41d625981e1678256ee476a81e5af877c2ffa848f79cd429": {
       "source": {
         "path": "SecurityGuardPaymentsBackendStack.template.json",
         "packaging": "file"
@@ -9,7 +23,7 @@
       "destinations": {
         "732439976770-eu-west-1": {
           "bucketName": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-          "objectKey": "eedff56eed5ed86f022272f2244f37d7151c3e88d906e6c13bf50931569b933a.json",
+          "objectKey": "8bc00bf76e2498fa41d625981e1678256ee476a81e5af877c2ffa848f79cd429.json",
           "region": "eu-west-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-file-publishing-role-732439976770-eu-west-1"
         }
@@ -17,16 +31,16 @@
     }
   },
   "dockerImages": {
-    "0cc15e328be8accad74b9309f5b05b67da630650649cd0dbd0ffa66605eb0a65": {
+    "96821393a730d056447914b0fabe9863598f51e5176bffbd2c5e13eebb1b485f": {
       "source": {
-        "directory": "asset.0cc15e328be8accad74b9309f5b05b67da630650649cd0dbd0ffa66605eb0a65",
+        "directory": "asset.96821393a730d056447914b0fabe9863598f51e5176bffbd2c5e13eebb1b485f",
         "dockerFile": "apps/backend/Dockerfile",
         "platform": "linux/amd64"
       },
       "destinations": {
         "732439976770-eu-west-1": {
           "repositoryName": "cdk-hnb659fds-container-assets-732439976770-eu-west-1",
-          "imageTag": "0cc15e328be8accad74b9309f5b05b67da630650649cd0dbd0ffa66605eb0a65",
+          "imageTag": "96821393a730d056447914b0fabe9863598f51e5176bffbd2c5e13eebb1b485f",
           "region": "eu-west-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-image-publishing-role-732439976770-eu-west-1"
         }

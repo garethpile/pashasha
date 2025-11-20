@@ -601,6 +601,714 @@
               "version": "2.158.0"
             }
           },
+          "UserPool": {
+            "id": "UserPool",
+            "path": "SecurityGuardPaymentsBackendStack/UserPool",
+            "children": {
+              "smsRole": {
+                "id": "smsRole",
+                "path": "SecurityGuardPaymentsBackendStack/UserPool/smsRole",
+                "children": {
+                  "ImportsmsRole": {
+                    "id": "ImportsmsRole",
+                    "path": "SecurityGuardPaymentsBackendStack/UserPool/smsRole/ImportsmsRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/UserPool/smsRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Condition": {
+                                "StringEquals": {
+                                  "sts:ExternalId": "SecurityGuardPaymentsBackendStackUserPoolB4F04AE2"
+                                }
+                              },
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "cognito-idp.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "policies": [
+                          {
+                            "policyName": "sns-publish",
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "sns:Publish",
+                                  "Effect": "Allow",
+                                  "Resource": "*"
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.158.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/UserPool/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Cognito::UserPool",
+                  "aws:cdk:cloudformation:props": {
+                    "accountRecoverySetting": {
+                      "recoveryMechanisms": [
+                        {
+                          "name": "verified_phone_number",
+                          "priority": 1
+                        },
+                        {
+                          "name": "verified_email",
+                          "priority": 2
+                        }
+                      ]
+                    },
+                    "adminCreateUserConfig": {
+                      "allowAdminCreateUserOnly": false
+                    },
+                    "aliasAttributes": ["email", "phone_number"],
+                    "autoVerifiedAttributes": ["email", "phone_number"],
+                    "emailVerificationMessage": "The verification code to your new account is {####}",
+                    "emailVerificationSubject": "Verify your new account",
+                    "schema": [
+                      {
+                        "name": "given_name",
+                        "mutable": true,
+                        "required": true
+                      },
+                      {
+                        "name": "family_name",
+                        "mutable": true,
+                        "required": true
+                      },
+                      {
+                        "name": "email",
+                        "mutable": true,
+                        "required": true
+                      },
+                      {
+                        "name": "phone_number",
+                        "mutable": true,
+                        "required": false
+                      }
+                    ],
+                    "smsConfiguration": {
+                      "externalId": "SecurityGuardPaymentsBackendStackUserPoolB4F04AE2",
+                      "snsCallerArn": {
+                        "Fn::GetAtt": ["UserPoolsmsRole4EA729DD", "Arn"]
+                      }
+                    },
+                    "smsVerificationMessage": "The verification code to your new account is {####}",
+                    "verificationMessageTemplate": {
+                      "defaultEmailOption": "CONFIRM_WITH_CODE",
+                      "emailMessage": "The verification code to your new account is {####}",
+                      "emailSubject": "Verify your new account",
+                      "smsMessage": "The verification code to your new account is {####}"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cognito.CfnUserPool",
+                  "version": "2.158.0"
+                }
+              },
+              "WebClient": {
+                "id": "WebClient",
+                "path": "SecurityGuardPaymentsBackendStack/UserPool/WebClient",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/UserPool/WebClient/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolClient",
+                      "aws:cdk:cloudformation:props": {
+                        "allowedOAuthFlows": ["implicit", "code"],
+                        "allowedOAuthFlowsUserPoolClient": true,
+                        "allowedOAuthScopes": [
+                          "profile",
+                          "phone",
+                          "email",
+                          "openid",
+                          "aws.cognito.signin.user.admin"
+                        ],
+                        "callbackUrLs": ["https://example.com"],
+                        "explicitAuthFlows": [
+                          "ALLOW_USER_PASSWORD_AUTH",
+                          "ALLOW_USER_SRP_AUTH",
+                          "ALLOW_REFRESH_TOKEN_AUTH"
+                        ],
+                        "supportedIdentityProviders": ["COGNITO"],
+                        "userPoolId": {
+                          "Ref": "UserPool6BA7E5F2"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_cognito.CfnUserPoolClient",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cognito.UserPoolClient",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cognito.UserPool",
+              "version": "2.158.0"
+            }
+          },
+          "AdministratorsGroup": {
+            "id": "AdministratorsGroup",
+            "path": "SecurityGuardPaymentsBackendStack/AdministratorsGroup",
+            "attributes": {
+              "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolGroup",
+              "aws:cdk:cloudformation:props": {
+                "groupName": "Administrators",
+                "userPoolId": {
+                  "Ref": "UserPool6BA7E5F2"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cognito.CfnUserPoolGroup",
+              "version": "2.158.0"
+            }
+          },
+          "CustomersGroup": {
+            "id": "CustomersGroup",
+            "path": "SecurityGuardPaymentsBackendStack/CustomersGroup",
+            "attributes": {
+              "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolGroup",
+              "aws:cdk:cloudformation:props": {
+                "groupName": "Customers",
+                "userPoolId": {
+                  "Ref": "UserPool6BA7E5F2"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cognito.CfnUserPoolGroup",
+              "version": "2.158.0"
+            }
+          },
+          "CivilServantsGroup": {
+            "id": "CivilServantsGroup",
+            "path": "SecurityGuardPaymentsBackendStack/CivilServantsGroup",
+            "attributes": {
+              "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolGroup",
+              "aws:cdk:cloudformation:props": {
+                "groupName": "CivilServants",
+                "userPoolId": {
+                  "Ref": "UserPool6BA7E5F2"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cognito.CfnUserPoolGroup",
+              "version": "2.158.0"
+            }
+          },
+          "CustomersTable": {
+            "id": "CustomersTable",
+            "path": "SecurityGuardPaymentsBackendStack/CustomersTable",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/CustomersTable/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
+                  "aws:cdk:cloudformation:props": {
+                    "attributeDefinitions": [
+                      {
+                        "attributeName": "customerId",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "accountNumber",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "familyNameUpper",
+                        "attributeType": "S"
+                      }
+                    ],
+                    "billingMode": "PAY_PER_REQUEST",
+                    "globalSecondaryIndexes": [
+                      {
+                        "indexName": "accountNumber",
+                        "keySchema": [
+                          {
+                            "attributeName": "accountNumber",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      },
+                      {
+                        "indexName": "familyNameUpper",
+                        "keySchema": [
+                          {
+                            "attributeName": "familyNameUpper",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      }
+                    ],
+                    "keySchema": [
+                      {
+                        "attributeName": "customerId",
+                        "keyType": "HASH"
+                      }
+                    ],
+                    "tableName": "sgp-customers"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnTable",
+                  "version": "2.158.0"
+                }
+              },
+              "ScalingRole": {
+                "id": "ScalingRole",
+                "path": "SecurityGuardPaymentsBackendStack/CustomersTable/ScalingRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_dynamodb.Table",
+              "version": "2.158.0"
+            }
+          },
+          "CivilServantsTable": {
+            "id": "CivilServantsTable",
+            "path": "SecurityGuardPaymentsBackendStack/CivilServantsTable",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/CivilServantsTable/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
+                  "aws:cdk:cloudformation:props": {
+                    "attributeDefinitions": [
+                      {
+                        "attributeName": "civilServantId",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "accountNumber",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "familyNameUpper",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "guardToken",
+                        "attributeType": "S"
+                      }
+                    ],
+                    "billingMode": "PAY_PER_REQUEST",
+                    "globalSecondaryIndexes": [
+                      {
+                        "indexName": "accountNumber",
+                        "keySchema": [
+                          {
+                            "attributeName": "accountNumber",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      },
+                      {
+                        "indexName": "familyNameUpper",
+                        "keySchema": [
+                          {
+                            "attributeName": "familyNameUpper",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      },
+                      {
+                        "indexName": "guardToken",
+                        "keySchema": [
+                          {
+                            "attributeName": "guardToken",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      }
+                    ],
+                    "keySchema": [
+                      {
+                        "attributeName": "civilServantId",
+                        "keyType": "HASH"
+                      }
+                    ],
+                    "tableName": "sgp-civil-servants"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnTable",
+                  "version": "2.158.0"
+                }
+              },
+              "ScalingRole": {
+                "id": "ScalingRole",
+                "path": "SecurityGuardPaymentsBackendStack/CivilServantsTable/ScalingRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_dynamodb.Table",
+              "version": "2.158.0"
+            }
+          },
+          "PaymentsTable": {
+            "id": "PaymentsTable",
+            "path": "SecurityGuardPaymentsBackendStack/PaymentsTable",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/PaymentsTable/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
+                  "aws:cdk:cloudformation:props": {
+                    "attributeDefinitions": [
+                      {
+                        "attributeName": "paymentId",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "customerId",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "civilServantId",
+                        "attributeType": "S"
+                      }
+                    ],
+                    "billingMode": "PAY_PER_REQUEST",
+                    "globalSecondaryIndexes": [
+                      {
+                        "indexName": "byCustomer",
+                        "keySchema": [
+                          {
+                            "attributeName": "customerId",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      },
+                      {
+                        "indexName": "byCivilServant",
+                        "keySchema": [
+                          {
+                            "attributeName": "civilServantId",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      }
+                    ],
+                    "keySchema": [
+                      {
+                        "attributeName": "paymentId",
+                        "keyType": "HASH"
+                      }
+                    ],
+                    "tableName": "sgp-payments"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnTable",
+                  "version": "2.158.0"
+                }
+              },
+              "ScalingRole": {
+                "id": "ScalingRole",
+                "path": "SecurityGuardPaymentsBackendStack/PaymentsTable/ScalingRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_dynamodb.Table",
+              "version": "2.158.0"
+            }
+          },
+          "AccountCounterTable": {
+            "id": "AccountCounterTable",
+            "path": "SecurityGuardPaymentsBackendStack/AccountCounterTable",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/AccountCounterTable/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
+                  "aws:cdk:cloudformation:props": {
+                    "attributeDefinitions": [
+                      {
+                        "attributeName": "pk",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "sk",
+                        "attributeType": "S"
+                      }
+                    ],
+                    "billingMode": "PAY_PER_REQUEST",
+                    "keySchema": [
+                      {
+                        "attributeName": "pk",
+                        "keyType": "HASH"
+                      },
+                      {
+                        "attributeName": "sk",
+                        "keyType": "RANGE"
+                      }
+                    ],
+                    "tableName": "sgp-account-counters"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnTable",
+                  "version": "2.158.0"
+                }
+              },
+              "ScalingRole": {
+                "id": "ScalingRole",
+                "path": "SecurityGuardPaymentsBackendStack/AccountCounterTable/ScalingRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_dynamodb.Table",
+              "version": "2.158.0"
+            }
+          },
+          "UserAssetsBucket": {
+            "id": "UserAssetsBucket",
+            "path": "SecurityGuardPaymentsBackendStack/UserAssetsBucket",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/UserAssetsBucket/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::S3::Bucket",
+                  "aws:cdk:cloudformation:props": {
+                    "bucketEncryption": {
+                      "serverSideEncryptionConfiguration": [
+                        {
+                          "serverSideEncryptionByDefault": {
+                            "sseAlgorithm": "AES256"
+                          }
+                        }
+                      ]
+                    },
+                    "corsConfiguration": {
+                      "corsRules": [
+                        {
+                          "allowedHeaders": ["*"],
+                          "allowedMethods": ["GET", "PUT"],
+                          "allowedOrigins": ["*"]
+                        }
+                      ]
+                    },
+                    "publicAccessBlockConfiguration": {
+                      "blockPublicAcls": true,
+                      "blockPublicPolicy": true,
+                      "ignorePublicAcls": true,
+                      "restrictPublicBuckets": true
+                    },
+                    "tags": [
+                      {
+                        "key": "aws-cdk:auto-delete-objects",
+                        "value": "true"
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3.CfnBucket",
+                  "version": "2.158.0"
+                }
+              },
+              "Policy": {
+                "id": "Policy",
+                "path": "SecurityGuardPaymentsBackendStack/UserAssetsBucket/Policy",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/UserAssetsBucket/Policy/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::S3::BucketPolicy",
+                      "aws:cdk:cloudformation:props": {
+                        "bucket": {
+                          "Ref": "UserAssetsBucket8B59E294"
+                        },
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": [
+                                "s3:PutBucketPolicy",
+                                "s3:GetBucket*",
+                                "s3:List*",
+                                "s3:DeleteObject*"
+                              ],
+                              "Effect": "Allow",
+                              "Principal": {
+                                "AWS": {
+                                  "Fn::GetAtt": [
+                                    "CustomS3AutoDeleteObjectsCustomResourceProviderRole3B1BD092",
+                                    "Arn"
+                                  ]
+                                }
+                              },
+                              "Resource": [
+                                {
+                                  "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                },
+                                {
+                                  "Fn::Join": [
+                                    "",
+                                    [
+                                      {
+                                        "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                      },
+                                      "/*"
+                                    ]
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.CfnBucketPolicy",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3.BucketPolicy",
+                  "version": "2.158.0"
+                }
+              },
+              "AutoDeleteObjectsCustomResource": {
+                "id": "AutoDeleteObjectsCustomResource",
+                "path": "SecurityGuardPaymentsBackendStack/UserAssetsBucket/AutoDeleteObjectsCustomResource",
+                "children": {
+                  "Default": {
+                    "id": "Default",
+                    "path": "SecurityGuardPaymentsBackendStack/UserAssetsBucket/AutoDeleteObjectsCustomResource/Default",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.CfnResource",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CustomResource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_s3.Bucket",
+              "version": "2.158.0"
+            }
+          },
+          "Custom::S3AutoDeleteObjectsCustomResourceProvider": {
+            "id": "Custom::S3AutoDeleteObjectsCustomResourceProvider",
+            "path": "SecurityGuardPaymentsBackendStack/Custom::S3AutoDeleteObjectsCustomResourceProvider",
+            "children": {
+              "Staging": {
+                "id": "Staging",
+                "path": "SecurityGuardPaymentsBackendStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Staging",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.AssetStaging",
+                  "version": "2.158.0"
+                }
+              },
+              "Role": {
+                "id": "Role",
+                "path": "SecurityGuardPaymentsBackendStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Role",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.158.0"
+                }
+              },
+              "Handler": {
+                "id": "Handler",
+                "path": "SecurityGuardPaymentsBackendStack/Custom::S3AutoDeleteObjectsCustomResourceProvider/Handler",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CustomResourceProviderBase",
+              "version": "2.158.0"
+            }
+          },
           "BackendLogGroup": {
             "id": "BackendLogGroup",
             "path": "SecurityGuardPaymentsBackendStack/BackendLogGroup",
@@ -875,6 +1583,208 @@
                           "fqn": "aws-cdk-lib.aws_iam.CfnRole",
                           "version": "2.158.0"
                         }
+                      },
+                      "DefaultPolicy": {
+                        "id": "DefaultPolicy",
+                        "path": "SecurityGuardPaymentsBackendStack/BackendFargateService/TaskDef/TaskRole/DefaultPolicy",
+                        "children": {
+                          "Resource": {
+                            "id": "Resource",
+                            "path": "SecurityGuardPaymentsBackendStack/BackendFargateService/TaskDef/TaskRole/DefaultPolicy/Resource",
+                            "attributes": {
+                              "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                              "aws:cdk:cloudformation:props": {
+                                "policyDocument": {
+                                  "Statement": [
+                                    {
+                                      "Action": [
+                                        "dynamodb:BatchGetItem",
+                                        "dynamodb:GetRecords",
+                                        "dynamodb:GetShardIterator",
+                                        "dynamodb:Query",
+                                        "dynamodb:GetItem",
+                                        "dynamodb:Scan",
+                                        "dynamodb:ConditionCheckItem",
+                                        "dynamodb:BatchWriteItem",
+                                        "dynamodb:PutItem",
+                                        "dynamodb:UpdateItem",
+                                        "dynamodb:DeleteItem",
+                                        "dynamodb:DescribeTable"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": [
+                                        {
+                                          "Fn::GetAtt": ["CustomersTableB554B793", "Arn"]
+                                        },
+                                        {
+                                          "Fn::Join": [
+                                            "",
+                                            [
+                                              {
+                                                "Fn::GetAtt": ["CustomersTableB554B793", "Arn"]
+                                              },
+                                              "/index/*"
+                                            ]
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "Action": [
+                                        "dynamodb:BatchGetItem",
+                                        "dynamodb:GetRecords",
+                                        "dynamodb:GetShardIterator",
+                                        "dynamodb:Query",
+                                        "dynamodb:GetItem",
+                                        "dynamodb:Scan",
+                                        "dynamodb:ConditionCheckItem",
+                                        "dynamodb:BatchWriteItem",
+                                        "dynamodb:PutItem",
+                                        "dynamodb:UpdateItem",
+                                        "dynamodb:DeleteItem",
+                                        "dynamodb:DescribeTable"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": [
+                                        {
+                                          "Fn::GetAtt": ["CivilServantsTableC16F2C77", "Arn"]
+                                        },
+                                        {
+                                          "Fn::Join": [
+                                            "",
+                                            [
+                                              {
+                                                "Fn::GetAtt": ["CivilServantsTableC16F2C77", "Arn"]
+                                              },
+                                              "/index/*"
+                                            ]
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "Action": [
+                                        "dynamodb:BatchGetItem",
+                                        "dynamodb:GetRecords",
+                                        "dynamodb:GetShardIterator",
+                                        "dynamodb:Query",
+                                        "dynamodb:GetItem",
+                                        "dynamodb:Scan",
+                                        "dynamodb:ConditionCheckItem",
+                                        "dynamodb:BatchWriteItem",
+                                        "dynamodb:PutItem",
+                                        "dynamodb:UpdateItem",
+                                        "dynamodb:DeleteItem",
+                                        "dynamodb:DescribeTable"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": [
+                                        {
+                                          "Fn::GetAtt": ["PaymentsTable48A42630", "Arn"]
+                                        },
+                                        {
+                                          "Fn::Join": [
+                                            "",
+                                            [
+                                              {
+                                                "Fn::GetAtt": ["PaymentsTable48A42630", "Arn"]
+                                              },
+                                              "/index/*"
+                                            ]
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "Action": [
+                                        "s3:GetObject*",
+                                        "s3:GetBucket*",
+                                        "s3:List*",
+                                        "s3:DeleteObject*",
+                                        "s3:PutObject",
+                                        "s3:PutObjectLegalHold",
+                                        "s3:PutObjectRetention",
+                                        "s3:PutObjectTagging",
+                                        "s3:PutObjectVersionTagging",
+                                        "s3:Abort*"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": [
+                                        {
+                                          "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                        },
+                                        {
+                                          "Fn::Join": [
+                                            "",
+                                            [
+                                              {
+                                                "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                              },
+                                              "/*"
+                                            ]
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "Action": [
+                                        "dynamodb:BatchGetItem",
+                                        "dynamodb:GetRecords",
+                                        "dynamodb:GetShardIterator",
+                                        "dynamodb:Query",
+                                        "dynamodb:GetItem",
+                                        "dynamodb:Scan",
+                                        "dynamodb:ConditionCheckItem",
+                                        "dynamodb:BatchWriteItem",
+                                        "dynamodb:PutItem",
+                                        "dynamodb:UpdateItem",
+                                        "dynamodb:DeleteItem",
+                                        "dynamodb:DescribeTable"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": [
+                                        {
+                                          "Fn::GetAtt": ["AccountCounterTable225C6EF1", "Arn"]
+                                        },
+                                        {
+                                          "Ref": "AWS::NoValue"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "Action": [
+                                        "cognito-idp:AdminCreateUser",
+                                        "cognito-idp:AdminDeleteUser",
+                                        "cognito-idp:AdminAddUserToGroup",
+                                        "cognito-idp:AdminUpdateUserAttributes",
+                                        "cognito-idp:ListUsersInGroup"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": {
+                                        "Fn::GetAtt": ["UserPool6BA7E5F2", "Arn"]
+                                      }
+                                    }
+                                  ],
+                                  "Version": "2012-10-17"
+                                },
+                                "policyName": "BackendFargateServiceTaskDefTaskRoleDefaultPolicy083DCFFD",
+                                "roles": [
+                                  {
+                                    "Ref": "BackendFargateServiceTaskDefTaskRole75B7E3C0"
+                                  }
+                                ]
+                              }
+                            },
+                            "constructInfo": {
+                              "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                              "version": "2.158.0"
+                            }
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.Policy",
+                          "version": "2.158.0"
+                        }
                       }
                     },
                     "constructInfo": {
@@ -892,7 +1802,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:0cc15e328be8accad74b9309f5b05b67da630650649cd0dbd0ffa66605eb0a65"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:96821393a730d056447914b0fabe9863598f51e5176bffbd2c5e13eebb1b485f"
                             },
                             "name": "web",
                             "portMappings": [
@@ -919,6 +1829,52 @@
                               {
                                 "name": "PORT",
                                 "value": "4000"
+                              },
+                              {
+                                "name": "USER_POOL_ID",
+                                "value": {
+                                  "Ref": "UserPool6BA7E5F2"
+                                }
+                              },
+                              {
+                                "name": "USER_POOL_CLIENT_ID",
+                                "value": {
+                                  "Ref": "UserPoolWebClient4C9370B0"
+                                }
+                              },
+                              {
+                                "name": "CUSTOMERS_TABLE_NAME",
+                                "value": {
+                                  "Ref": "CustomersTableB554B793"
+                                }
+                              },
+                              {
+                                "name": "CIVIL_SERVANTS_TABLE_NAME",
+                                "value": {
+                                  "Ref": "CivilServantsTableC16F2C77"
+                                }
+                              },
+                              {
+                                "name": "PAYMENTS_TABLE_NAME",
+                                "value": {
+                                  "Ref": "PaymentsTable48A42630"
+                                }
+                              },
+                              {
+                                "name": "USER_ASSETS_BUCKET",
+                                "value": {
+                                  "Ref": "UserAssetsBucket8B59E294"
+                                }
+                              },
+                              {
+                                "name": "COUNTER_TABLE_NAME",
+                                "value": {
+                                  "Ref": "AccountCounterTable225C6EF1"
+                                }
+                              },
+                              {
+                                "name": "GUARD_PORTAL_BASE_URL",
+                                "value": "https://main.d2vxflzymkt19g.amplifyapp.com"
                               }
                             ]
                           }
@@ -1348,6 +2304,71 @@
               "version": "2.158.0"
             }
           },
+          "BackendDistribution": {
+            "id": "BackendDistribution",
+            "path": "SecurityGuardPaymentsBackendStack/BackendDistribution",
+            "children": {
+              "Origin1": {
+                "id": "Origin1",
+                "path": "SecurityGuardPaymentsBackendStack/BackendDistribution/Origin1",
+                "constructInfo": {
+                  "fqn": "constructs.Construct",
+                  "version": "10.4.3"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/BackendDistribution/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::CloudFront::Distribution",
+                  "aws:cdk:cloudformation:props": {
+                    "distributionConfig": {
+                      "enabled": true,
+                      "origins": [
+                        {
+                          "domainName": {
+                            "Fn::GetAtt": ["BackendFargateServiceLBA38260FE", "DNSName"]
+                          },
+                          "id": "SecurityGuardPaymentsBackendStackBackendDistributionOrigin17F178CC9",
+                          "customOriginConfig": {
+                            "originSslProtocols": ["TLSv1.2"],
+                            "originProtocolPolicy": "http-only"
+                          }
+                        }
+                      ],
+                      "defaultCacheBehavior": {
+                        "pathPattern": "*",
+                        "targetOriginId": "SecurityGuardPaymentsBackendStackBackendDistributionOrigin17F178CC9",
+                        "allowedMethods": [
+                          "GET",
+                          "HEAD",
+                          "OPTIONS",
+                          "PUT",
+                          "PATCH",
+                          "POST",
+                          "DELETE"
+                        ],
+                        "cachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+                        "compress": true,
+                        "originRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+                        "viewerProtocolPolicy": "redirect-to-https"
+                      },
+                      "httpVersion": "http2",
+                      "ipv6Enabled": true
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_cloudfront.CfnDistribution",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_cloudfront.Distribution",
+              "version": "2.158.0"
+            }
+          },
           "BackendLoadBalancerDns": {
             "id": "BackendLoadBalancerDns",
             "path": "SecurityGuardPaymentsBackendStack/BackendLoadBalancerDns",
@@ -1380,6 +2401,78 @@
               "version": "2.158.0"
             }
           },
+          "BackendSecureApiEndpoint": {
+            "id": "BackendSecureApiEndpoint",
+            "path": "SecurityGuardPaymentsBackendStack/BackendSecureApiEndpoint",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "BackendCloudFrontDomain": {
+            "id": "BackendCloudFrontDomain",
+            "path": "SecurityGuardPaymentsBackendStack/BackendCloudFrontDomain",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "UserPoolId": {
+            "id": "UserPoolId",
+            "path": "SecurityGuardPaymentsBackendStack/UserPoolId",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "UserPoolClientId": {
+            "id": "UserPoolClientId",
+            "path": "SecurityGuardPaymentsBackendStack/UserPoolClientId",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "CustomersTableName": {
+            "id": "CustomersTableName",
+            "path": "SecurityGuardPaymentsBackendStack/CustomersTableName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "CivilServantsTableName": {
+            "id": "CivilServantsTableName",
+            "path": "SecurityGuardPaymentsBackendStack/CivilServantsTableName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "PaymentsTableName": {
+            "id": "PaymentsTableName",
+            "path": "SecurityGuardPaymentsBackendStack/PaymentsTableName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "UserAssetsBucketName": {
+            "id": "UserAssetsBucketName",
+            "path": "SecurityGuardPaymentsBackendStack/UserAssetsBucketName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "AccountCounterTableName": {
+            "id": "AccountCounterTableName",
+            "path": "SecurityGuardPaymentsBackendStack/AccountCounterTableName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
           "CDKMetadata": {
             "id": "CDKMetadata",
             "path": "SecurityGuardPaymentsBackendStack/CDKMetadata",
@@ -1402,6 +2495,14 @@
             "id": "Exports",
             "path": "SecurityGuardPaymentsBackendStack/Exports",
             "children": {
+              "Output{\"Fn::GetAtt\":[\"BackendDistribution025C1152\",\"DomainName\"]}": {
+                "id": "Output{\"Fn::GetAtt\":[\"BackendDistribution025C1152\",\"DomainName\"]}",
+                "path": "SecurityGuardPaymentsBackendStack/Exports/Output{\"Fn::GetAtt\":[\"BackendDistribution025C1152\",\"DomainName\"]}",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnOutput",
+                  "version": "2.158.0"
+                }
+              },
               "Output{\"Fn::GetAtt\":[\"BackendFargateServiceLBA38260FE\",\"DNSName\"]}": {
                 "id": "Output{\"Fn::GetAtt\":[\"BackendFargateServiceLBA38260FE\",\"DNSName\"]}",
                 "path": "SecurityGuardPaymentsBackendStack/Exports/Output{\"Fn::GetAtt\":[\"BackendFargateServiceLBA38260FE\",\"DNSName\"]}",
@@ -1508,6 +2609,36 @@
                           "Fn::Join": [
                             "",
                             [
+                              "https://",
+                              {
+                                "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
+                              },
+                              "/api/guards"
+                            ]
+                          ]
+                        }
+                      },
+                      {
+                        "name": "NEXT_PUBLIC_BACKEND_API_ROOT",
+                        "value": {
+                          "Fn::Join": [
+                            "",
+                            [
+                              "https://",
+                              {
+                                "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
+                              },
+                              "/api"
+                            ]
+                          ]
+                        }
+                      },
+                      {
+                        "name": "NEXT_PUBLIC_LEGACY_BACKEND_BASE",
+                        "value": {
+                          "Fn::Join": [
+                            "",
+                            [
                               "http://",
                               {
                                 "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendFargateServiceLBA38260FEDNSNameC594C614"
@@ -1543,11 +2674,41 @@
                           "Fn::GetAtt": ["AmplifyApp6046A70F", "AppId"]
                         },
                         "branchName": "main",
-                        "enableAutoBuild": true,
-                        "enablePullRequestPreview": true,
+                        "enableAutoBuild": false,
+                        "enablePullRequestPreview": false,
                         "environmentVariables": [
                           {
                             "name": "NEXT_PUBLIC_API_BASE_URL",
+                            "value": {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  "https://",
+                                  {
+                                    "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
+                                  },
+                                  "/api/guards"
+                                ]
+                              ]
+                            }
+                          },
+                          {
+                            "name": "NEXT_PUBLIC_BACKEND_API_ROOT",
+                            "value": {
+                              "Fn::Join": [
+                                "",
+                                [
+                                  "https://",
+                                  {
+                                    "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
+                                  },
+                                  "/api"
+                                ]
+                              ]
+                            }
+                          },
+                          {
+                            "name": "NEXT_PUBLIC_LEGACY_BACKEND_BASE",
                             "value": {
                               "Fn::Join": [
                                 "",

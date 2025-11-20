@@ -1,0 +1,83 @@
+### Title: QR Payment Landing Flow for Security Guards
+
+As a mobile patron scanning a guard’s QR code,  
+I want to open a responsive tipping page with preset and custom amounts,  
+So that I can compensate the guard quickly without manual entry friction.
+
+#### Acceptance Criteria
+1. Scanning a guard’s unique QR code resolves to the guard-specific landing page with guard name, photo (if uploaded), and confirmation messaging.
+2. Landing page renders responsive layouts for common mobile viewports (≥320px width) and passes accessibility contrast guidelines for preset amount buttons.
+3. Preset tip buttons (e.g., R20, R50, R100) and a custom amount input are displayed; selecting any option enables the payment CTA showing the chosen amount.
+4. Payment CTA launches the configured payment processor with the guard identifier, selected amount, and transaction reference prepopulated.
+5. Guard landing page displays confirmation call-to-action to share feedback or report issues, with link instrumented for guard reference.
+
+---
+
+### Title: Guard Profile & QR Code Provisioning
+
+As an operations manager,  
+I want to generate personalized QR codes linked to each guard profile,  
+So that patrons can tip the right guard and we can track payouts accurately.
+
+#### Acceptance Criteria
+1. Guard profile CRUD interface captures full name, employee ID, payout destination, portrait photo (optional), and active/inactive status.
+2. Generating a profile produces a unique, shareable QR code encoded with the guard landing URL and guard identifier.
+3. Regenerating a QR code invalidates prior URLs and prevents reuse within five minutes to avoid broken links during updates.
+4. Guard status changes propagate to QR landing pages within 60 seconds, displaying ‘inactive’ messaging for inactive guards.
+5. Audit log records QR generation, regeneration, and status updates with timestamp, actor, and guard identifier.
+
+---
+
+### Title: Payment Processing & Settlement Pipeline
+
+As a finance administrator,  
+I want patron tips to route through a secure payment processor and settle to guard accounts,  
+So that payouts remain compliant and auditable.
+
+#### Acceptance Criteria
+1. Payment API integrates with preferred payment gateway using PCI-compliant tokens; no card data stored on our servers.
+2. Successful transactions create payout ledger entries tagged by guard ID, transaction amount, timestamp, and payment reference.
+3. Settlement batch job reconciles daily transactions, applying fees and scheduling payouts per guard payout configuration.
+4. Failed transactions trigger patron-facing error messaging and alert ops dashboard with guard ID and failure reason.
+5. Financial reports export CSV summaries per guard, including totals, fees, payout status, and reconciliation notes.
+
+---
+
+### Title: Patron Payment Validation & Security Controls
+
+As a platform security engineer,  
+I want threat protections around the QR payment flow,  
+So that patron payments and guard payouts remain trustworthy.
+
+#### Acceptance Criteria
+1. Landing URLs enforce HTTPS, HSTS, and redirect guards against open redirect vectors.
+2. Each tip submission validates guard status, amount bounds (R5–R2,000), and idempotency keys to avoid duplicate charges.
+3. Rate limiting throttles payment initiation per IP/device (configurable threshold) with 429 responses logging guard ID and client fingerprint.
+4. QR links include signature tokens expiring after configurable TTL; tampered or expired links return a secure error page.
+5. All security events (invalid signature, rate limit, duplicate attempts) feed into centralized monitoring with guard and transaction metadata.
+
+---
+
+### Title: Cross-Channel Guard Status Notifications
+
+As a guard,  
+I want to receive timely updates about my tips and QR status,  
+So that I can track income and react to issues quickly.
+
+#### Acceptance Criteria
+1. Guard portal shows tip history with amount, payer alias (if available), timestamp, and payment status.
+2. Optional SMS/email notifications trigger for each successful tip and for QR status changes (activation/deactivation).
+3. Guards can opt in/out of notification channels separately, with preferences applied within 5 minutes.
+4. Notification payloads include cumulative daily total and link to dispute/report issues.
+5. Failed delivery attempts retry twice and escalate to support if undelivered after 30 minutes.
+
+---
+
+### Edge Cases and Considerations
+- Guards marked inactive mid-transaction: payment completion blocked with respectful messaging to patrons.
+- Patron selects custom amount below minimum or above maximum: validation error shown inline before payment initiation.
+- QR codes damaged or unreadable: provide fallback short URL printed alongside QR.
+- High traffic (events): ensure payment API autoscaling and queueing to maintain sub-2s response times for landing page.
+- Guards sharing devices: enforce 2FA for guard portal logins; log out after 15 minutes idle to prevent unauthorized access.
+
+These user stories and acceptance criteria cover functional flows, operational tooling, payment compliance, security controls, and edge cases for the QR-based tipping solution.

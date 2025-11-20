@@ -36,6 +36,36 @@
               "Fn::Join": [
                 "",
                 [
+                  "https://",
+                  {
+                    "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
+                  },
+                  "/api/guards"
+                ]
+              ]
+            }
+          },
+          {
+            "Name": "NEXT_PUBLIC_BACKEND_API_ROOT",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
+                  },
+                  "/api"
+                ]
+              ]
+            }
+          },
+          {
+            "Name": "NEXT_PUBLIC_LEGACY_BACKEND_BASE",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
                   "http://",
                   {
                     "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendFargateServiceLBA38260FEDNSNameC594C614"
@@ -62,11 +92,41 @@
           "Fn::GetAtt": ["AmplifyApp6046A70F", "AppId"]
         },
         "BranchName": "main",
-        "EnableAutoBuild": true,
-        "EnablePullRequestPreview": true,
+        "EnableAutoBuild": false,
+        "EnablePullRequestPreview": false,
         "EnvironmentVariables": [
           {
             "Name": "NEXT_PUBLIC_API_BASE_URL",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
+                  },
+                  "/api/guards"
+                ]
+              ]
+            }
+          },
+          {
+            "Name": "NEXT_PUBLIC_BACKEND_API_ROOT",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149"
+                  },
+                  "/api"
+                ]
+              ]
+            }
+          },
+          {
+            "Name": "NEXT_PUBLIC_LEGACY_BACKEND_BASE",
             "Value": {
               "Fn::Join": [
                 "",

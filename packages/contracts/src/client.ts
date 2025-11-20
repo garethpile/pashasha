@@ -36,10 +36,11 @@ export class GuardsClient {
     });
   }
 
-  private async request<T>(path: string, init: RequestInit): Promise<T> {
+  private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const url = this.resolveUrl(path);
     const response = await this.fetchFn(url, {
       credentials: 'include',
+      cache: init.cache ?? 'no-store',
       ...init,
       headers: {
         ...this.defaultHeaders,
