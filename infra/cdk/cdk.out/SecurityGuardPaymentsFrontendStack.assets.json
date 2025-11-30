@@ -1,7 +1,7 @@
 {
   "version": "36.3.0",
   "files": {
-    "ada7ada2cf7c8e52f314695898266b6fce778aafab05b073fe6d4cc160a99f83": {
+    "2afe594cc233f07d00b61b6e993438e6c2a6b9577c9429a40e8f38680339c8cd": {
       "source": {
         "path": "SecurityGuardPaymentsFrontendStack.template.json",
         "packaging": "file"
@@ -9,7 +9,7 @@
       "destinations": {
         "732439976770-eu-west-1": {
           "bucketName": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-          "objectKey": "ada7ada2cf7c8e52f314695898266b6fce778aafab05b073fe6d4cc160a99f83.json",
+          "objectKey": "2afe594cc233f07d00b61b6e993438e6c2a6b9577c9429a40e8f38680339c8cd.json",
           "region": "eu-west-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-file-publishing-role-732439976770-eu-west-1"
         }

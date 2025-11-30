@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/8bc00bf76e2498fa41d625981e1678256ee476a81e5af877c2ffa848f79cd429.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/f84f250e139e0217473aeadc0e4c6e45a48ed27cf51bf15fdf8302f052c8e171.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -296,6 +296,12 @@
             "data": "BackendLogGroupDA10F1B2"
           }
         ],
+        "/SecurityGuardPaymentsBackendStack/SignupNotificationsTopic/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SignupNotificationsTopicB32F2A94"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/BackendFargateService/LB/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -532,7 +538,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/ada7ada2cf7c8e52f314695898266b6fce778aafab05b073fe6d4cc160a99f83.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/2afe594cc233f07d00b61b6e993438e6c2a6b9577c9429a40e8f38680339c8cd.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsFrontendStack.assets"],

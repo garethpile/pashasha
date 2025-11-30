@@ -958,6 +958,15 @@
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendLogGroup/Resource"
       }
     },
+    "SignupNotificationsTopicB32F2A94": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "Signup Notifications"
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/SignupNotificationsTopic/Resource"
+      }
+    },
     "BackendFargateServiceLBA38260FE": {
       "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
       "Properties": {
@@ -1260,6 +1269,13 @@
               ]
             },
             {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SignupNotificationsTopicB32F2A94"
+              }
+            },
+            {
               "Action": [
                 "cognito-idp:AdminCreateUser",
                 "cognito-idp:AdminDeleteUser",
@@ -1345,11 +1361,17 @@
               {
                 "Name": "GUARD_PORTAL_BASE_URL",
                 "Value": "https://main.d2vxflzymkt19g.amplifyapp.com"
+              },
+              {
+                "Name": "SIGNUP_SNS_TOPIC_ARN",
+                "Value": {
+                  "Ref": "SignupNotificationsTopicB32F2A94"
+                }
               }
             ],
             "Essential": true,
             "Image": {
-              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:96821393a730d056447914b0fabe9863598f51e5176bffbd2c5e13eebb1b485f"
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:76eb5005a7b134e5b94b966b405cdba1b970b42a553e50fca382c3dd48d04ad4"
             },
             "LogConfiguration": {
               "LogDriver": "awslogs",
@@ -1367,15 +1389,41 @@
                 "ContainerPort": 4000,
                 "Protocol": "tcp"
               }
+            ],
+            "Secrets": [
+              {
+                "Name": "ECLIPSE_API_BASE",
+                "ValueFrom": "arn:aws:secretsmanager:af-south-1:732439976770:secret:prod/pashashapay/eclipse-JIpDxA:ECLIPSE_API_BASE::"
+              },
+              {
+                "Name": "ECLIPSE_TENANT_ID",
+                "ValueFrom": "arn:aws:secretsmanager:af-south-1:732439976770:secret:prod/pashashapay/eclipse-JIpDxA:ECLIPSE_TENANT_ID::"
+              },
+              {
+                "Name": "ECLIPSE_TENANT_IDENTITY",
+                "ValueFrom": "arn:aws:secretsmanager:af-south-1:732439976770:secret:prod/pashashapay/eclipse-JIpDxA:ECLIPSE_TENANT_IDENTITY::"
+              },
+              {
+                "Name": "ECLIPSE_TENANT_PASSWORD",
+                "ValueFrom": "arn:aws:secretsmanager:af-south-1:732439976770:secret:prod/pashashapay/eclipse-JIpDxA:ECLIPSE_TENANT_PASSWORD::"
+              },
+              {
+                "Name": "ECLIPSE_CALLBACK_BASE",
+                "ValueFrom": "arn:aws:secretsmanager:af-south-1:732439976770:secret:prod/pashashapay/eclipse-JIpDxA:ECLIPSE_CALLBACK_BASE::"
+              },
+              {
+                "Name": "ECLIPSE_WEBHOOK_SECRET",
+                "ValueFrom": "arn:aws:secretsmanager:af-south-1:732439976770:secret:prod/pashashapay/eclipse-JIpDxA:ECLIPSE_WEBHOOK_SECRET::"
+              }
             ]
           }
         ],
-        "Cpu": "512",
+        "Cpu": "1024",
         "ExecutionRoleArn": {
           "Fn::GetAtt": ["BackendFargateServiceTaskDefExecutionRoleAEEBC172", "Arn"]
         },
         "Family": "SecurityGuardPaymentsBackendStackBackendFargateServiceTaskDef8BD4B29A",
-        "Memory": "1024",
+        "Memory": "4096",
         "NetworkMode": "awsvpc",
         "RequiresCompatibilities": ["FARGATE"],
         "TaskRoleArn": {
@@ -1442,6 +1490,11 @@
               "Resource": {
                 "Fn::GetAtt": ["BackendLogGroupDA10F1B2", "Arn"]
               }
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": "arn:aws:secretsmanager:af-south-1:732439976770:secret:prod/pashashapay/eclipse-JIpDxA"
             }
           ],
           "Version": "2012-10-17"
@@ -1673,7 +1726,7 @@
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAA/31STW/bMAz9Lb2rWpttwK5t0hUBis1Iul4LWmY8NopoiFSKwPB/H2QnsdtuO/Hx8Yni18xef/1mry7gVS5dtb30VNp2reC2Bl7luUU3s+1T48x8E56KuSlS6cmtUxlQMzeiFSfFRyg9jvzI3YiwI1DicBZncLcssvkBeg+Kr3AwRaQ9KI6Jl0ExBjwLhkqO3o0quN87DGrW6FIkPdxHTk1fw3+JuzqiyAd6GXq+M+jEtnOfRDFm1Ql+h1hD7kq2C9xQoFNP7xkOChQwTrjj2zXGPblhTke4duDznHKSOaegnXFcB1K27S/BWDD7rD/jE5h7ys1PQh+ZvrHOEOxsu+JhQb0t2JPrJzqgzlSHADuuStueV9mDzshn294mtx2WckSDGdNM/c54rsW2D1yfN3DC/XifG9C8WrE3TePJ9dfxwFDdgofgsHo3LvQgSs4zVGWvoFDvZ7b9++s4/DfxpzoSxXDUnPAk/gixRj2XPXFz5fEZRFDFLthtMS53UOcDR80xu8KGhZTj4RYEDYxZISmLA0+htu248Zy7v4W3zGAeI7gthXo9vBtH/YbojPOcqk3koLZdkGikMp0uc+p3nVmhcIr5/pIo70Z3E/4RKiLvqcLYN9R3ulaoKdT5zc+kTdLOBK7Qvsin/eyLvb62VxcvQnQZU1DaoV0N9g9BAXnbcAQAAA=="
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/31UyW7bMBD9lt5ptnVboFcvaWAgaAXLzdWgqLHKmOIIXBwYgv69Q0qylAU58c3jzHCWJy351x8/+ZdP4tktZHleaFXwNvdCnhlRxxbkkrePjWSbk3nMNiwLhVYyD4UBH7kJ7TF4OIhCw8RP3Mo5lEp4hebmHMHdLovHb+HvhYdncWWZVReCU+Kd8WAJjw59JYO18lTrvxqMZznIYJW/3lsMTarhQ+KusuDcG3pnEt8xkI63Gx0cvR69RvhL2ErErtx5Cydl1NjTawaNF8qAnXFDbA72omQ/pwHmUug4p5hkg8H4jkmsKAx5+9eBzRB19L/hEWy0is3Prt4yqbGOKVHzdo/9gtKZIS0zTbRHHSuvRtRYkghuq0ygY+4bb9dBnvulDKg/pjRzu2MaK5rhA1a3DYyY0hm6OmCjkrQSSDM/NsLHfTu+ahpKkyTzgKJc04CMhPLVDEEL55XU5FEkD2WqC2n2/WjbFzGz536KFmwGnxHP7g/0Mslw7GVmxsrtUTgH3vEt0gzsrhZVVD0Nie74Hhp0tE17XQsHTExZRfDoaPtUN315NxnE3EkgL5n+OFj6QCkg7+Om+b8gSEIaQ3mypETebqkjq4owynVudx3bg8NgoyhJ5lhPJknl/avM4kWVYFNDqVP6b1T0eoz5E3wTSMQGS+BP7vNl+Z0v6T/z5JRaWNK3qoHv+/M/zaJjyoQEAAA="
       },
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/CDKMetadata/Default"
