@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/f84f250e139e0217473aeadc0e4c6e45a48ed27cf51bf15fdf8302f052c8e171.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/105f1a986eb96963d7293f9ef4f13f0e8ecbc435ff2f8344a7286f51bf27b547.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -30,6 +30,12 @@
       },
       "dependencies": ["SecurityGuardPaymentsBackendStack.assets"],
       "metadata": {
+        "/SecurityGuardPaymentsBackendStack/CognitoSmsRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CognitoSmsRole3E5A1370"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/BackendVpc/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -160,12 +166,6 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "BackendCluster5086059C"
-          }
-        ],
-        "/SecurityGuardPaymentsBackendStack/UserPool/smsRole/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "UserPoolsmsRole4EA729DD"
           }
         ],
         "/SecurityGuardPaymentsBackendStack/UserPool/Resource": [

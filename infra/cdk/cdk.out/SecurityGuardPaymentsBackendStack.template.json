@@ -1,5 +1,41 @@
 {
   "Resources": {
+    "CognitoSmsRole3E5A1370": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "cognito-idp.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "Description": "Allows Cognito to publish SMS messages via SNS",
+        "Policies": [
+          {
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": "sns:Publish",
+                  "Effect": "Allow",
+                  "Resource": "*"
+                }
+              ],
+              "Version": "2012-10-17"
+            },
+            "PolicyName": "CognitoSmsPublish"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/CognitoSmsRole/Resource"
+      }
+    },
     "BackendVpcC09D5BB7": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
@@ -397,46 +433,6 @@
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/BackendCluster/Resource"
       }
     },
-    "UserPoolsmsRole4EA729DD": {
-      "Type": "AWS::IAM::Role",
-      "Properties": {
-        "AssumeRolePolicyDocument": {
-          "Statement": [
-            {
-              "Action": "sts:AssumeRole",
-              "Condition": {
-                "StringEquals": {
-                  "sts:ExternalId": "SecurityGuardPaymentsBackendStackUserPoolB4F04AE2"
-                }
-              },
-              "Effect": "Allow",
-              "Principal": {
-                "Service": "cognito-idp.amazonaws.com"
-              }
-            }
-          ],
-          "Version": "2012-10-17"
-        },
-        "Policies": [
-          {
-            "PolicyDocument": {
-              "Statement": [
-                {
-                  "Action": "sns:Publish",
-                  "Effect": "Allow",
-                  "Resource": "*"
-                }
-              ],
-              "Version": "2012-10-17"
-            },
-            "PolicyName": "sns-publish"
-          }
-        ]
-      },
-      "Metadata": {
-        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/UserPool/smsRole/Resource"
-      }
-    },
     "UserPool6BA7E5F2": {
       "Type": "AWS::Cognito::UserPool",
       "Properties": {
@@ -482,9 +478,9 @@
           }
         ],
         "SmsConfiguration": {
-          "ExternalId": "SecurityGuardPaymentsBackendStackUserPoolB4F04AE2",
+          "ExternalId": "CognitoSmsRoleExternal",
           "SnsCallerArn": {
-            "Fn::GetAtt": ["UserPoolsmsRole4EA729DD", "Arn"]
+            "Fn::GetAtt": ["CognitoSmsRole3E5A1370", "Arn"]
           }
         },
         "SmsVerificationMessage": "The verification code to your new account is {####}",
@@ -1371,7 +1367,7 @@
             ],
             "Essential": true,
             "Image": {
-              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:76eb5005a7b134e5b94b966b405cdba1b970b42a553e50fca382c3dd48d04ad4"
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:9a71ff99fab43ffdda0e546397ea801ffbee28a8afefc4518c97696afe78fed9"
             },
             "LogConfiguration": {
               "LogDriver": "awslogs",
@@ -1522,17 +1518,10 @@
             "Enable": false,
             "Rollback": false
           },
-          "DeploymentCircuitBreaker": {
-            "Enable": true,
-            "Rollback": true
-          },
           "MaximumPercent": 200,
           "MinimumHealthyPercent": 50
         },
-        "DeploymentController": {
-          "Type": "ECS"
-        },
-        "DesiredCount": 2,
+        "DesiredCount": 1,
         "EnableECSManagedTags": false,
         "HealthCheckGracePeriodSeconds": 60,
         "LaunchType": "FARGATE",
@@ -1726,7 +1715,7 @@
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAA/31UyW7bMBD9lt5ptnVboFcvaWAgaAXLzdWgqLHKmOIIXBwYgv69Q0qylAU58c3jzHCWJy351x8/+ZdP4tktZHleaFXwNvdCnhlRxxbkkrePjWSbk3nMNiwLhVYyD4UBH7kJ7TF4OIhCw8RP3Mo5lEp4hebmHMHdLovHb+HvhYdncWWZVReCU+Kd8WAJjw59JYO18lTrvxqMZznIYJW/3lsMTarhQ+KusuDcG3pnEt8xkI63Gx0cvR69RvhL2ErErtx5Cydl1NjTawaNF8qAnXFDbA72omQ/pwHmUug4p5hkg8H4jkmsKAx5+9eBzRB19L/hEWy0is3Prt4yqbGOKVHzdo/9gtKZIS0zTbRHHSuvRtRYkghuq0ygY+4bb9dBnvulDKg/pjRzu2MaK5rhA1a3DYyY0hm6OmCjkrQSSDM/NsLHfTu+ahpKkyTzgKJc04CMhPLVDEEL55XU5FEkD2WqC2n2/WjbFzGz536KFmwGnxHP7g/0Mslw7GVmxsrtUTgH3vEt0gzsrhZVVD0Nie74Hhp0tE17XQsHTExZRfDoaPtUN315NxnE3EkgL5n+OFj6QCkg7+Om+b8gSEIaQ3mypETebqkjq4owynVudx3bg8NgoyhJ5lhPJknl/avM4kWVYFNDqVP6b1T0eoz5E3wTSMQGS+BP7vNl+Z0v6T/z5JRaWNK3qoHv+/M/zaJjyoQEAAA="
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/31UyW7bMBD9lt5ptnVboFcvaWAgaAXLzdWgqLHKWOIIXBwYgv69Q1KylAU58c2bhZyZJy351x8/+ZdP4tkuZHle1KrgXe6EPDOijp0SDe/2WAPbnHQ8M6yVvAYzoZ6BXPLusZWBe8w2LPMFOXJfaHCBm9AevYODKFK5xE/cylqUSjiF+hYcwN0uC8dv4e6Fg2dxZZlRF4JT4Z12YAiPAeklg7Vy1M+/BrRjOUhvlLveG/RtfMOHxF1lwNo39E5HPnRuebepvaXbQ9QIfwlTidCVPW/hpLQae3rNoHZCaTAzbsjNwVyUTHMaYC5FHeYUimzQa9cziRWlIe/+WjAZYh3ib3gEm1qF5meut0xsrGflVYsGSxLBbU0R9Mx+493ay3Ma+IDSMUlibvesxorm84DVbbojpnKaXAdsVZRNBHGex1a4sEvLV21LZaIcHlCUa2peSyhfzQdqYZ2SNUUUMULp6kJ6fD/bpEfM7HmcouXpIWbEM/+BbiaJjb3MzPBycxTWgrN8izQDs2tEFRRNQyIf30OLljZlrmthgYmpqvAOLW2W3k1f3m3FoXZc/ksmHQdDHygl5Clvmv8LguRRoy9PhlTGuy11ZFThRynO7b5ne7DoTRAcSRibyaQP8X1XZvCiSjCxodgp/Tcquj3k/PGu9SRQjSXwJ/v5svzOl/SfebJKLQxpVzXA9+n8D8j/a5CEBAAA"
       },
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/CDKMetadata/Default"

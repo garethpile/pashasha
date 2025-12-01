@@ -8,6 +8,65 @@
         "id": "SecurityGuardPaymentsBackendStack",
         "path": "SecurityGuardPaymentsBackendStack",
         "children": {
+          "CognitoSmsRole": {
+            "id": "CognitoSmsRole",
+            "path": "SecurityGuardPaymentsBackendStack/CognitoSmsRole",
+            "children": {
+              "ImportCognitoSmsRole": {
+                "id": "ImportCognitoSmsRole",
+                "path": "SecurityGuardPaymentsBackendStack/CognitoSmsRole/ImportCognitoSmsRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.158.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/CognitoSmsRole/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                  "aws:cdk:cloudformation:props": {
+                    "assumeRolePolicyDocument": {
+                      "Statement": [
+                        {
+                          "Action": "sts:AssumeRole",
+                          "Effect": "Allow",
+                          "Principal": {
+                            "Service": "cognito-idp.amazonaws.com"
+                          }
+                        }
+                      ],
+                      "Version": "2012-10-17"
+                    },
+                    "description": "Allows Cognito to publish SMS messages via SNS",
+                    "policies": [
+                      {
+                        "policyName": "CognitoSmsPublish",
+                        "policyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sns:Publish",
+                              "Effect": "Allow",
+                              "Resource": "*"
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        }
+                      }
+                    ]
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_iam.Role",
+              "version": "2.158.0"
+            }
+          },
           "BackendVpc": {
             "id": "BackendVpc",
             "path": "SecurityGuardPaymentsBackendStack/BackendVpc",
@@ -605,69 +664,6 @@
             "id": "UserPool",
             "path": "SecurityGuardPaymentsBackendStack/UserPool",
             "children": {
-              "smsRole": {
-                "id": "smsRole",
-                "path": "SecurityGuardPaymentsBackendStack/UserPool/smsRole",
-                "children": {
-                  "ImportsmsRole": {
-                    "id": "ImportsmsRole",
-                    "path": "SecurityGuardPaymentsBackendStack/UserPool/smsRole/ImportsmsRole",
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.Resource",
-                      "version": "2.158.0"
-                    }
-                  },
-                  "Resource": {
-                    "id": "Resource",
-                    "path": "SecurityGuardPaymentsBackendStack/UserPool/smsRole/Resource",
-                    "attributes": {
-                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
-                      "aws:cdk:cloudformation:props": {
-                        "assumeRolePolicyDocument": {
-                          "Statement": [
-                            {
-                              "Action": "sts:AssumeRole",
-                              "Condition": {
-                                "StringEquals": {
-                                  "sts:ExternalId": "SecurityGuardPaymentsBackendStackUserPoolB4F04AE2"
-                                }
-                              },
-                              "Effect": "Allow",
-                              "Principal": {
-                                "Service": "cognito-idp.amazonaws.com"
-                              }
-                            }
-                          ],
-                          "Version": "2012-10-17"
-                        },
-                        "policies": [
-                          {
-                            "policyName": "sns-publish",
-                            "policyDocument": {
-                              "Statement": [
-                                {
-                                  "Action": "sns:Publish",
-                                  "Effect": "Allow",
-                                  "Resource": "*"
-                                }
-                              ],
-                              "Version": "2012-10-17"
-                            }
-                          }
-                        ]
-                      }
-                    },
-                    "constructInfo": {
-                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
-                      "version": "2.158.0"
-                    }
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_iam.Role",
-                  "version": "2.158.0"
-                }
-              },
               "Resource": {
                 "id": "Resource",
                 "path": "SecurityGuardPaymentsBackendStack/UserPool/Resource",
@@ -716,10 +712,10 @@
                       }
                     ],
                     "smsConfiguration": {
-                      "externalId": "SecurityGuardPaymentsBackendStackUserPoolB4F04AE2",
                       "snsCallerArn": {
-                        "Fn::GetAtt": ["UserPoolsmsRole4EA729DD", "Arn"]
-                      }
+                        "Fn::GetAtt": ["CognitoSmsRole3E5A1370", "Arn"]
+                      },
+                      "externalId": "CognitoSmsRoleExternal"
                     },
                     "smsVerificationMessage": "The verification code to your new account is {####}",
                     "verificationMessageTemplate": {
@@ -1841,7 +1837,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:76eb5005a7b134e5b94b966b405cdba1b970b42a553e50fca382c3dd48d04ad4"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:9a71ff99fab43ffdda0e546397ea801ffbee28a8afefc4518c97696afe78fed9"
                             },
                             "name": "web",
                             "portMappings": [
@@ -2143,20 +2139,13 @@
                         "deploymentConfiguration": {
                           "maximumPercent": 200,
                           "minimumHealthyPercent": 50,
-                          "deploymentCircuitBreaker": {
-                            "enable": true,
-                            "rollback": true
-                          },
                           "alarms": {
                             "alarmNames": [],
                             "enable": false,
                             "rollback": false
                           }
                         },
-                        "deploymentController": {
-                          "type": "ECS"
-                        },
-                        "desiredCount": 2,
+                        "desiredCount": 1,
                         "enableEcsManagedTags": false,
                         "healthCheckGracePeriodSeconds": 60,
                         "launchType": "FARGATE",
