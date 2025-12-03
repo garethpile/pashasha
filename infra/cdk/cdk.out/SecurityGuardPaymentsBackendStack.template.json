@@ -1116,7 +1116,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-          "S3Key": "77a6ce904d378a896cacc3e5d8fdab3b6b75617e2c01c7e2f3920497062540c5.zip"
+          "S3Key": "46ec9d10a10041bdaed517a9479cea592f3c56ff8f91ad0c588950f742cb8443.zip"
         },
         "Environment": {
           "Variables": {
@@ -1144,7 +1144,7 @@
       ],
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountWorkflowLambda/Resource",
-        "aws:asset:path": "asset.77a6ce904d378a896cacc3e5d8fdab3b6b75617e2c01c7e2f3920497062540c5",
+        "aws:asset:path": "asset.46ec9d10a10041bdaed517a9479cea592f3c56ff8f91ad0c588950f742cb8443",
         "aws:asset:is-bundled": true,
         "aws:asset:property": "Code"
       }
@@ -1738,7 +1738,7 @@
             ],
             "Essential": true,
             "Image": {
-              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:5e3b1dcfcbce527adb02de87ad1a8b7a1907da457867c1df6ff846195ee0c32b"
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:df2bdc1957854e7a148a0029533eae78bab5dbd198c73caa06b1b4535ca57246"
             },
             "LogConfiguration": {
               "LogDriver": "awslogs",
@@ -2086,7 +2086,7 @@
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAA/31UTW/bMAz9Lbs72pZuwK5p0hYBss5Isl4DWWY8JbZo6MNFYPi/j5Ls2GmLnvhIkZL4+KQ5+/7zF/v2hb+amcjPs1JmrN1ZLs4JhQ6t5BVrt1hCsjyqYFMspbh4N6IuATFn7UstfOwlXSapy2hh5zIF1sdGtEVnYc+zuF2Mj7GFMSgktxLVNdmDh3XqzTO3T9zCK78kqZYNwXHjtbKgCQ8J8Sa9t7DUz78KlE12IJyW9vKk0dXhDp8GHgoNxrwLr1WI+84Na5elM3S6zxrgI9cF912Z8wqOUsmhp7cRVJZLBXoS62t3oBspIk893Aleep78Jkt0ynaJwILKkLV/DegUsfT5VzyAZSl985Ol95HQWJfkF8UrzEkE1zEF0CXmjrX3Tpwj4T2KZpTEjR+de26ousSCqNpgcSV6wLTGqyznB4U5nAx7DubRKRHoMHcHbgxYwxbe9MmMNhhTLNTH3jEHS+wYtglpa9XgGW4Tgrwt/CZJEPOB34lPffqUPdYy6DmAMOhDza0XGV2krqm/oNMN8vyepqIE5G8GByU3VoqSMrKQIVXR0EP5uFpHSib+NE9SB6rPGfBkfU8nk/YHZieuv7keCFwhzUOvK15A5JLW2BZqNCQhffGDSvi4K3cWDUmO7k2cXbXn9w6s3Uai2Wv6OahgF+tGYdwESLcluvyoSf6sXVFHWmZueCNTv+uSLRh02r8EeltYjS79EB8vpRobmYMODYVOacIFne5r/jhbO3o5Xm3sZL428x9sTh/gyUg50/SoZAVsG+1/Md6HOR0FAAA="
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/31Ty27bMBD8lt4ZNo8W6NVxHjCQpobt5mqsqLWyEU0K3KUDQ9C/F6RsS07annZmOCS4w+W1vvr+Q19+gXe+MGV9YanQ7VLA1Areed0SbHW78BbVdONynXtLZp9ojzqF5lq3L41J2st8quaxsGSWsXAoSRvQwkfBFRT9cb0+aBNmbwiEvDuZE7ifzVN5BnkEwXfYq3mgHQgOB8+cYHB4MvQ3ObCJCJjXLTpRSzQxkOwfg49NvsN/hfsqIPMneeaynjpn3U5tZMGQXEf4AKGC1BXXd7ghR8eePireCZDDMNIOe5cYdmT6nA5wacCmnNIhUx+ddMr4ypF43f5mDHPvbfKf8BFMLaXmR0ufldxYp8q9g60vC92enimDTvGNbm+jqfvAD6gvw0ic8Z7cAmOnrK9Yt0++OgV9xJ2ysC1KWDtf4hvr51weojM5Dr5ZAzMK60kqB7OebtxgEWw2B8JrAa5ZP2XbzO18jeeGPN6CP8G8kuvzHfFOcbKsfEN5njPID71uQNKQsZ40jSWT5/TJQ3kLFpzB8sPDoQUWMtZDWWQHuWp3rdu/7w59JCM+9hELuoPniEfrKwgVyinZEU03D8cA77ypMcy2UGGfJZqgF9h4JvFhnx5KwXAqRPFswJKrdDvMXjo7p3au9GUVwNTkqmW/bxiMM6FTxvpYboJ3ots7YglUxOMfGfOuUwtkH0P6CZHFbwe6cf9Ymge/oxJDbih3uhSoyFVpz68oTZROpWnTb/x1d/1NX13pyy9vTHQRohPaol709Q/fMgd/HgUAAA=="
       },
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/CDKMetadata/Default"
@@ -2210,6 +2210,22 @@
       },
       "Export": {
         "Name": "SecurityGuardPaymentsBackendStack:ExportsOutputFnGetAttBackendFargateServiceLBA38260FEDNSNameC594C614"
+      }
+    },
+    "ExportsOutputRefUserPool6BA7E5F296FD7236": {
+      "Value": {
+        "Ref": "UserPool6BA7E5F2"
+      },
+      "Export": {
+        "Name": "SecurityGuardPaymentsBackendStack:ExportsOutputRefUserPool6BA7E5F296FD7236"
+      }
+    },
+    "ExportsOutputRefUserPoolWebClient4C9370B02E2C9FF9": {
+      "Value": {
+        "Ref": "UserPoolWebClient4C9370B0"
+      },
+      "Export": {
+        "Name": "SecurityGuardPaymentsBackendStack:ExportsOutputRefUserPoolWebClient4C9370B02E2C9FF9"
       }
     }
   },

@@ -1587,7 +1587,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-                      "s3Key": "77a6ce904d378a896cacc3e5d8fdab3b6b75617e2c01c7e2f3920497062540c5.zip"
+                      "s3Key": "46ec9d10a10041bdaed517a9479cea592f3c56ff8f91ad0c588950f742cb8443.zip"
                     },
                     "environment": {
                       "variables": {
@@ -2377,7 +2377,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:5e3b1dcfcbce527adb02de87ad1a8b7a1907da457867c1df6ff846195ee0c32b"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:df2bdc1957854e7a148a0029533eae78bab5dbd198c73caa06b1b4535ca57246"
                             },
                             "name": "web",
                             "portMappings": [
@@ -3124,6 +3124,22 @@
                   "fqn": "aws-cdk-lib.CfnOutput",
                   "version": "2.158.0"
                 }
+              },
+              "Output{\"Ref\":\"UserPool6BA7E5F2\"}": {
+                "id": "Output{\"Ref\":\"UserPool6BA7E5F2\"}",
+                "path": "SecurityGuardPaymentsBackendStack/Exports/Output{\"Ref\":\"UserPool6BA7E5F2\"}",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnOutput",
+                  "version": "2.158.0"
+                }
+              },
+              "Output{\"Ref\":\"UserPoolWebClient4C9370B0\"}": {
+                "id": "Output{\"Ref\":\"UserPoolWebClient4C9370B0\"}",
+                "path": "SecurityGuardPaymentsBackendStack/Exports/Output{\"Ref\":\"UserPoolWebClient4C9370B0\"}",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnOutput",
+                  "version": "2.158.0"
+                }
               }
             },
             "constructInfo": {
@@ -3260,6 +3276,22 @@
                             ]
                           ]
                         }
+                      },
+                      {
+                        "name": "NEXT_PUBLIC_COGNITO_USER_POOL_ID",
+                        "value": {
+                          "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputRefUserPool6BA7E5F296FD7236"
+                        }
+                      },
+                      {
+                        "name": "NEXT_PUBLIC_COGNITO_CLIENT_ID",
+                        "value": {
+                          "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputRefUserPoolWebClient4C9370B02E2C9FF9"
+                        }
+                      },
+                      {
+                        "name": "NEXT_PUBLIC_AWS_REGION",
+                        "value": "eu-west-1"
                       }
                     ],
                     "iamServiceRole": {
@@ -3334,6 +3366,22 @@
                                 ]
                               ]
                             }
+                          },
+                          {
+                            "name": "NEXT_PUBLIC_COGNITO_USER_POOL_ID",
+                            "value": {
+                              "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputRefUserPool6BA7E5F296FD7236"
+                            }
+                          },
+                          {
+                            "name": "NEXT_PUBLIC_COGNITO_CLIENT_ID",
+                            "value": {
+                              "Fn::ImportValue": "SecurityGuardPaymentsBackendStack:ExportsOutputRefUserPoolWebClient4C9370B02E2C9FF9"
+                            }
+                          },
+                          {
+                            "name": "NEXT_PUBLIC_AWS_REGION",
+                            "value": "eu-west-1"
                           }
                         ],
                         "stage": "PRODUCTION"

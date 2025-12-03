@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/5f9ed7f7937149a8da8171a639b46a8446f42d29551e68963d9a4ba2dcd4a38e.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/e7c500436326b6f925f3bbfcf5f27d6db9fe97eed600d55769b0b53a9bc70dda.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -548,6 +548,18 @@
             "data": "ExportsOutputFnGetAttBackendFargateServiceLBA38260FEDNSNameC594C614"
           }
         ],
+        "/SecurityGuardPaymentsBackendStack/Exports/Output{\"Ref\":\"UserPool6BA7E5F2\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefUserPool6BA7E5F296FD7236"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/Exports/Output{\"Ref\":\"UserPoolWebClient4C9370B0\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefUserPoolWebClient4C9370B02E2C9FF9"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/BootstrapVersion": [
           {
             "type": "aws:cdk:logicalId",
@@ -580,7 +592,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/2afe594cc233f07d00b61b6e993438e6c2a6b9577c9429a40e8f38680339c8cd.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/c6b7a27d7a83c194ba7b5ccac8f07d9a34df75af2966a8a1e4ced1212ee0c847.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsFrontendStack.assets"],

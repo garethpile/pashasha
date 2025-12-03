@@ -1,40 +1,41 @@
-import {
-  CognitoIdentityProviderClient,
-  AdminCreateUserCommand,
-  AdminCreateUserCommandInput,
-} from '@aws-sdk/client-cognito-identity-provider';
-import { DynamoDBClient, PutItemCommand, UpdateItemCommand } from '@aws-sdk/client-dynamodb';
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all) __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if ((from && typeof from === 'object') || typeof from === 'function') {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, {
+          get: () => from[key],
+          enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable,
+        });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, '__esModule', { value: true }), mod);
 
-const cognito = new CognitoIdentityProviderClient({});
-const dynamo = new DynamoDBClient({});
-const secrets = new SecretsManagerClient({});
-
-const USER_POOL_ID = process.env.USER_POOL_ID!;
-const CUSTOMERS_TABLE = process.env.CUSTOMERS_TABLE_NAME!;
-const CIVIL_TABLE = process.env.CIVIL_SERVANTS_TABLE_NAME!;
-const ECLIPSE_SECRET_ARN = process.env.ECLIPSE_SECRET_ARN!;
-
-type AccountType = 'customer' | 'civil-servant';
-
-interface WorkflowInput {
-  type: AccountType;
-  firstName?: string;
-  familyName?: string;
-  email?: string;
-  phoneNumber?: string;
-  address?: string;
-  cognitoUsername?: string;
-  cognitoSub?: string;
-  accountNumber?: string;
-  eclipseCustomerId?: string;
-  eclipseWalletId?: string;
-  profileAlreadyExists?: boolean;
-}
-
-export const handler = async (event: WorkflowInput) => {
-  const step = (event as any).step ?? (event as any).Step ?? 'createCognito';
-
+// ../lambda/account-workflow/handler.ts
+var handler_exports = {};
+__export(handler_exports, {
+  handler: () => handler,
+});
+module.exports = __toCommonJS(handler_exports);
+var import_client_cognito_identity_provider = require('@aws-sdk/client-cognito-identity-provider');
+var import_client_dynamodb = require('@aws-sdk/client-dynamodb');
+var import_client_secrets_manager = require('@aws-sdk/client-secrets-manager');
+var cognito = new import_client_cognito_identity_provider.CognitoIdentityProviderClient({});
+var dynamo = new import_client_dynamodb.DynamoDBClient({});
+var secrets = new import_client_secrets_manager.SecretsManagerClient({});
+var USER_POOL_ID = process.env.USER_POOL_ID;
+var CUSTOMERS_TABLE = process.env.CUSTOMERS_TABLE_NAME;
+var CIVIL_TABLE = process.env.CIVIL_SERVANTS_TABLE_NAME;
+var ECLIPSE_SECRET_ARN = process.env.ECLIPSE_SECRET_ARN;
+var handler = async (event) => {
+  const step = event.step ?? event.Step ?? 'createCognito';
   switch (step) {
     case 'createCognito':
       return await createCognito(event);
@@ -50,11 +51,9 @@ export const handler = async (event: WorkflowInput) => {
       return event;
   }
 };
-
-async function createCognito(input: WorkflowInput) {
+async function createCognito(input) {
   if (input.cognitoUsername) return { ...input, step: 'createProfile' };
-
-  const params: AdminCreateUserCommandInput = {
+  const params = {
     UserPoolId: USER_POOL_ID,
     Username: input.email ?? input.phoneNumber ?? `user-${Date.now()}`,
     TemporaryPassword: 'TempPassw0rd!',
@@ -69,8 +68,9 @@ async function createCognito(input: WorkflowInput) {
   if (input.phoneNumber) {
     params.UserAttributes?.push({ Name: 'phone_number', Value: input.phoneNumber });
   }
-
-  const result = await cognito.send(new AdminCreateUserCommand(params));
+  const result = await cognito.send(
+    new import_client_cognito_identity_provider.AdminCreateUserCommand(params)
+  );
   const attributes = result.User?.Attributes ?? [];
   const sub = attributes.find((a) => a?.Name === 'sub')?.Value ?? '';
   return {
@@ -80,16 +80,14 @@ async function createCognito(input: WorkflowInput) {
     cognitoSub: sub,
   };
 }
-
-async function createProfile(input: WorkflowInput) {
+async function createProfile(input) {
   const id = input.cognitoSub ?? input.cognitoUsername ?? `id-${Date.now()}`;
   const table = input.type === 'customer' ? CUSTOMERS_TABLE : CIVIL_TABLE;
   const pkName = input.type === 'customer' ? 'customerId' : 'civilServantId';
-
   if (!input.profileAlreadyExists) {
     try {
       await dynamo.send(
-        new PutItemCommand({
+        new import_client_dynamodb.PutItemCommand({
           TableName: table,
           Item: {
             [pkName]: { S: id },
@@ -104,19 +102,16 @@ async function createProfile(input: WorkflowInput) {
           ExpressionAttributeNames: { '#pk': pkName },
         })
       );
-    } catch (error: any) {
+    } catch (error) {
       if (error?.name !== 'ConditionalCheckFailedException') {
         throw error;
       }
     }
   }
-
   return { ...input, step: 'createEclipseCustomer', profileId: id };
 }
-
-async function createEclipseCustomer(input: WorkflowInput) {
+async function createEclipseCustomer(input) {
   if (input.eclipseCustomerId) return { ...input, step: 'createEclipseWallet' };
-
   const { apiBase, tenantId, identity, password } = await loadEclipseSecrets();
   const body = {
     firstName: input.firstName ?? '',
@@ -125,7 +120,6 @@ async function createEclipseCustomer(input: WorkflowInput) {
     phone1: input.phoneNumber?.replace(/^\+/, ''),
     externalUniqueId: input.cognitoSub ?? input.cognitoUsername ?? `ext-${Date.now()}`,
   };
-
   const resp = await fetch(`${apiBase}/tenants/${tenantId}/customers`, {
     method: 'POST',
     headers: {
@@ -134,20 +128,16 @@ async function createEclipseCustomer(input: WorkflowInput) {
     },
     body: JSON.stringify(body),
   });
-
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Eclipse customer failed: ${resp.status} ${text}`);
   }
-
   const data = await resp.json();
   const eclipseCustomerId = data.customerId?.toString() ?? `ecust-${Date.now()}`;
   return { ...input, step: 'createEclipseWallet', eclipseCustomerId };
 }
-
-async function createEclipseWallet(input: WorkflowInput) {
+async function createEclipseWallet(input) {
   if (input.eclipseWalletId) return { ...input, step: 'updateProfile' };
-
   const { apiBase, tenantId, identity, password } = await loadEclipseSecrets();
   const body = {
     name: input.type === 'civil-servant' ? 'Civil Servant Wallet' : 'Customer Wallet',
@@ -156,7 +146,6 @@ async function createEclipseWallet(input: WorkflowInput) {
     status: 'ACTIVE',
     currency: 'ZAR',
   };
-
   const resp = await fetch(
     `${apiBase}/tenants/${tenantId}/customers/${input.eclipseCustomerId}/wallets`,
     {
@@ -168,23 +157,20 @@ async function createEclipseWallet(input: WorkflowInput) {
       body: JSON.stringify(body),
     }
   );
-
   if (!resp.ok) {
     const text = await resp.text();
     throw new Error(`Eclipse wallet failed: ${resp.status} ${text}`);
   }
-
   const data = await resp.json();
   const eclipseWalletId = data.walletId?.toString() ?? `ewallet-${Date.now()}`;
   return { ...input, step: 'updateProfile', eclipseWalletId };
 }
-
-async function updateProfile(input: WorkflowInput) {
+async function updateProfile(input) {
   const table = input.type === 'customer' ? CUSTOMERS_TABLE : CIVIL_TABLE;
   const pkName = input.type === 'customer' ? 'customerId' : 'civilServantId';
-  const id = (input as any).profileId ?? input.cognitoSub ?? input.cognitoUsername!;
+  const id = input.profileId ?? input.cognitoSub ?? input.cognitoUsername;
   await dynamo.send(
-    new UpdateItemCommand({
+    new import_client_dynamodb.UpdateItemCommand({
       TableName: table,
       Key: { [pkName]: { S: id } },
       UpdateExpression: 'SET eclipseCustomerId = :cid, eclipseWalletId = :wid',
@@ -196,10 +182,9 @@ async function updateProfile(input: WorkflowInput) {
   );
   return { ...input, step: 'done' };
 }
-
 async function loadEclipseSecrets() {
   const secret = await secrets.send(
-    new GetSecretValueCommand({
+    new import_client_secrets_manager.GetSecretValueCommand({
       SecretId: ECLIPSE_SECRET_ARN,
     })
   );
@@ -211,3 +196,8 @@ async function loadEclipseSecrets() {
     password: parsed.ECLIPSE_TENANT_PASSWORD,
   };
 }
+// Annotate the CommonJS export names for ESM import in node:
+0 &&
+  (module.exports = {
+    handler,
+  });
