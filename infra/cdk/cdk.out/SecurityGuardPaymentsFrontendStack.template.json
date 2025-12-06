@@ -181,7 +181,7 @@
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2NQQ6DIBBFz+IeRjRt0mVbD2BiD9BMESOKSARqGsLdGyzp6iX/z7xfQ3W+QGAF7pbyfqZKviA8HPKZ4G6fQeICoVuVIM2gEyPBxSg5fCA0g74Zk4r7hpqPMZJO2NVv/LhuvTPeHX85jYRRVGZEYMU1L5aJWZnLkKx/pV57AZMt3/UJqgpYMVkp6ea1k4uA7scvWVHywcgAAAA="
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2NWw7CIBBF19J/mGKjiZ8+FmBSF2BGSlNaoKSAxhD2bqnEr5ucO/dMA7vDESKr8O0o7yaq5BPi3SOfyIoeUaKG2M5KkGtvciaC2irZfyCu5GxtLi4LGj6kRFrh5rDw7foWvA1+2xWaCKOo7IDAqlP5WOcsylLGbP0rzdwJGF39avbQrMPRSUmXYLzUAtpffgFDSPTHxwAAAA=="
       },
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsFrontendStack/CDKMetadata/Default"

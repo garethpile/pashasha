@@ -29,7 +29,7 @@
         }
       }
     },
-    "e7c500436326b6f925f3bbfcf5f27d6db9fe97eed600d55769b0b53a9bc70dda": {
+    "cff3c2fcb53d0b0206bc0d056192567f6570b03a35b6916ed9324b4109df7565": {
       "source": {
         "path": "SecurityGuardPaymentsBackendStack.template.json",
         "packaging": "file"
@@ -37,7 +37,7 @@
       "destinations": {
         "732439976770-eu-west-1": {
           "bucketName": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-          "objectKey": "e7c500436326b6f925f3bbfcf5f27d6db9fe97eed600d55769b0b53a9bc70dda.json",
+          "objectKey": "cff3c2fcb53d0b0206bc0d056192567f6570b03a35b6916ed9324b4109df7565.json",
           "region": "eu-west-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-file-publishing-role-732439976770-eu-west-1"
         }
@@ -45,16 +45,16 @@
     }
   },
   "dockerImages": {
-    "df2bdc1957854e7a148a0029533eae78bab5dbd198c73caa06b1b4535ca57246": {
+    "a28d7eb784f63800bd7948195e80fc2481dd3d1364e6786d19c051b6685446e5": {
       "source": {
-        "directory": "asset.df2bdc1957854e7a148a0029533eae78bab5dbd198c73caa06b1b4535ca57246",
+        "directory": "asset.a28d7eb784f63800bd7948195e80fc2481dd3d1364e6786d19c051b6685446e5",
         "dockerFile": "apps/backend/Dockerfile",
         "platform": "linux/amd64"
       },
       "destinations": {
         "732439976770-eu-west-1": {
           "repositoryName": "cdk-hnb659fds-container-assets-732439976770-eu-west-1",
-          "imageTag": "df2bdc1957854e7a148a0029533eae78bab5dbd198c73caa06b1b4535ca57246",
+          "imageTag": "a28d7eb784f63800bd7948195e80fc2481dd3d1364e6786d19c051b6685446e5",
           "region": "eu-west-1",
           "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-image-publishing-role-732439976770-eu-west-1"
         }
