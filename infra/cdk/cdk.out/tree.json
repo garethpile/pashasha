@@ -1040,6 +1040,10 @@
                       {
                         "attributeName": "civilServantId",
                         "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "walletId",
+                        "attributeType": "S"
                       }
                     ],
                     "billingMode": "PAY_PER_REQUEST",
@@ -1061,6 +1065,18 @@
                         "keySchema": [
                           {
                             "attributeName": "civilServantId",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      },
+                      {
+                        "indexName": "byWallet",
+                        "keySchema": [
+                          {
+                            "attributeName": "walletId",
                             "keyType": "HASH"
                           }
                         ],
@@ -1804,7 +1820,7 @@
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"3\",\"16\":\"6\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createCognito\"}}},\"CreateProfileRecord\":{\"Next\":\"CreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
+                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"3\",\"16\":\"9\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createCognito\"}}},\"CreateProfileRecord\":{\"Next\":\"CreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
                           {
                             "Ref": "AWS::Partition"
                           },
@@ -1812,7 +1828,7 @@
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"3\",\"16\":\"7\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createProfile\"}}},\"CreateEclipseCustomer\":{\"Next\":\"CreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
+                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"0\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createProfile\"}}},\"CreateEclipseCustomer\":{\"Next\":\"CreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
                           {
                             "Ref": "AWS::Partition"
                           },
@@ -1820,7 +1836,7 @@
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"3\",\"16\":\"8\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createEclipseCustomer\"}}},\"CreateEclipseWallet\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
+                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"1\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createEclipseCustomer\"}}},\"CreateEclipseWallet\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
                           {
                             "Ref": "AWS::Partition"
                           },
@@ -1828,7 +1844,7 @@
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"3\",\"16\":\"9\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createEclipseWallet\"}}},\"UpdateProfileWithEclipseIds\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
+                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"2\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createEclipseWallet\"}}},\"UpdateProfileWithEclipseIds\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
                           {
                             "Ref": "AWS::Partition"
                           },
@@ -1836,7 +1852,7 @@
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"0\",\"17\":\"]\",\"18\":\"}\",\"step\":\"updateProfile\"}}}}}"
+                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"3\",\"17\":\"]\",\"18\":\"}\",\"step\":\"updateProfile\"}}}}}"
                         ]
                       ]
                     },
@@ -2377,7 +2393,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:ce74778726c4139a1c9a19a982f658144a91a61d315ea6dc88fc86b9bd71d16c"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:6fbe4b7bf02eff78d6d1e9a7f4262d80fb4fa617d829f215d18bd74035f0a99b"
                             },
                             "name": "web",
                             "portMappings": [
