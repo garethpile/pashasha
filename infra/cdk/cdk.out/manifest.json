@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/5e74c9081fa31c23278531a53fde5a7067ceb42c53ca07f9acdff693118581bb.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/cd50395828865a8750acf0e01603d86faef69666f3c0caff8d790927ff244212.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -302,6 +302,12 @@
             "data": "AccountWorkflowLogs4F77612E"
           }
         ],
+        "/SecurityGuardPaymentsBackendStack/SignupNotificationsTopic/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SignupNotificationsTopicB32F2A94"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/AccountWorkflowLambda/ServiceRole/Resource": [
           {
             "type": "aws:cdk:logicalId",
@@ -320,28 +326,22 @@
             "data": "AccountWorkflowLambda45EAA938"
           }
         ],
-        "/SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Role/Resource": [
+        "/SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AccountProvisioningStateMachineRoleF56DFB71"
+            "data": "AccountProvisioningStateMachineV2RoleD36AA1BD"
           }
         ],
-        "/SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Role/DefaultPolicy/Resource": [
+        "/SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/DefaultPolicy/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AccountProvisioningStateMachineRoleDefaultPolicy4BC36FF9"
+            "data": "AccountProvisioningStateMachineV2RoleDefaultPolicyDDFB4BD4"
           }
         ],
-        "/SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Resource": [
+        "/SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "AccountProvisioningStateMachine40F6048A"
-          }
-        ],
-        "/SecurityGuardPaymentsBackendStack/SignupNotificationsTopic/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "SignupNotificationsTopicB32F2A94"
+            "data": "AccountProvisioningStateMachineV2063EE88C"
           }
         ],
         "/SecurityGuardPaymentsBackendStack/BackendFargateService/LB/Resource": [

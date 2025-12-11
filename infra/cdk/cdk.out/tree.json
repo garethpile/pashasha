@@ -1393,6 +1393,30 @@
               "version": "2.158.0"
             }
           },
+          "SignupNotificationsTopic": {
+            "id": "SignupNotificationsTopic",
+            "path": "SecurityGuardPaymentsBackendStack/SignupNotificationsTopic",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/SignupNotificationsTopic/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SNS::Topic",
+                  "aws:cdk:cloudformation:props": {
+                    "displayName": "Signup Notifications"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sns.CfnTopic",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_sns.Topic",
+              "version": "2.158.0"
+            }
+          },
           "AccountWorkflowLambda": {
             "id": "AccountWorkflowLambda",
             "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowLambda",
@@ -1468,6 +1492,13 @@
                                   }
                                 },
                                 {
+                                  "Action": "cognito-idp:AdminAddUserToGroup",
+                                  "Effect": "Allow",
+                                  "Resource": {
+                                    "Fn::GetAtt": ["UserPool6BA7E5F2", "Arn"]
+                                  }
+                                },
+                                {
                                   "Action": [
                                     "dynamodb:BatchGetItem",
                                     "dynamodb:GetRecords",
@@ -1535,11 +1566,43 @@
                                 },
                                 {
                                   "Action": [
+                                    "dynamodb:BatchGetItem",
+                                    "dynamodb:GetRecords",
+                                    "dynamodb:GetShardIterator",
+                                    "dynamodb:Query",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:ConditionCheckItem",
+                                    "dynamodb:BatchWriteItem",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:UpdateItem",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:DescribeTable"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": ["AccountCounterTable225C6EF1", "Arn"]
+                                    },
+                                    {
+                                      "Ref": "AWS::NoValue"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": [
                                     "secretsmanager:GetSecretValue",
                                     "secretsmanager:DescribeSecret"
                                   ],
                                   "Effect": "Allow",
                                   "Resource": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K"
+                                },
+                                {
+                                  "Action": "sns:Publish",
+                                  "Effect": "Allow",
+                                  "Resource": {
+                                    "Ref": "SignupNotificationsTopicB32F2A94"
+                                  }
                                 }
                               ],
                               "Version": "2012-10-17"
@@ -1603,7 +1666,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-                      "s3Key": "46ec9d10a10041bdaed517a9479cea592f3c56ff8f91ad0c588950f742cb8443.zip"
+                      "s3Key": "0020779e25fe70995cd28cbc382a143f64c54126a7131075eec7f6ca39f11673.zip"
                     },
                     "environment": {
                       "variables": {
@@ -1616,7 +1679,13 @@
                         "CIVIL_SERVANTS_TABLE_NAME": {
                           "Ref": "CivilServantsTableC16F2C77"
                         },
-                        "ECLIPSE_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K"
+                        "ECLIPSE_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K",
+                        "SIGNUP_TOPIC_ARN": {
+                          "Ref": "SignupNotificationsTopicB32F2A94"
+                        },
+                        "COUNTER_TABLE_NAME": {
+                          "Ref": "AccountCounterTable225C6EF1"
+                        }
                       }
                     },
                     "handler": "index.handler",
@@ -1677,17 +1746,17 @@
               "version": "2.158.0"
             }
           },
-          "AccountProvisioningStateMachine": {
-            "id": "AccountProvisioningStateMachine",
-            "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine",
+          "AccountProvisioningStateMachineV2": {
+            "id": "AccountProvisioningStateMachineV2",
+            "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2",
             "children": {
               "Role": {
                 "id": "Role",
-                "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Role",
+                "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role",
                 "children": {
                   "ImportRole": {
                     "id": "ImportRole",
-                    "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Role/ImportRole",
+                    "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/ImportRole",
                     "constructInfo": {
                       "fqn": "aws-cdk-lib.Resource",
                       "version": "2.158.0"
@@ -1695,7 +1764,7 @@
                   },
                   "Resource": {
                     "id": "Resource",
-                    "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Role/Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/Resource",
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::IAM::Role",
                       "aws:cdk:cloudformation:props": {
@@ -1720,11 +1789,11 @@
                   },
                   "DefaultPolicy": {
                     "id": "DefaultPolicy",
-                    "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Role/DefaultPolicy",
+                    "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/DefaultPolicy",
                     "children": {
                       "Resource": {
                         "id": "Resource",
-                        "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Role/DefaultPolicy/Resource",
+                        "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/DefaultPolicy/Resource",
                         "attributes": {
                           "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
                           "aws:cdk:cloudformation:props": {
@@ -1777,10 +1846,10 @@
                               ],
                               "Version": "2012-10-17"
                             },
-                            "policyName": "AccountProvisioningStateMachineRoleDefaultPolicy4BC36FF9",
+                            "policyName": "AccountProvisioningStateMachineV2RoleDefaultPolicyDDFB4BD4",
                             "roles": [
                               {
-                                "Ref": "AccountProvisioningStateMachineRoleF56DFB71"
+                                "Ref": "AccountProvisioningStateMachineV2RoleD36AA1BD"
                               }
                             ]
                           }
@@ -1804,7 +1873,7 @@
               },
               "Resource": {
                 "id": "Resource",
-                "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachine/Resource",
+                "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Resource",
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::StepFunctions::StateMachine",
                   "aws:cdk:cloudformation:props": {
@@ -1812,47 +1881,27 @@
                       "Fn::Join": [
                         "",
                         [
-                          "{\"StartAt\":\"CreateCognitoUser\",\"States\":{\"CreateCognitoUser\":{\"Next\":\"CreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
-                          {
-                            "Ref": "AWS::Partition"
-                          },
-                          ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+                          "{\"StartAt\":\"CreateCognitoUser\",\"States\":{\"CreateCognitoUser\":{\"Next\":\"CreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"3\",\"16\":\"9\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createCognito\"}}},\"CreateProfileRecord\":{\"Next\":\"CreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
-                          {
-                            "Ref": "AWS::Partition"
-                          },
-                          ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"CreateProfileRecord\":{\"Next\":\"CreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"0\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createProfile\"}}},\"CreateEclipseCustomer\":{\"Next\":\"CreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
-                          {
-                            "Ref": "AWS::Partition"
-                          },
-                          ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"CreateEclipseCustomer\":{\"Next\":\"CreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"1\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createEclipseCustomer\"}}},\"CreateEclipseWallet\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
-                          {
-                            "Ref": "AWS::Partition"
-                          },
-                          ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CreateEclipseWallet\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"2\",\"17\":\"]\",\"18\":\"}\",\"step\":\"createEclipseWallet\"}}},\"UpdateProfileWithEclipseIds\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"arn:",
-                          {
-                            "Ref": "AWS::Partition"
-                          },
-                          ":states:::lambda:invoke\",\"Parameters\":{\"FunctionName\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"UpdateProfileWithEclipseIds\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Payload\":{\"0\":\"$\",\"1\":\"{\",\"2\":\"T\",\"3\":\"o\",\"4\":\"k\",\"5\":\"e\",\"6\":\"n\",\"7\":\"[\",\"8\":\"T\",\"9\":\"O\",\"10\":\"K\",\"11\":\"E\",\"12\":\"N\",\"13\":\".\",\"14\":\"2\",\"15\":\"4\",\"16\":\"3\",\"17\":\"]\",\"18\":\"}\",\"step\":\"updateProfile\"}}}}}"
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}}}}"
                         ]
                       ]
                     },
@@ -1869,7 +1918,7 @@
                       "level": "ALL"
                     },
                     "roleArn": {
-                      "Fn::GetAtt": ["AccountProvisioningStateMachineRoleF56DFB71", "Arn"]
+                      "Fn::GetAtt": ["AccountProvisioningStateMachineV2RoleD36AA1BD", "Arn"]
                     },
                     "tracingConfiguration": {
                       "enabled": true
@@ -1884,30 +1933,6 @@
             },
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_stepfunctions.StateMachine",
-              "version": "2.158.0"
-            }
-          },
-          "SignupNotificationsTopic": {
-            "id": "SignupNotificationsTopic",
-            "path": "SecurityGuardPaymentsBackendStack/SignupNotificationsTopic",
-            "children": {
-              "Resource": {
-                "id": "Resource",
-                "path": "SecurityGuardPaymentsBackendStack/SignupNotificationsTopic/Resource",
-                "attributes": {
-                  "aws:cdk:cloudformation:type": "AWS::SNS::Topic",
-                  "aws:cdk:cloudformation:props": {
-                    "displayName": "Signup Notifications"
-                  }
-                },
-                "constructInfo": {
-                  "fqn": "aws-cdk-lib.aws_sns.CfnTopic",
-                  "version": "2.158.0"
-                }
-              }
-            },
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_sns.Topic",
               "version": "2.158.0"
             }
           },
@@ -2339,7 +2364,7 @@
                                       "Action": "states:StartExecution",
                                       "Effect": "Allow",
                                       "Resource": {
-                                        "Ref": "AccountProvisioningStateMachine40F6048A"
+                                        "Ref": "AccountProvisioningStateMachineV2063EE88C"
                                       }
                                     },
                                     {
@@ -2393,7 +2418,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:6fbe4b7bf02eff78d6d1e9a7f4262d80fb4fa617d829f215d18bd74035f0a99b"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:04cc702c1dcd83390da8f9ffdab17c373cc084380de3e3aeb0c02c695aa266bc"
                             },
                             "name": "web",
                             "portMappings": [
@@ -2476,7 +2501,7 @@
                               {
                                 "name": "ACCOUNT_WORKFLOW_ARN",
                                 "value": {
-                                  "Ref": "AccountProvisioningStateMachine40F6048A"
+                                  "Ref": "AccountProvisioningStateMachineV2063EE88C"
                                 }
                               }
                             ],
