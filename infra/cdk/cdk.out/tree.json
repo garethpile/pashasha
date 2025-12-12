@@ -866,6 +866,10 @@
                       {
                         "attributeName": "familyNameUpper",
                         "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "emailLower",
+                        "attributeType": "S"
                       }
                     ],
                     "billingMode": "PAY_PER_REQUEST",
@@ -887,6 +891,18 @@
                         "keySchema": [
                           {
                             "attributeName": "familyNameUpper",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      },
+                      {
+                        "indexName": "email",
+                        "keySchema": [
+                          {
+                            "attributeName": "emailLower",
                             "keyType": "HASH"
                           }
                         ],
@@ -949,6 +965,10 @@
                       {
                         "attributeName": "guardToken",
                         "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "emailLower",
+                        "attributeType": "S"
                       }
                     ],
                     "billingMode": "PAY_PER_REQUEST",
@@ -982,6 +1002,18 @@
                         "keySchema": [
                           {
                             "attributeName": "guardToken",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      },
+                      {
+                        "indexName": "email",
+                        "keySchema": [
+                          {
+                            "attributeName": "emailLower",
                             "keyType": "HASH"
                           }
                         ],
@@ -1666,7 +1698,7 @@
                   "aws:cdk:cloudformation:props": {
                     "code": {
                       "s3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-                      "s3Key": "0020779e25fe70995cd28cbc382a143f64c54126a7131075eec7f6ca39f11673.zip"
+                      "s3Key": "2d04857924ae39cd8729a3bb95491500f5372b51eecd0d74d48a1f94bff86c7c.zip"
                     },
                     "environment": {
                       "variables": {
@@ -1691,6 +1723,169 @@
                     "handler": "index.handler",
                     "role": {
                       "Fn::GetAtt": ["AccountWorkflowLambdaServiceRole4DD86BD4", "Arn"]
+                    },
+                    "runtime": "nodejs20.x"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda_nodejs.NodejsFunction",
+              "version": "2.158.0"
+            }
+          },
+          "AccountWorkflowNotifier": {
+            "id": "AccountWorkflowNotifier",
+            "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "sns:Publish",
+                                  "Effect": "Allow",
+                                  "Resource": {
+                                    "Ref": "SignupNotificationsTopicB32F2A94"
+                                  }
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "AccountWorkflowNotifierServiceRoleDefaultPolicy72BF748E",
+                            "roles": [
+                              {
+                                "Ref": "AccountWorkflowNotifierServiceRole01B1B6E3"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.158.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.158.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.158.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
+                      "s3Key": "e7e2e0430a12e7f1a2448c574371339328e2bc7ae4714e7d269afb0c02038f25.zip"
+                    },
+                    "environment": {
+                      "variables": {
+                        "SIGNUP_TOPIC_ARN": {
+                          "Ref": "SignupNotificationsTopicB32F2A94"
+                        }
+                      }
+                    },
+                    "handler": "index.handler",
+                    "role": {
+                      "Fn::GetAtt": ["AccountWorkflowNotifierServiceRole01B1B6E3", "Arn"]
                     },
                     "runtime": "nodejs20.x"
                   }
@@ -1743,6 +1938,38 @@
             "path": "SecurityGuardPaymentsBackendStack/UpdateProfileWithEclipseIds",
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.158.0"
+            }
+          },
+          "NotifyWorkflowSuccess": {
+            "id": "NotifyWorkflowSuccess",
+            "path": "SecurityGuardPaymentsBackendStack/NotifyWorkflowSuccess",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.158.0"
+            }
+          },
+          "AccountWorkflowSucceeded": {
+            "id": "AccountWorkflowSucceeded",
+            "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowSucceeded",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions.Succeed",
+              "version": "2.158.0"
+            }
+          },
+          "NotifyWorkflowFailure": {
+            "id": "NotifyWorkflowFailure",
+            "path": "SecurityGuardPaymentsBackendStack/NotifyWorkflowFailure",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.158.0"
+            }
+          },
+          "AccountWorkflowFailed": {
+            "id": "AccountWorkflowFailed",
+            "path": "SecurityGuardPaymentsBackendStack/AccountWorkflowFailed",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions.Fail",
               "version": "2.158.0"
             }
           },
@@ -1820,6 +2047,26 @@
                                   ]
                                 },
                                 {
+                                  "Action": "lambda:InvokeFunction",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                                          },
+                                          ":*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
                                   "Action": [
                                     "logs:CreateLogDelivery",
                                     "logs:GetLogDelivery",
@@ -1881,27 +2128,35 @@
                       "Fn::Join": [
                         "",
                         [
-                          "{\"StartAt\":\"CreateCognitoUser\",\"States\":{\"CreateCognitoUser\":{\"Next\":\"CreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          "{\"StartAt\":\"CreateCognitoUser\",\"States\":{\"CreateCognitoUser\":{\"Next\":\"CreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"CreateProfileRecord\":{\"Next\":\"CreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"CreateProfileRecord\":{\"Next\":\"CreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"CreateEclipseCustomer\":{\"Next\":\"CreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"CreateEclipseCustomer\":{\"Next\":\"CreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CreateEclipseWallet\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CreateEclipseWallet\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"UpdateProfileWithEclipseIds\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"UpdateProfileWithEclipseIds\":{\"Next\":\"NotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}}}}"
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}},\"NotifyWorkflowSuccess\":{\"Next\":\"AccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+                          {
+                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                          },
+                          "\",\"Parameters\":{\"status\":\"success\",\"message\":\"Account provisioning completed successfully\",\"context\":{\"type\":0,\"value.$\":\"$\"}}},\"AccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"NotifyWorkflowFailure\":{\"Next\":\"AccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+                          {
+                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                          },
+                          "\",\"Parameters\":{\"status\":\"failure\",\"message.$\":\"$.error.Cause\",\"context\":{\"type\":0,\"value.$\":\"$.error\"}}},\"AccountWorkflowFailed\":{\"Type\":\"Fail\",\"Cause\":\"Account provisioning failed\"}}}"
                         ]
                       ]
                     },
@@ -2418,7 +2673,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:27a69aed32fb9fc4d153951adb5f1811d1922d1801654cb08193423799705379"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:3c3a6134d6f5d58eeae17ac5d84d565bf0cbdc571c8c008d481f633ecf8383d5"
                             },
                             "name": "web",
                             "portMappings": [

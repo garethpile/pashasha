@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/50c2e503f32c1d28fbe10d7f86272754d648caf5b7b757282b295f1f991b1e3d.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/b726fd32fded223c2145c1c3a2fbd511bdd227efe66affd036614bc56e95932f.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -324,6 +324,24 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "AccountWorkflowLambda45EAA938"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AccountWorkflowNotifierServiceRole01B1B6E3"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AccountWorkflowNotifierServiceRoleDefaultPolicy72BF748E"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AccountWorkflowNotifierCF707EBD"
           }
         ],
         "/SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/Resource": [
