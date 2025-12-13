@@ -118,7 +118,7 @@
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
                       "aws:cdk:cloudformation:props": {
-                        "availabilityZone": "eu-west-1a",
+                        "availabilityZone": "af-south-1a",
                         "cidrBlock": "10.0.0.0/18",
                         "mapPublicIpOnLaunch": true,
                         "tags": [
@@ -275,7 +275,7 @@
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
                       "aws:cdk:cloudformation:props": {
-                        "availabilityZone": "eu-west-1b",
+                        "availabilityZone": "af-south-1b",
                         "cidrBlock": "10.0.64.0/18",
                         "mapPublicIpOnLaunch": true,
                         "tags": [
@@ -387,7 +387,7 @@
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
                       "aws:cdk:cloudformation:props": {
-                        "availabilityZone": "eu-west-1a",
+                        "availabilityZone": "af-south-1a",
                         "cidrBlock": "10.0.128.0/18",
                         "mapPublicIpOnLaunch": false,
                         "tags": [
@@ -499,7 +499,7 @@
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::EC2::Subnet",
                       "aws:cdk:cloudformation:props": {
-                        "availabilityZone": "eu-west-1b",
+                        "availabilityZone": "af-south-1b",
                         "cidrBlock": "10.0.192.0/18",
                         "mapPublicIpOnLaunch": false,
                         "tags": [
@@ -1697,7 +1697,7 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
+                      "s3Bucket": "cdk-hnb659fds-assets-732439976770-af-south-1",
                       "s3Key": "2d04857924ae39cd8729a3bb95491500f5372b51eecd0d74d48a1f94bff86c7c.zip"
                     },
                     "environment": {
@@ -1873,8 +1873,8 @@
                   "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
                   "aws:cdk:cloudformation:props": {
                     "code": {
-                      "s3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-                      "s3Key": "e7e2e0430a12e7f1a2448c574371339328e2bc7ae4714e7d269afb0c02038f25.zip"
+                      "s3Bucket": "cdk-hnb659fds-assets-732439976770-af-south-1",
+                      "s3Key": "3c506014f9fb114a06b94ce3428c3dee16778fd37f03c492bad51dd1cf8dcabc.zip"
                     },
                     "environment": {
                       "variables": {
@@ -2152,7 +2152,7 @@
                           {
                             "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
                           },
-                          "\",\"Parameters\":{\"status\":\"success\",\"message\":\"Account provisioning completed successfully\",\"context\":{\"type\":0,\"value.$\":\"$\"}}},\"AccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"NotifyWorkflowFailure\":{\"Next\":\"AccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+                          "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\",\"eclipseCustomerId.$\":\"$.eclipseCustomerId\",\"eclipseWalletId.$\":\"$.eclipseWalletId\"}}}},\"AccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"NotifyWorkflowFailure\":{\"Next\":\"AccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
                           },
@@ -2673,7 +2673,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:3c3a6134d6f5d58eeae17ac5d84d565bf0cbdc571c8c008d481f633ecf8383d5"
+                              "Fn::Sub": "732439976770.dkr.ecr.af-south-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-af-south-1:c67f98a598ac13e6bcd136027a76086b83226b03c6d5935f2934e3c1b18b302e"
                             },
                             "name": "web",
                             "portMappings": [
@@ -2689,7 +2689,7 @@
                                   "Ref": "BackendLogGroupDA10F1B2"
                                 },
                                 "awslogs-stream-prefix": "backend",
-                                "awslogs-region": "eu-west-1"
+                                "awslogs-region": "af-south-1"
                               }
                             },
                             "environment": [
@@ -2906,7 +2906,7 @@
                                             {
                                               "Ref": "AWS::Partition"
                                             },
-                                            ":ecr:eu-west-1:732439976770:repository/cdk-hnb659fds-container-assets-732439976770-eu-west-1"
+                                            ":ecr:af-south-1:732439976770:repository/cdk-hnb659fds-container-assets-732439976770-af-south-1"
                                           ]
                                         ]
                                       }
@@ -3587,7 +3587,7 @@
                       },
                       {
                         "name": "NEXT_PUBLIC_AWS_REGION",
-                        "value": "eu-west-1"
+                        "value": "af-south-1"
                       }
                     ],
                     "iamServiceRole": {
@@ -3677,7 +3677,7 @@
                           },
                           {
                             "name": "NEXT_PUBLIC_AWS_REGION",
-                            "value": "eu-west-1"
+                            "value": "af-south-1"
                           }
                         ],
                         "stage": "PRODUCTION"

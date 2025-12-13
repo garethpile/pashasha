@@ -47,7 +47,12 @@ fi
 log "Verifying backend health before deployment..."
 STACK_NAME="$BACKEND_STACK_NAME" AWS_REGION="$REGION" "$ROOT_DIR/infra/scripts/backend-smoke-test.sh"
 
-BASE_URL="${NEXT_PUBLIC_API_BASE_URL:-${BACKEND_API%/}/api/guards}"
+if [[ -n "${NEXT_PUBLIC_API_BASE_URL:-}" ]]; then
+  BASE_URL="${NEXT_PUBLIC_API_BASE_URL%/}"
+else
+  # Default to the backend API /api path; no extra subpath.
+  BASE_URL="${BACKEND_API%/}/api"
+fi
 
 log "Building frontend (branch: $BRANCH_NAME, app: $APP_ID, api: $BASE_URL)"
 (cd "$ROOT_DIR" && NEXT_PUBLIC_API_BASE_URL="$BASE_URL" npm run build --workspace frontend >/dev/null)
