@@ -234,6 +234,11 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
       displayName: 'Signup Notifications',
     });
 
+    const guardPortalBaseUrl =
+      props?.env?.region && props?.env?.region.startsWith('eu-')
+        ? (process.env.GUARD_PORTAL_BASE_URL ?? 'https://main.d2vxflzymkt19g.amplifyapp.com')
+        : (process.env.GUARD_PORTAL_BASE_URL ?? 'https://main.d2vxflzymkt19g.amplifyapp.com');
+
     const workflowFunction = new lambdaNode.NodejsFunction(this, 'AccountWorkflowLambda', {
       entry: path.join(__dirname, '../../lambda/account-workflow/handler.ts'),
       handler: 'handler',
@@ -245,6 +250,8 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
         ECLIPSE_SECRET_ARN: eclipseSecret.secretArn,
         SIGNUP_TOPIC_ARN: signupTopic.topicArn,
         COUNTER_TABLE_NAME: accountCounterTable.tableName,
+        USER_ASSETS_BUCKET: userAssetsBucket.bucketName,
+        GUARD_PORTAL_BASE_URL: guardPortalBaseUrl,
       },
       bundling: {
         externalModules: ['@aws-sdk/*'],
@@ -253,11 +260,18 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
 
     userPool.grant(workflowFunction, 'cognito-idp:AdminCreateUser');
     userPool.grant(workflowFunction, 'cognito-idp:AdminAddUserToGroup');
+    workflowFunction.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['cognito-idp:AdminSetUserPassword'],
+        resources: [userPool.userPoolArn],
+      })
+    );
     customersTable.grantReadWriteData(workflowFunction);
     civilServantsTable.grantReadWriteData(workflowFunction);
     accountCounterTable.grantReadWriteData(workflowFunction);
     eclipseSecret.grantRead(workflowFunction);
     signupTopic.grantPublish(workflowFunction);
+    userAssetsBucket.grantPut(workflowFunction);
 
     const workflowNotifier = new lambdaNode.NodejsFunction(this, 'AccountWorkflowNotifier', {
       entry: path.join(__dirname, '../../lambda/account-workflow/notifier.ts'),
@@ -304,6 +318,15 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
       payload: sfn.TaskInput.fromObject({
         state: sfn.TaskInput.fromJsonPathAt('$'),
         step: 'createEclipseWallet',
+      }),
+      payloadResponseOnly: true,
+      resultPath: '$',
+    });
+    const ensureGuardAssets = new sfnTasks.LambdaInvoke(this, 'EnsureGuardAssets', {
+      lambdaFunction: workflowFunction,
+      payload: sfn.TaskInput.fromObject({
+        state: sfn.TaskInput.fromJsonPathAt('$'),
+        step: 'ensureGuardAssets',
       }),
       payloadResponseOnly: true,
       resultPath: '$',
@@ -366,6 +389,7 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
       .next(withFailureHandling(createProfile))
       .next(withFailureHandling(createEclipseCustomer))
       .next(withFailureHandling(createEclipseWallet))
+      .next(withFailureHandling(ensureGuardAssets))
       .next(withFailureHandling(updateProfile))
       .next(notifySuccess)
       .next(successState);
@@ -390,11 +414,6 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
       file: dockerFilePath,
       platform: ecrAssets.Platform.LINUX_AMD64,
     });
-
-    const guardPortalBaseUrl =
-      props?.env?.region && props?.env?.region.startsWith('eu-')
-        ? (process.env.GUARD_PORTAL_BASE_URL ?? 'https://main.d2vxflzymkt19g.amplifyapp.com')
-        : (process.env.GUARD_PORTAL_BASE_URL ?? 'https://main.d2vxflzymkt19g.amplifyapp.com');
 
     const service = new ecsPatterns.ApplicationLoadBalancedFargateService(
       this,
@@ -425,6 +444,7 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
             GUARD_PORTAL_BASE_URL: guardPortalBaseUrl,
             SIGNUP_SNS_TOPIC_ARN: signupTopic.topicArn,
             ACCOUNT_WORKFLOW_ARN: accountWorkflow.stateMachineArn,
+            TENANT_WALLET_ID: process.env.TENANT_WALLET_ID ?? '',
           },
           secrets: {
             ECLIPSE_API_BASE: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_API_BASE'),

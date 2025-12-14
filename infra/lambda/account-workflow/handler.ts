@@ -3,6 +3,7 @@ import {
   AdminCreateUserCommand,
   AdminCreateUserCommandInput,
   AdminAddUserToGroupCommand,
+  AdminSetUserPasswordCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import {
   DynamoDBClient,
@@ -12,11 +13,15 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import * as QRCode from 'qrcode';
+import { randomUUID } from 'crypto';
 
 const cognito = new CognitoIdentityProviderClient({});
 const dynamo = new DynamoDBClient({});
 const secrets = new SecretsManagerClient({});
 const sns = new SNSClient({});
+const s3 = new S3Client({});
 
 const USER_POOL_ID = process.env.USER_POOL_ID!;
 const CUSTOMERS_TABLE = process.env.CUSTOMERS_TABLE_NAME!;
@@ -24,6 +29,9 @@ const CIVIL_TABLE = process.env.CIVIL_SERVANTS_TABLE_NAME!;
 const ECLIPSE_SECRET_ARN = process.env.ECLIPSE_SECRET_ARN!;
 const ERROR_TOPIC_ARN = process.env.SIGNUP_TOPIC_ARN;
 const COUNTER_TABLE_NAME = process.env.COUNTER_TABLE_NAME!;
+const USER_ASSETS_BUCKET = process.env.USER_ASSETS_BUCKET;
+const GUARD_PORTAL_BASE =
+  (process.env.GUARD_PORTAL_BASE_URL ?? 'https://main.d2vxflzymkt19g.amplifyapp.com') + '/g?token=';
 
 type AccountType = 'customer' | 'civil-servant';
 
@@ -40,6 +48,9 @@ interface WorkflowInput {
   eclipseCustomerId?: string;
   eclipseWalletId?: string;
   profileAlreadyExists?: boolean;
+  password?: string;
+  guardToken?: string;
+  qrCodeKey?: string;
 }
 
 function unwrap(value: any): any {
@@ -104,6 +115,8 @@ export const handler = async (event: WorkflowInput) => {
         return await createEclipseCustomer(input);
       case 'createEclipseWallet':
         return await createEclipseWallet(input);
+      case 'ensureGuardAssets':
+        return await ensureGuardAssets(input);
       case 'updateProfile':
         return await updateProfile(input);
       default:
@@ -140,11 +153,12 @@ async function createCognito(input: WorkflowInput) {
   const dd = String(today.getDate()).padStart(2, '0');
   const username = `${familyName}-${givenName}-${yyyy}-${mm}-${dd}`;
   const resolvedEmail = email ?? `${username}@placeholder.pashasha.local`;
+  const tempPassword = sanitized.password?.trim() || 'TempPassw0rd!';
 
   const params: AdminCreateUserCommandInput = {
     UserPoolId: USER_POOL_ID,
     Username: username,
-    TemporaryPassword: 'TempPassw0rd!',
+    TemporaryPassword: tempPassword,
     MessageAction: 'SUPPRESS',
     UserAttributes: [
       { Name: 'email', Value: resolvedEmail },
@@ -165,6 +179,21 @@ async function createCognito(input: WorkflowInput) {
       throw new Error(`Cognito username already exists: ${username}`);
     }
     throw err;
+  }
+
+  // Make password permanent to avoid forced reset on first login.
+  try {
+    await cognito.send(
+      new AdminSetUserPasswordCommand({
+        UserPoolId: USER_POOL_ID,
+        Username: result.User?.Username ?? username,
+        Password: tempPassword,
+        Permanent: true,
+      })
+    );
+  } catch (err) {
+    console.error('Failed to set permanent password', err);
+    // continue; user can still force-change if needed
   }
 
   const groupName =
@@ -188,6 +217,7 @@ async function createCognito(input: WorkflowInput) {
   const sub = attributes.find((a) => a?.Name === 'sub')?.Value ?? '';
   return {
     ...sanitized,
+    password: undefined,
     step: 'createProfile',
     cognitoUsername: result.User?.Username ?? email,
     cognitoSub: sub,
@@ -335,7 +365,45 @@ async function createEclipseWallet(input: WorkflowInput) {
 
   const data = await resp.json();
   const eclipseWalletId = data.walletId?.toString() ?? `ewallet-${Date.now()}`;
-  return { ...input, step: 'updateProfile', eclipseWalletId };
+  return { ...input, step: 'ensureGuardAssets', eclipseWalletId };
+}
+
+async function ensureGuardAssets(input: WorkflowInput) {
+  if (input.type !== 'civil-servant') {
+    return { ...input, step: 'updateProfile' };
+  }
+
+  if (!USER_ASSETS_BUCKET) {
+    console.warn('USER_ASSETS_BUCKET is not set; skipping QR creation');
+    return { ...input, step: 'updateProfile' };
+  }
+
+  if (input.guardToken && input.qrCodeKey) {
+    return { ...input, step: 'updateProfile' };
+  }
+
+  const token = randomUUID().replace(/-/g, '').slice(0, 16);
+  const landingUrl = GUARD_PORTAL_BASE + encodeURIComponent(token);
+  const buffer = await QRCode.toBuffer(landingUrl, {
+    width: 512,
+    margin: 1,
+    type: 'png',
+    errorCorrectionLevel: 'H',
+  });
+  const civilServantId =
+    input.cognitoSub ?? input.cognitoUsername ?? input.accountNumber ?? `id-${Date.now()}`;
+  const key = `qr/${civilServantId}/${token}.png`;
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: USER_ASSETS_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: 'image/png',
+    })
+  );
+
+  return { ...input, step: 'updateProfile', guardToken: token, qrCodeKey: key };
 }
 
 async function updateProfile(input: WorkflowInput) {
@@ -358,6 +426,8 @@ async function updateProfile(input: WorkflowInput) {
   const exprParts = [
     'eclipseCustomerId = :cid',
     'eclipseWalletId = :wid',
+    'guardToken = if_not_exists(guardToken, :gtoken)',
+    'qrCodeKey = if_not_exists(qrCodeKey, :qr)',
     'firstName = if_not_exists(firstName, :fn)',
     'familyName = if_not_exists(familyName, :ln)',
     'familyNameUpper = if_not_exists(familyNameUpper, :lnUpper)',
@@ -382,6 +452,8 @@ async function updateProfile(input: WorkflowInput) {
       ExpressionAttributeValues: {
         ':cid': { S: input.eclipseCustomerId ?? '' },
         ':wid': { S: input.eclipseWalletId ?? '' },
+        ':gtoken': { S: input.guardToken ?? '' },
+        ':qr': { S: input.qrCodeKey ?? '' },
         ':fn': { S: input.firstName ?? '' },
         ':ln': { S: input.familyName ?? '' },
         ':lnUpper': { S: familyNameUpper },
@@ -417,6 +489,10 @@ async function loadEclipseSecrets() {
 async function publishError(message: string, context: any) {
   if (!ERROR_TOPIC_ARN) return;
   try {
+    const safeContext = { ...context };
+    if (safeContext.password) {
+      safeContext.password = '[REDACTED]';
+    }
     await sns.send(
       new PublishCommand({
         TopicArn: ERROR_TOPIC_ARN,
@@ -424,7 +500,7 @@ async function publishError(message: string, context: any) {
         Message: JSON.stringify(
           {
             message,
-            context,
+            context: safeContext,
           },
           null,
           2

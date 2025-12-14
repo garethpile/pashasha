@@ -71,7 +71,7 @@
     "BackendVpcPublicSubnet1Subnet9D3515AA": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "AvailabilityZone": "af-south-1a",
+        "AvailabilityZone": "eu-west-1a",
         "CidrBlock": "10.0.0.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": [
@@ -185,7 +185,7 @@
     "BackendVpcPublicSubnet2Subnet5D82DB54": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "AvailabilityZone": "af-south-1b",
+        "AvailabilityZone": "eu-west-1b",
         "CidrBlock": "10.0.64.0/18",
         "MapPublicIpOnLaunch": true,
         "Tags": [
@@ -260,7 +260,7 @@
     "BackendVpcPrivateSubnet1Subnet911DA327": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "AvailabilityZone": "af-south-1a",
+        "AvailabilityZone": "eu-west-1a",
         "CidrBlock": "10.0.128.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": [
@@ -334,7 +334,7 @@
     "BackendVpcPrivateSubnet2Subnet7AF7AF1A": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "AvailabilityZone": "af-south-1b",
+        "AvailabilityZone": "eu-west-1b",
         "CidrBlock": "10.0.192.0/18",
         "MapPublicIpOnLaunch": false,
         "Tags": [
@@ -974,7 +974,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": "cdk-hnb659fds-assets-732439976770-af-south-1",
+          "S3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
           "S3Key": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip"
         },
         "Timeout": 900,
@@ -1091,6 +1091,13 @@
               }
             },
             {
+              "Action": "cognito-idp:AdminSetUserPassword",
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::GetAtt": ["UserPool6BA7E5F2", "Arn"]
+              }
+            },
+            {
               "Action": [
                 "dynamodb:BatchGetItem",
                 "dynamodb:GetRecords",
@@ -1192,6 +1199,28 @@
               "Resource": {
                 "Ref": "SignupNotificationsTopicB32F2A94"
               }
+            },
+            {
+              "Action": [
+                "s3:PutObject",
+                "s3:PutObjectLegalHold",
+                "s3:PutObjectRetention",
+                "s3:PutObjectTagging",
+                "s3:PutObjectVersionTagging",
+                "s3:Abort*"
+              ],
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                    },
+                    "/*"
+                  ]
+                ]
+              }
             }
           ],
           "Version": "2012-10-17"
@@ -1211,8 +1240,8 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": "cdk-hnb659fds-assets-732439976770-af-south-1",
-          "S3Key": "2d04857924ae39cd8729a3bb95491500f5372b51eecd0d74d48a1f94bff86c7c.zip"
+          "S3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
+          "S3Key": "2c568af9f2053e3919dc0bbbd7a4e4ba4e058b7e1fa21e8a825d0e7e30b7afb2.zip"
         },
         "Environment": {
           "Variables": {
@@ -1231,7 +1260,11 @@
             },
             "COUNTER_TABLE_NAME": {
               "Ref": "AccountCounterTable225C6EF1"
-            }
+            },
+            "USER_ASSETS_BUCKET": {
+              "Ref": "UserAssetsBucket8B59E294"
+            },
+            "GUARD_PORTAL_BASE_URL": "https://main.d2vxflzymkt19g.amplifyapp.com"
           }
         },
         "Handler": "index.handler",
@@ -1246,7 +1279,7 @@
       ],
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountWorkflowLambda/Resource",
-        "aws:asset:path": "asset.2d04857924ae39cd8729a3bb95491500f5372b51eecd0d74d48a1f94bff86c7c",
+        "aws:asset:path": "asset.2c568af9f2053e3919dc0bbbd7a4e4ba4e058b7e1fa21e8a825d0e7e30b7afb2",
         "aws:asset:is-bundled": true,
         "aws:asset:property": "Code"
       }
@@ -1315,7 +1348,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "S3Bucket": "cdk-hnb659fds-assets-732439976770-af-south-1",
+          "S3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
           "S3Key": "3c506014f9fb114a06b94ce3428c3dee16778fd37f03c492bad51dd1cf8dcabc.zip"
         },
         "Environment": {
@@ -1464,11 +1497,15 @@
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
-              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CreateEclipseWallet\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CreateEclipseWallet\":{\"Next\":\"EnsureGuardAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
-              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"UpdateProfileWithEclipseIds\":{\"Next\":\"NotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"EnsureGuardAssets\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"ensureGuardAssets\"}},\"UpdateProfileWithEclipseIds\":{\"Next\":\"NotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
@@ -1926,11 +1963,15 @@
                 "Value": {
                   "Ref": "AccountProvisioningStateMachineV2063EE88C"
                 }
+              },
+              {
+                "Name": "TENANT_WALLET_ID",
+                "Value": "2549317"
               }
             ],
             "Essential": true,
             "Image": {
-              "Fn::Sub": "732439976770.dkr.ecr.af-south-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-af-south-1:c67f98a598ac13e6bcd136027a76086b83226b03c6d5935f2934e3c1b18b302e"
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:32f918c3fb28577c24d0c45f95fadfa2e04bdf9c23965e377240ac85254d84b7"
             },
             "LogConfiguration": {
               "LogDriver": "awslogs",
@@ -1939,7 +1980,7 @@
                   "Ref": "BackendLogGroupDA10F1B2"
                 },
                 "awslogs-stream-prefix": "backend",
-                "awslogs-region": "af-south-1"
+                "awslogs-region": "eu-west-1"
               }
             },
             "Name": "web",
@@ -2033,7 +2074,7 @@
                     {
                       "Ref": "AWS::Partition"
                     },
-                    ":ecr:af-south-1:732439976770:repository/cdk-hnb659fds-container-assets-732439976770-af-south-1"
+                    ":ecr:eu-west-1:732439976770:repository/cdk-hnb659fds-container-assets-732439976770-eu-west-1"
                   ]
                 ]
               }

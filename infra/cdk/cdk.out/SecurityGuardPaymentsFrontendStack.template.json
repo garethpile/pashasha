@@ -88,7 +88,7 @@
           },
           {
             "Name": "NEXT_PUBLIC_AWS_REGION",
-            "Value": "af-south-1"
+            "Value": "eu-west-1"
           }
         ],
         "IAMServiceRole": {
@@ -169,7 +169,7 @@
           },
           {
             "Name": "NEXT_PUBLIC_AWS_REGION",
-            "Value": "af-south-1"
+            "Value": "eu-west-1"
           }
         ],
         "Stage": "PRODUCTION"
