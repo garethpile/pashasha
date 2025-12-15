@@ -1966,12 +1966,12 @@
               },
               {
                 "Name": "TENANT_WALLET_ID",
-                "Value": ""
+                "Value": "2550018"
               }
             ],
             "Essential": true,
             "Image": {
-              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:8eb459582eb6958fc9dea5fe712610dea677a03520e509ddc3d542a4d9f02715"
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:f2b45a5b96f8378480ad77b138460bb6fd13e8ea6cd00b318427d32b18120444"
             },
             "LogConfiguration": {
               "LogDriver": "awslogs",
