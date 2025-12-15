@@ -2718,7 +2718,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:f2b45a5b96f8378480ad77b138460bb6fd13e8ea6cd00b318427d32b18120444"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:ab984033ce00965fd9a51ef0b1efd0a71727b0a9fd729399797173fe07dd2dfd"
                             },
                             "name": "web",
                             "portMappings": [
