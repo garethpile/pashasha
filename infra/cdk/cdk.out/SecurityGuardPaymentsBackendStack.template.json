@@ -1349,7 +1349,7 @@
       "Properties": {
         "Code": {
           "S3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
-          "S3Key": "3c506014f9fb114a06b94ce3428c3dee16778fd37f03c492bad51dd1cf8dcabc.zip"
+          "S3Key": "21b2f8900bd986b399ca22500d8a513e023f3198e5ff2badf8b856cdc5957052.zip"
         },
         "Environment": {
           "Variables": {
@@ -1370,12 +1370,12 @@
       ],
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountWorkflowNotifier/Resource",
-        "aws:asset:path": "asset.3c506014f9fb114a06b94ce3428c3dee16778fd37f03c492bad51dd1cf8dcabc",
+        "aws:asset:path": "asset.21b2f8900bd986b399ca22500d8a513e023f3198e5ff2badf8b856cdc5957052",
         "aws:asset:is-bundled": true,
         "aws:asset:property": "Code"
       }
     },
-    "AccountProvisioningStateMachineV2RoleD36AA1BD": {
+    "AccountProvisioningCivilServantRoleD1BCF1C2": {
       "Type": "AWS::IAM::Role",
       "Properties": {
         "AssumeRolePolicyDocument": {
@@ -1392,10 +1392,10 @@
         }
       },
       "Metadata": {
-        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/Resource"
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningCivilServant/Role/Resource"
       }
     },
-    "AccountProvisioningStateMachineV2RoleDefaultPolicyDDFB4BD4": {
+    "AccountProvisioningCivilServantRoleDefaultPolicy2740A20E": {
       "Type": "AWS::IAM::Policy",
       "Properties": {
         "PolicyDocument": {
@@ -1467,57 +1467,57 @@
           ],
           "Version": "2012-10-17"
         },
-        "PolicyName": "AccountProvisioningStateMachineV2RoleDefaultPolicyDDFB4BD4",
+        "PolicyName": "AccountProvisioningCivilServantRoleDefaultPolicy2740A20E",
         "Roles": [
           {
-            "Ref": "AccountProvisioningStateMachineV2RoleD36AA1BD"
+            "Ref": "AccountProvisioningCivilServantRoleD1BCF1C2"
           }
         ]
       },
       "Metadata": {
-        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Role/DefaultPolicy/Resource"
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningCivilServant/Role/DefaultPolicy/Resource"
       }
     },
-    "AccountProvisioningStateMachineV2063EE88C": {
+    "AccountProvisioningCivilServant1CB1CF85": {
       "Type": "AWS::StepFunctions::StateMachine",
       "Properties": {
         "DefinitionString": {
           "Fn::Join": [
             "",
             [
-              "{\"StartAt\":\"CreateCognitoUser\",\"States\":{\"CreateCognitoUser\":{\"Next\":\"CreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              "{\"StartAt\":\"CivilServantCreateCognitoUser\",\"States\":{\"CivilServantCreateCognitoUser\":{\"Next\":\"CivilServantCreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
-              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"CreateProfileRecord\":{\"Next\":\"CreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"CivilServantCreateProfileRecord\":{\"Next\":\"CivilServantCreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
-              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"CreateEclipseCustomer\":{\"Next\":\"CreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"CivilServantCreateEclipseCustomer\":{\"Next\":\"CivilServantCreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
-              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CreateEclipseWallet\":{\"Next\":\"EnsureGuardAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CivilServantCreateEclipseWallet\":{\"Next\":\"CivilServantEnsureGuardAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
-              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"EnsureGuardAssets\":{\"Next\":\"UpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"CivilServantEnsureGuardAssets\":{\"Next\":\"CivilServantUpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
-              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"ensureGuardAssets\"}},\"UpdateProfileWithEclipseIds\":{\"Next\":\"NotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"NotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"ensureGuardAssets\"}},\"CivilServantUpdateProfileWithEclipseIds\":{\"Next\":\"CivilServantNotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
               },
-              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}},\"NotifyWorkflowSuccess\":{\"Next\":\"AccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}},\"CivilServantNotifyWorkflowSuccess\":{\"Next\":\"CivilServantAccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
               },
-              "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\",\"eclipseCustomerId.$\":\"$.eclipseCustomerId\",\"eclipseWalletId.$\":\"$.eclipseWalletId\"}}}},\"AccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"NotifyWorkflowFailure\":{\"Next\":\"AccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+              "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\",\"eclipseCustomerId.$\":\"$.eclipseCustomerId\",\"eclipseWalletId.$\":\"$.eclipseWalletId\"}}}},\"CivilServantAccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"CivilServantNotifyWorkflowFailure\":{\"Next\":\"CivilServantAccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
               {
                 "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
               },
-              "\",\"Parameters\":{\"status\":\"failure\",\"message.$\":\"$.error.Cause\",\"context\":{\"type\":0,\"value.$\":\"$.error\"}}},\"AccountWorkflowFailed\":{\"Type\":\"Fail\",\"Cause\":\"Account provisioning failed\"}}}"
+              "\",\"Parameters\":{\"status\":\"failure\",\"message.$\":\"$.error.Cause\",\"context\":{\"type\":0,\"value.$\":\"$.error\"}}},\"CivilServantAccountWorkflowFailed\":{\"Type\":\"Fail\",\"Cause\":\"Account provisioning failed\"}}}"
             ]
           ]
         },
@@ -1534,20 +1534,373 @@
           "Level": "ALL"
         },
         "RoleArn": {
-          "Fn::GetAtt": ["AccountProvisioningStateMachineV2RoleD36AA1BD", "Arn"]
+          "Fn::GetAtt": ["AccountProvisioningCivilServantRoleD1BCF1C2", "Arn"]
         },
+        "StateMachineName": "AccountProvisioning-CivilServant",
         "TracingConfiguration": {
           "Enabled": true
         }
       },
       "DependsOn": [
-        "AccountProvisioningStateMachineV2RoleDefaultPolicyDDFB4BD4",
-        "AccountProvisioningStateMachineV2RoleD36AA1BD"
+        "AccountProvisioningCivilServantRoleDefaultPolicy2740A20E",
+        "AccountProvisioningCivilServantRoleD1BCF1C2"
       ],
       "UpdateReplacePolicy": "Delete",
       "DeletionPolicy": "Delete",
       "Metadata": {
-        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningStateMachineV2/Resource"
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningCivilServant/Resource"
+      }
+    },
+    "AccountProvisioningCustomerRole55F01B27": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningCustomer/Role/Resource"
+      }
+    },
+    "AccountProvisioningCustomerRoleDefaultPolicyEB695763": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                      },
+                      ":*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                      },
+                      ":*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "AccountProvisioningCustomerRoleDefaultPolicyEB695763",
+        "Roles": [
+          {
+            "Ref": "AccountProvisioningCustomerRole55F01B27"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningCustomer/Role/DefaultPolicy/Resource"
+      }
+    },
+    "AccountProvisioningCustomer579C0F1D": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"StartAt\":\"CustomerCreateCognitoUser\",\"States\":{\"CustomerCreateCognitoUser\":{\"Next\":\"CustomerCreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"CustomerCreateProfileRecord\":{\"Next\":\"CustomerCreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"CustomerCreateEclipseCustomer\":{\"Next\":\"CustomerCreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CustomerCreateEclipseWallet\":{\"Next\":\"CustomerEnsureGuardAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"CustomerEnsureGuardAssets\":{\"Next\":\"CustomerUpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"ensureGuardAssets\"}},\"CustomerUpdateProfileWithEclipseIds\":{\"Next\":\"CustomerNotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}},\"CustomerNotifyWorkflowSuccess\":{\"Next\":\"CustomerAccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+              },
+              "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\",\"eclipseCustomerId.$\":\"$.eclipseCustomerId\",\"eclipseWalletId.$\":\"$.eclipseWalletId\"}}}},\"CustomerAccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"CustomerNotifyWorkflowFailure\":{\"Next\":\"CustomerAccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+              },
+              "\",\"Parameters\":{\"status\":\"failure\",\"message.$\":\"$.error.Cause\",\"context\":{\"type\":0,\"value.$\":\"$.error\"}}},\"CustomerAccountWorkflowFailed\":{\"Type\":\"Fail\",\"Cause\":\"Account provisioning failed\"}}}"
+            ]
+          ]
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": ["AccountWorkflowLogs4F77612E", "Arn"]
+                }
+              }
+            }
+          ],
+          "Level": "ALL"
+        },
+        "RoleArn": {
+          "Fn::GetAtt": ["AccountProvisioningCustomerRole55F01B27", "Arn"]
+        },
+        "StateMachineName": "AccountProvisioning-Customer",
+        "TracingConfiguration": {
+          "Enabled": true
+        }
+      },
+      "DependsOn": [
+        "AccountProvisioningCustomerRoleDefaultPolicyEB695763",
+        "AccountProvisioningCustomerRole55F01B27"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningCustomer/Resource"
+      }
+    },
+    "AccountProvisioningAdministratorRole10529F79": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningAdministrator/Role/Resource"
+      }
+    },
+    "AccountProvisioningAdministratorRoleDefaultPolicyA3F0243C": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                      },
+                      ":*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                      },
+                      ":*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "logs:CreateLogDelivery",
+                "logs:GetLogDelivery",
+                "logs:UpdateLogDelivery",
+                "logs:DeleteLogDelivery",
+                "logs:ListLogDeliveries",
+                "logs:PutResourcePolicy",
+                "logs:DescribeResourcePolicies",
+                "logs:DescribeLogGroups"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "xray:PutTraceSegments",
+                "xray:PutTelemetryRecords",
+                "xray:GetSamplingRules",
+                "xray:GetSamplingTargets"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "AccountProvisioningAdministratorRoleDefaultPolicyA3F0243C",
+        "Roles": [
+          {
+            "Ref": "AccountProvisioningAdministratorRole10529F79"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningAdministrator/Role/DefaultPolicy/Resource"
+      }
+    },
+    "AccountProvisioningAdministrator6CD3C1AD": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "DefinitionString": {
+          "Fn::Join": [
+            "",
+            [
+              "{\"StartAt\":\"AdministratorCreateCognitoUser\",\"States\":{\"AdministratorCreateCognitoUser\":{\"Next\":\"AdministratorCreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"AdministratorCreateProfileRecord\":{\"Next\":\"AdministratorCreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"AdministratorCreateEclipseCustomer\":{\"Next\":\"AdministratorCreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"AdministratorCreateEclipseWallet\":{\"Next\":\"AdministratorEnsureGuardAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"AdministratorEnsureGuardAssets\":{\"Next\":\"AdministratorUpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"ensureGuardAssets\"}},\"AdministratorUpdateProfileWithEclipseIds\":{\"Next\":\"AdministratorNotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+              },
+              "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}},\"AdministratorNotifyWorkflowSuccess\":{\"Next\":\"AdministratorAccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+              },
+              "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\",\"eclipseCustomerId.$\":\"$.eclipseCustomerId\",\"eclipseWalletId.$\":\"$.eclipseWalletId\"}}}},\"AdministratorAccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"AdministratorNotifyWorkflowFailure\":{\"Next\":\"AdministratorAccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+              {
+                "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+              },
+              "\",\"Parameters\":{\"status\":\"failure\",\"message.$\":\"$.error.Cause\",\"context\":{\"type\":0,\"value.$\":\"$.error\"}}},\"AdministratorAccountWorkflowFailed\":{\"Type\":\"Fail\",\"Cause\":\"Account provisioning failed\"}}}"
+            ]
+          ]
+        },
+        "LoggingConfiguration": {
+          "Destinations": [
+            {
+              "CloudWatchLogsLogGroup": {
+                "LogGroupArn": {
+                  "Fn::GetAtt": ["AccountWorkflowLogs4F77612E", "Arn"]
+                }
+              }
+            }
+          ],
+          "Level": "ALL"
+        },
+        "RoleArn": {
+          "Fn::GetAtt": ["AccountProvisioningAdministratorRole10529F79", "Arn"]
+        },
+        "StateMachineName": "AccountProvisioning-Administrator",
+        "TracingConfiguration": {
+          "Enabled": true
+        }
+      },
+      "DependsOn": [
+        "AccountProvisioningAdministratorRoleDefaultPolicyA3F0243C",
+        "AccountProvisioningAdministratorRole10529F79"
+      ],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountProvisioningAdministrator/Resource"
       }
     },
     "BackendFargateServiceLBA38260FE": {
@@ -1862,7 +2215,21 @@
               "Action": "states:StartExecution",
               "Effect": "Allow",
               "Resource": {
-                "Ref": "AccountProvisioningStateMachineV2063EE88C"
+                "Ref": "AccountProvisioningCivilServant1CB1CF85"
+              }
+            },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "AccountProvisioningCustomer579C0F1D"
+              }
+            },
+            {
+              "Action": "states:StartExecution",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "AccountProvisioningAdministrator6CD3C1AD"
               }
             },
             {
@@ -1961,17 +2328,35 @@
               {
                 "Name": "ACCOUNT_WORKFLOW_ARN",
                 "Value": {
-                  "Ref": "AccountProvisioningStateMachineV2063EE88C"
+                  "Ref": "AccountProvisioningCivilServant1CB1CF85"
+                }
+              },
+              {
+                "Name": "ACCOUNT_WORKFLOW_ARN_CIVIL",
+                "Value": {
+                  "Ref": "AccountProvisioningCivilServant1CB1CF85"
+                }
+              },
+              {
+                "Name": "ACCOUNT_WORKFLOW_ARN_CUSTOMER",
+                "Value": {
+                  "Ref": "AccountProvisioningCustomer579C0F1D"
+                }
+              },
+              {
+                "Name": "ACCOUNT_WORKFLOW_ARN_ADMINISTRATOR",
+                "Value": {
+                  "Ref": "AccountProvisioningAdministrator6CD3C1AD"
                 }
               },
               {
                 "Name": "TENANT_WALLET_ID",
-                "Value": "2550018"
+                "Value": ""
               }
             ],
             "Essential": true,
             "Image": {
-              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:ab984033ce00965fd9a51ef0b1efd0a71727b0a9fd729399797173fe07dd2dfd"
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:dd0cc21508e9e530136bfca9c345fe8225c8a868c4394902f15c8eb9b48a53f2"
             },
             "LogConfiguration": {
               "LogDriver": "awslogs",

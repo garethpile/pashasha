@@ -31,7 +31,7 @@ export class GuardsClient {
         'Content-Type': 'application/json',
         ...init?.headers,
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ guardToken: token, ...payload }),
       ...init,
     });
   }

@@ -43,6 +43,7 @@ export interface CreateTipIntentPayload {
   clientReference?: string;
   deviceFingerprint?: string;
   returnUrl?: string;
+  guardToken?: string;
 }
 
 export interface GuardsClientOptions {

@@ -341,61 +341,157 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
       resultPath: '$',
     });
 
-    const notifySuccess = new sfnTasks.LambdaInvoke(this, 'NotifyWorkflowSuccess', {
-      lambdaFunction: workflowNotifier,
-      payload: sfn.TaskInput.fromObject({
-        status: 'success',
-        message: sfn.JsonPath.format(
-          'Account provisioning succeeded for {}',
-          sfn.JsonPath.stringAt('$.type')
-        ),
-        context: sfn.TaskInput.fromObject({
-          type: sfn.JsonPath.stringAt('$.type'),
-          profileId: sfn.JsonPath.stringAt('$.profileId'),
-          cognitoUsername: sfn.JsonPath.stringAt('$.cognitoUsername'),
-          cognitoSub: sfn.JsonPath.stringAt('$.cognitoSub'),
-          eclipseCustomerId: sfn.JsonPath.stringAt('$.eclipseCustomerId'),
-          eclipseWalletId: sfn.JsonPath.stringAt('$.eclipseWalletId'),
+    const buildWorkflowDefinition = (prefix: string) => {
+      const successState = new sfn.Succeed(this, `${prefix}AccountWorkflowSucceeded`);
+      const notifySuccess = new sfnTasks.LambdaInvoke(this, `${prefix}NotifyWorkflowSuccess`, {
+        lambdaFunction: workflowNotifier,
+        payload: sfn.TaskInput.fromObject({
+          status: 'success',
+          message: sfn.JsonPath.format(
+            'Account provisioning succeeded for {}',
+            sfn.JsonPath.stringAt('$.type')
+          ),
+          context: sfn.TaskInput.fromObject({
+            type: sfn.JsonPath.stringAt('$.type'),
+            profileId: sfn.JsonPath.stringAt('$.profileId'),
+            cognitoUsername: sfn.JsonPath.stringAt('$.cognitoUsername'),
+            cognitoSub: sfn.JsonPath.stringAt('$.cognitoSub'),
+            eclipseCustomerId: sfn.JsonPath.stringAt('$.eclipseCustomerId'),
+            eclipseWalletId: sfn.JsonPath.stringAt('$.eclipseWalletId'),
+          }),
         }),
-      }),
-      payloadResponseOnly: true,
-      resultPath: '$.notification',
-    });
-    const successState = new sfn.Succeed(this, 'AccountWorkflowSucceeded');
-
-    const notifyFailure = new sfnTasks.LambdaInvoke(this, 'NotifyWorkflowFailure', {
-      lambdaFunction: workflowNotifier,
-      payload: sfn.TaskInput.fromObject({
-        status: 'failure',
-        message: sfn.JsonPath.stringAt('$.error.Cause'),
-        context: sfn.TaskInput.fromJsonPathAt('$.error'),
-      }),
-      payloadResponseOnly: true,
-      resultPath: '$.notification',
-    });
-    const failureState = new sfn.Fail(this, 'AccountWorkflowFailed', {
-      cause: 'Account provisioning failed',
-    });
-    const failureChain = notifyFailure.next(failureState);
-
-    const withFailureHandling = <T extends sfn.TaskStateBase>(state: T) =>
-      state.addCatch(failureChain, {
-        resultPath: '$.error',
-        errors: ['States.ALL'],
+        payloadResponseOnly: true,
+        resultPath: '$.notification',
       });
 
-    // Renamed to force recreation after accidental deletion in console.
-    const chainedDefinition = withFailureHandling(createCognito)
-      .next(withFailureHandling(createProfile))
-      .next(withFailureHandling(createEclipseCustomer))
-      .next(withFailureHandling(createEclipseWallet))
-      .next(withFailureHandling(ensureGuardAssets))
-      .next(withFailureHandling(updateProfile))
-      .next(notifySuccess)
-      .next(successState);
+      const notifyFailure = new sfnTasks.LambdaInvoke(this, `${prefix}NotifyWorkflowFailure`, {
+        lambdaFunction: workflowNotifier,
+        payload: sfn.TaskInput.fromObject({
+          status: 'failure',
+          message: sfn.JsonPath.stringAt('$.error.Cause'),
+          context: sfn.TaskInput.fromJsonPathAt('$.error'),
+        }),
+        payloadResponseOnly: true,
+        resultPath: '$.notification',
+      });
+      const failureState = new sfn.Fail(this, `${prefix}AccountWorkflowFailed`, {
+        cause: 'Account provisioning failed',
+      });
+      const failureChain = notifyFailure.next(failureState);
 
-    const accountWorkflow = new sfn.StateMachine(this, 'AccountProvisioningStateMachineV2', {
-      definitionBody: sfn.DefinitionBody.fromChainable(chainedDefinition),
+      const withFailureHandling = <T extends sfn.TaskStateBase>(state: T) =>
+        state.addCatch(failureChain, {
+          resultPath: '$.error',
+          errors: ['States.ALL'],
+        });
+
+      return withFailureHandling(
+        new sfnTasks.LambdaInvoke(this, `${prefix}CreateCognitoUser`, {
+          lambdaFunction: workflowFunction,
+          payload: sfn.TaskInput.fromObject({
+            state: sfn.TaskInput.fromJsonPathAt('$'),
+            step: 'createCognito',
+          }),
+          payloadResponseOnly: true,
+          resultPath: '$',
+        })
+      )
+        .next(
+          withFailureHandling(
+            new sfnTasks.LambdaInvoke(this, `${prefix}CreateProfileRecord`, {
+              lambdaFunction: workflowFunction,
+              payload: sfn.TaskInput.fromObject({
+                state: sfn.TaskInput.fromJsonPathAt('$'),
+                step: 'createProfile',
+              }),
+              payloadResponseOnly: true,
+              resultPath: '$',
+            })
+          )
+        )
+        .next(
+          withFailureHandling(
+            new sfnTasks.LambdaInvoke(this, `${prefix}CreateEclipseCustomer`, {
+              lambdaFunction: workflowFunction,
+              payload: sfn.TaskInput.fromObject({
+                state: sfn.TaskInput.fromJsonPathAt('$'),
+                step: 'createEclipseCustomer',
+              }),
+              payloadResponseOnly: true,
+              resultPath: '$',
+            })
+          )
+        )
+        .next(
+          withFailureHandling(
+            new sfnTasks.LambdaInvoke(this, `${prefix}CreateEclipseWallet`, {
+              lambdaFunction: workflowFunction,
+              payload: sfn.TaskInput.fromObject({
+                state: sfn.TaskInput.fromJsonPathAt('$'),
+                step: 'createEclipseWallet',
+              }),
+              payloadResponseOnly: true,
+              resultPath: '$',
+            })
+          )
+        )
+        .next(
+          withFailureHandling(
+            new sfnTasks.LambdaInvoke(this, `${prefix}EnsureGuardAssets`, {
+              lambdaFunction: workflowFunction,
+              payload: sfn.TaskInput.fromObject({
+                state: sfn.TaskInput.fromJsonPathAt('$'),
+                step: 'ensureGuardAssets',
+              }),
+              payloadResponseOnly: true,
+              resultPath: '$',
+            })
+          )
+        )
+        .next(
+          withFailureHandling(
+            new sfnTasks.LambdaInvoke(this, `${prefix}UpdateProfileWithEclipseIds`, {
+              lambdaFunction: workflowFunction,
+              payload: sfn.TaskInput.fromObject({
+                state: sfn.TaskInput.fromJsonPathAt('$'),
+                step: 'updateProfile',
+              }),
+              payloadResponseOnly: true,
+              resultPath: '$',
+            })
+          )
+        )
+        .next(notifySuccess)
+        .next(successState);
+    };
+
+    const civilDefinition = buildWorkflowDefinition('CivilServant');
+    const customerDefinition = buildWorkflowDefinition('Customer');
+    const adminDefinition = buildWorkflowDefinition('Administrator');
+
+    const accountWorkflowCivil = new sfn.StateMachine(this, 'AccountProvisioningCivilServant', {
+      stateMachineName: 'AccountProvisioning-CivilServant',
+      definitionBody: sfn.DefinitionBody.fromChainable(civilDefinition),
+      tracingEnabled: true,
+      logs: {
+        destination: workflowLogGroup,
+        level: sfn.LogLevel.ALL,
+      },
+    });
+
+    const accountWorkflowCustomer = new sfn.StateMachine(this, 'AccountProvisioningCustomer', {
+      stateMachineName: 'AccountProvisioning-Customer',
+      definitionBody: sfn.DefinitionBody.fromChainable(customerDefinition),
+      tracingEnabled: true,
+      logs: {
+        destination: workflowLogGroup,
+        level: sfn.LogLevel.ALL,
+      },
+    });
+
+    const accountWorkflowAdmin = new sfn.StateMachine(this, 'AccountProvisioningAdministrator', {
+      stateMachineName: 'AccountProvisioning-Administrator',
+      definitionBody: sfn.DefinitionBody.fromChainable(adminDefinition),
       tracingEnabled: true,
       logs: {
         destination: workflowLogGroup,
@@ -443,7 +539,10 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
             COUNTER_TABLE_NAME: accountCounterTable.tableName,
             GUARD_PORTAL_BASE_URL: guardPortalBaseUrl,
             SIGNUP_SNS_TOPIC_ARN: signupTopic.topicArn,
-            ACCOUNT_WORKFLOW_ARN: accountWorkflow.stateMachineArn,
+            ACCOUNT_WORKFLOW_ARN: accountWorkflowCivil.stateMachineArn,
+            ACCOUNT_WORKFLOW_ARN_CIVIL: accountWorkflowCivil.stateMachineArn,
+            ACCOUNT_WORKFLOW_ARN_CUSTOMER: accountWorkflowCustomer.stateMachineArn,
+            ACCOUNT_WORKFLOW_ARN_ADMINISTRATOR: accountWorkflowAdmin.stateMachineArn,
             TENANT_WALLET_ID: process.env.TENANT_WALLET_ID ?? '',
           },
           secrets: {
@@ -494,7 +593,9 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
     userAssetsBucket.grantReadWrite(service.taskDefinition.taskRole);
     accountCounterTable.grantReadWriteData(service.taskDefinition.taskRole);
     signupTopic.grantPublish(service.taskDefinition.taskRole);
-    accountWorkflow.grantStartExecution(service.taskDefinition.taskRole);
+    accountWorkflowCivil.grantStartExecution(service.taskDefinition.taskRole);
+    accountWorkflowCustomer.grantStartExecution(service.taskDefinition.taskRole);
+    accountWorkflowAdmin.grantStartExecution(service.taskDefinition.taskRole);
     service.taskDefinition.taskRole.addToPrincipalPolicy(
       new iam.PolicyStatement({
         actions: [
