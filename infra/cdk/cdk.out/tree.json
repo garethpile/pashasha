@@ -1435,7 +1435,33 @@
                 "attributes": {
                   "aws:cdk:cloudformation:type": "AWS::SNS::Topic",
                   "aws:cdk:cloudformation:props": {
-                    "displayName": "Signup Notifications"
+                    "displayName": "Pashasha Account Provisioning",
+                    "topicName": "Pashasha-AccountProvisioning"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sns.CfnTopic",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_sns.Topic",
+              "version": "2.158.0"
+            }
+          },
+          "PaymentsNotificationsTopic": {
+            "id": "PaymentsNotificationsTopic",
+            "path": "SecurityGuardPaymentsBackendStack/PaymentsNotificationsTopic",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/PaymentsNotificationsTopic/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SNS::Topic",
+                  "aws:cdk:cloudformation:props": {
+                    "displayName": "Pashasha Payments",
+                    "topicName": "Pashasha-Payments"
                   }
                 },
                 "constructInfo": {
@@ -2428,7 +2454,7 @@
                     "roleArn": {
                       "Fn::GetAtt": ["AccountProvisioningCivilServantRoleD1BCF1C2", "Arn"]
                     },
-                    "stateMachineName": "AccountProvisioning-CivilServant",
+                    "stateMachineName": "Pashasha-AccountProvisioning-CivilServant",
                     "tracingConfiguration": {
                       "enabled": true
                     }
@@ -2651,7 +2677,7 @@
                     "roleArn": {
                       "Fn::GetAtt": ["AccountProvisioningCustomerRole55F01B27", "Arn"]
                     },
-                    "stateMachineName": "AccountProvisioning-Customer",
+                    "stateMachineName": "Pashasha-AccountProvisioning-Customer",
                     "tracingConfiguration": {
                       "enabled": true
                     }
@@ -2874,7 +2900,7 @@
                     "roleArn": {
                       "Fn::GetAtt": ["AccountProvisioningAdministratorRole10529F79", "Arn"]
                     },
-                    "stateMachineName": "AccountProvisioning-Administrator",
+                    "stateMachineName": "Pashasha-AccountProvisioning-Administrator",
                     "tracingConfiguration": {
                       "enabled": true
                     }
@@ -3387,7 +3413,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:dd0cc21508e9e530136bfca9c345fe8225c8a868c4394902f15c8eb9b48a53f2"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:cde3ab66a6ad7e2afbbfdf6407ebd11477ace9b5963faeede2c00016165265d2"
                             },
                             "name": "web",
                             "portMappings": [

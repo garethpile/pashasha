@@ -231,7 +231,13 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
     );
 
     const signupTopic = new sns.Topic(this, 'SignupNotificationsTopic', {
-      displayName: 'Signup Notifications',
+      topicName: 'Pashasha-AccountProvisioning',
+      displayName: 'Pashasha Account Provisioning',
+    });
+
+    const paymentsTopic = new sns.Topic(this, 'PaymentsNotificationsTopic', {
+      topicName: 'Pashasha-Payments',
+      displayName: 'Pashasha Payments',
     });
 
     const guardPortalBaseUrl =
@@ -470,7 +476,7 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
     const adminDefinition = buildWorkflowDefinition('Administrator');
 
     const accountWorkflowCivil = new sfn.StateMachine(this, 'AccountProvisioningCivilServant', {
-      stateMachineName: 'AccountProvisioning-CivilServant',
+      stateMachineName: 'Pashasha-AccountProvisioning-CivilServant',
       definitionBody: sfn.DefinitionBody.fromChainable(civilDefinition),
       tracingEnabled: true,
       logs: {
@@ -480,7 +486,7 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
     });
 
     const accountWorkflowCustomer = new sfn.StateMachine(this, 'AccountProvisioningCustomer', {
-      stateMachineName: 'AccountProvisioning-Customer',
+      stateMachineName: 'Pashasha-AccountProvisioning-Customer',
       definitionBody: sfn.DefinitionBody.fromChainable(customerDefinition),
       tracingEnabled: true,
       logs: {
@@ -490,7 +496,7 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
     });
 
     const accountWorkflowAdmin = new sfn.StateMachine(this, 'AccountProvisioningAdministrator', {
-      stateMachineName: 'AccountProvisioning-Administrator',
+      stateMachineName: 'Pashasha-AccountProvisioning-Administrator',
       definitionBody: sfn.DefinitionBody.fromChainable(adminDefinition),
       tracingEnabled: true,
       logs: {

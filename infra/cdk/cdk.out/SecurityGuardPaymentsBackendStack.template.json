@@ -1031,10 +1031,21 @@
     "SignupNotificationsTopicB32F2A94": {
       "Type": "AWS::SNS::Topic",
       "Properties": {
-        "DisplayName": "Signup Notifications"
+        "DisplayName": "Pashasha Account Provisioning",
+        "TopicName": "Pashasha-AccountProvisioning"
       },
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/SignupNotificationsTopic/Resource"
+      }
+    },
+    "PaymentsNotificationsTopic4A627B6C": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "Pashasha Payments",
+        "TopicName": "Pashasha-Payments"
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/PaymentsNotificationsTopic/Resource"
       }
     },
     "AccountWorkflowLambdaServiceRole4DD86BD4": {
@@ -1536,7 +1547,7 @@
         "RoleArn": {
           "Fn::GetAtt": ["AccountProvisioningCivilServantRoleD1BCF1C2", "Arn"]
         },
-        "StateMachineName": "AccountProvisioning-CivilServant",
+        "StateMachineName": "Pashasha-AccountProvisioning-CivilServant",
         "TracingConfiguration": {
           "Enabled": true
         }
@@ -1712,7 +1723,7 @@
         "RoleArn": {
           "Fn::GetAtt": ["AccountProvisioningCustomerRole55F01B27", "Arn"]
         },
-        "StateMachineName": "AccountProvisioning-Customer",
+        "StateMachineName": "Pashasha-AccountProvisioning-Customer",
         "TracingConfiguration": {
           "Enabled": true
         }
@@ -1888,7 +1899,7 @@
         "RoleArn": {
           "Fn::GetAtt": ["AccountProvisioningAdministratorRole10529F79", "Arn"]
         },
-        "StateMachineName": "AccountProvisioning-Administrator",
+        "StateMachineName": "Pashasha-AccountProvisioning-Administrator",
         "TracingConfiguration": {
           "Enabled": true
         }
@@ -2356,7 +2367,7 @@
             ],
             "Essential": true,
             "Image": {
-              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:dd0cc21508e9e530136bfca9c345fe8225c8a868c4394902f15c8eb9b48a53f2"
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:cde3ab66a6ad7e2afbbfdf6407ebd11477ace9b5963faeede2c00016165265d2"
             },
             "LogConfiguration": {
               "LogDriver": "awslogs",

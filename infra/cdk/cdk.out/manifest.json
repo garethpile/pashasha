@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/1ef7a0003334e62680053d6252dfcd68475776aa831327ef1e240806d51b3af1.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/2c973e3f442319931ecee09cb52b1f362209daf642f8da469a71374ef90b7efb.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -306,6 +306,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "SignupNotificationsTopicB32F2A94"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/PaymentsNotificationsTopic/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentsNotificationsTopic4A627B6C"
           }
         ],
         "/SecurityGuardPaymentsBackendStack/AccountWorkflowLambda/ServiceRole/Resource": [
