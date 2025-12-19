@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/2c973e3f442319931ecee09cb52b1f362209daf642f8da469a71374ef90b7efb.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/8ca17f82892e10b6e662a1418ebec55fae92c9e0ed1f3d08a844647cf2ee2879.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -226,6 +226,20 @@
             "data": "CivilServantsTableC16F2C77"
           }
         ],
+        "/SecurityGuardPaymentsBackendStack/AdministratorsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "AdministratorsTable2813DFBD"
+            }
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AdministratorsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AdministratorsTable2813DFBD"
+          }
+        ],
         "/SecurityGuardPaymentsBackendStack/PaymentsTable": [
           {
             "type": "aws:cdk:hasPhysicalName",
@@ -312,6 +326,48 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "PaymentsNotificationsTopic4A627B6C"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomerPaymentLambdaServiceRoleE5D0A150"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomerPaymentLambdaServiceRoleDefaultPolicy908D1966"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomerPaymentLambdaFF0A5221"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/LogRetention/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomerPaymentLambdaLogRetentionD83FBF54"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aFD4BFC8A"
           }
         ],
         "/SecurityGuardPaymentsBackendStack/AccountWorkflowLambda/ServiceRole/Resource": [
@@ -402,6 +458,24 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "AccountProvisioningAdministrator6CD3C1AD"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomerPaymentStateMachineRoleEE7FF056"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomerPaymentStateMachineRoleDefaultPolicy79258FC2"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomerPaymentStateMachine4EB00B2D"
           }
         ],
         "/SecurityGuardPaymentsBackendStack/BackendFargateService/LB/Resource": [
@@ -570,6 +644,18 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "CivilServantsTableName"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/AdministratorsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AdministratorsTableName"
+          }
+        ],
+        "/SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachineArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomerPaymentStateMachineArn"
           }
         ],
         "/SecurityGuardPaymentsBackendStack/PaymentsTableName": [

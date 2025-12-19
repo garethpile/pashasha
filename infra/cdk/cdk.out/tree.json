@@ -1050,6 +1050,69 @@
               "version": "2.158.0"
             }
           },
+          "AdministratorsTable": {
+            "id": "AdministratorsTable",
+            "path": "SecurityGuardPaymentsBackendStack/AdministratorsTable",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/AdministratorsTable/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
+                  "aws:cdk:cloudformation:props": {
+                    "attributeDefinitions": [
+                      {
+                        "attributeName": "username",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "emailLower",
+                        "attributeType": "S"
+                      }
+                    ],
+                    "billingMode": "PAY_PER_REQUEST",
+                    "globalSecondaryIndexes": [
+                      {
+                        "indexName": "email",
+                        "keySchema": [
+                          {
+                            "attributeName": "emailLower",
+                            "keyType": "HASH"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      }
+                    ],
+                    "keySchema": [
+                      {
+                        "attributeName": "username",
+                        "keyType": "HASH"
+                      }
+                    ],
+                    "tableName": "sgp-administrators"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnTable",
+                  "version": "2.158.0"
+                }
+              },
+              "ScalingRole": {
+                "id": "ScalingRole",
+                "path": "SecurityGuardPaymentsBackendStack/AdministratorsTable/ScalingRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_dynamodb.Table",
+              "version": "2.158.0"
+            }
+          },
           "PaymentsTable": {
             "id": "PaymentsTable",
             "path": "SecurityGuardPaymentsBackendStack/PaymentsTable",
@@ -1473,6 +1536,386 @@
             "constructInfo": {
               "fqn": "aws-cdk-lib.aws_sns.Topic",
               "version": "2.158.0"
+            }
+          },
+          "CustomerPaymentLambda": {
+            "id": "CustomerPaymentLambda",
+            "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda",
+            "children": {
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "dynamodb:BatchGetItem",
+                                    "dynamodb:GetRecords",
+                                    "dynamodb:GetShardIterator",
+                                    "dynamodb:Query",
+                                    "dynamodb:GetItem",
+                                    "dynamodb:Scan",
+                                    "dynamodb:ConditionCheckItem",
+                                    "dynamodb:BatchWriteItem",
+                                    "dynamodb:PutItem",
+                                    "dynamodb:UpdateItem",
+                                    "dynamodb:DeleteItem",
+                                    "dynamodb:DescribeTable"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": ["PaymentsTable48A42630", "Arn"]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": ["PaymentsTable48A42630", "Arn"]
+                                          },
+                                          "/index/*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": "sns:Publish",
+                                  "Effect": "Allow",
+                                  "Resource": {
+                                    "Ref": "PaymentsNotificationsTopic4A627B6C"
+                                  }
+                                },
+                                {
+                                  "Action": [
+                                    "secretsmanager:GetSecretValue",
+                                    "secretsmanager:DescribeSecret"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K"
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "CustomerPaymentLambdaServiceRoleDefaultPolicy908D1966",
+                            "roles": [
+                              {
+                                "Ref": "CustomerPaymentLambdaServiceRoleE5D0A150"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.158.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.158.0"
+                }
+              },
+              "Code": {
+                "id": "Code",
+                "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.158.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::Lambda::Function",
+                  "aws:cdk:cloudformation:props": {
+                    "code": {
+                      "s3Bucket": "cdk-hnb659fds-assets-732439976770-eu-west-1",
+                      "s3Key": "72272403d15fe2dca9e67c1e9440596d85dc53c816ae8387855723eeef320bd7.zip"
+                    },
+                    "environment": {
+                      "variables": {
+                        "PAYMENTS_TABLE_NAME": {
+                          "Ref": "PaymentsTable48A42630"
+                        },
+                        "PAYMENT_SUCCESS_SNS_TOPIC_ARN": {
+                          "Ref": "PaymentsNotificationsTopic4A627B6C"
+                        },
+                        "PAYMENT_FAILURE_SNS_TOPIC_ARN": {
+                          "Ref": "PaymentsNotificationsTopic4A627B6C"
+                        },
+                        "ECLIPSE_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K"
+                      }
+                    },
+                    "handler": "index.handler",
+                    "role": {
+                      "Fn::GetAtt": ["CustomerPaymentLambdaServiceRoleE5D0A150", "Arn"]
+                    },
+                    "runtime": "nodejs20.x"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_lambda.CfnFunction",
+                  "version": "2.158.0"
+                }
+              },
+              "LogRetention": {
+                "id": "LogRetention",
+                "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/LogRetention",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/LogRetention/Resource",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.CfnResource",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_logs.LogRetention",
+                  "version": "2.158.0"
+                }
+              },
+              "LogGroup": {
+                "id": "LogGroup",
+                "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda/LogGroup",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_lambda_nodejs.NodejsFunction",
+              "version": "2.158.0"
+            }
+          },
+          "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a": {
+            "id": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a",
+            "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a",
+            "children": {
+              "Code": {
+                "id": "Code",
+                "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code",
+                "children": {
+                  "Stage": {
+                    "id": "Stage",
+                    "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code/Stage",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.AssetStaging",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "AssetBucket": {
+                    "id": "AssetBucket",
+                    "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Code/AssetBucket",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_s3.BucketBase",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_s3_assets.Asset",
+                  "version": "2.158.0"
+                }
+              },
+              "ServiceRole": {
+                "id": "ServiceRole",
+                "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole",
+                "children": {
+                  "ImportServiceRole": {
+                    "id": "ImportServiceRole",
+                    "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/ImportServiceRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        },
+                        "managedPolicyArns": [
+                          {
+                            "Fn::Join": [
+                              "",
+                              [
+                                "arn:",
+                                {
+                                  "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                              ]
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/ServiceRole/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": [
+                                    "logs:PutRetentionPolicy",
+                                    "logs:DeleteRetentionPolicy"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": "*"
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRoleDefaultPolicyADDA7DEB",
+                            "roles": [
+                              {
+                                "Ref": "LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8aServiceRole9741ECFB"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.158.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.158.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/LogRetentionaae0aa3c5b4d4f87b02d85b201efdd8a/Resource",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.CfnResource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "constructs.Construct",
+              "version": "10.4.3"
             }
           },
           "AccountWorkflowLambda": {
@@ -2216,38 +2659,6 @@
               "version": "2.158.0"
             }
           },
-          "AdministratorCreateEclipseCustomer": {
-            "id": "AdministratorCreateEclipseCustomer",
-            "path": "SecurityGuardPaymentsBackendStack/AdministratorCreateEclipseCustomer",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
-              "version": "2.158.0"
-            }
-          },
-          "AdministratorCreateEclipseWallet": {
-            "id": "AdministratorCreateEclipseWallet",
-            "path": "SecurityGuardPaymentsBackendStack/AdministratorCreateEclipseWallet",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
-              "version": "2.158.0"
-            }
-          },
-          "AdministratorEnsureGuardAssets": {
-            "id": "AdministratorEnsureGuardAssets",
-            "path": "SecurityGuardPaymentsBackendStack/AdministratorEnsureGuardAssets",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
-              "version": "2.158.0"
-            }
-          },
-          "AdministratorUpdateProfileWithEclipseIds": {
-            "id": "AdministratorUpdateProfileWithEclipseIds",
-            "path": "SecurityGuardPaymentsBackendStack/AdministratorUpdateProfileWithEclipseIds",
-            "constructInfo": {
-              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
-              "version": "2.158.0"
-            }
-          },
           "AccountProvisioningCivilServant": {
             "id": "AccountProvisioningCivilServant",
             "path": "SecurityGuardPaymentsBackendStack/AccountProvisioningCivilServant",
@@ -2853,31 +3264,15 @@
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"AdministratorCreateProfileRecord\":{\"Next\":\"AdministratorCreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"AdministratorCreateProfileRecord\":{\"Next\":\"AdministratorNotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
                           },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"AdministratorCreateEclipseCustomer\":{\"Next\":\"AdministratorCreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
-                          {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
-                          },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"AdministratorCreateEclipseWallet\":{\"Next\":\"AdministratorEnsureGuardAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
-                          {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
-                          },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"AdministratorEnsureGuardAssets\":{\"Next\":\"AdministratorUpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
-                          {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
-                          },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"ensureGuardAssets\"}},\"AdministratorUpdateProfileWithEclipseIds\":{\"Next\":\"AdministratorNotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
-                          {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
-                          },
-                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}},\"AdministratorNotifyWorkflowSuccess\":{\"Next\":\"AdministratorAccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+                          "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"AdministratorNotifyWorkflowSuccess\":{\"Next\":\"AdministratorAccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
                           },
-                          "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\",\"eclipseCustomerId.$\":\"$.eclipseCustomerId\",\"eclipseWalletId.$\":\"$.eclipseWalletId\"}}}},\"AdministratorAccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"AdministratorNotifyWorkflowFailure\":{\"Next\":\"AdministratorAccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
+                          "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\"}}}},\"AdministratorAccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"AdministratorNotifyWorkflowFailure\":{\"Next\":\"AdministratorAccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
                             "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
                           },
@@ -2901,6 +3296,190 @@
                       "Fn::GetAtt": ["AccountProvisioningAdministratorRole10529F79", "Arn"]
                     },
                     "stateMachineName": "Pashasha-AccountProvisioning-Administrator",
+                    "tracingConfiguration": {
+                      "enabled": true
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_stepfunctions.CfnStateMachine",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions.StateMachine",
+              "version": "2.158.0"
+            }
+          },
+          "InvokeCustomerPayment": {
+            "id": "InvokeCustomerPayment",
+            "path": "SecurityGuardPaymentsBackendStack/InvokeCustomerPayment",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_stepfunctions_tasks.LambdaInvoke",
+              "version": "2.158.0"
+            }
+          },
+          "CustomerPaymentStateMachine": {
+            "id": "CustomerPaymentStateMachine",
+            "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine",
+            "children": {
+              "Role": {
+                "id": "Role",
+                "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Role",
+                "children": {
+                  "ImportRole": {
+                    "id": "ImportRole",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Role/ImportRole",
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.Resource",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Role/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::IAM::Role",
+                      "aws:cdk:cloudformation:props": {
+                        "assumeRolePolicyDocument": {
+                          "Statement": [
+                            {
+                              "Action": "sts:AssumeRole",
+                              "Effect": "Allow",
+                              "Principal": {
+                                "Service": "states.amazonaws.com"
+                              }
+                            }
+                          ],
+                          "Version": "2012-10-17"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.CfnRole",
+                      "version": "2.158.0"
+                    }
+                  },
+                  "DefaultPolicy": {
+                    "id": "DefaultPolicy",
+                    "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Role/DefaultPolicy",
+                    "children": {
+                      "Resource": {
+                        "id": "Resource",
+                        "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Role/DefaultPolicy/Resource",
+                        "attributes": {
+                          "aws:cdk:cloudformation:type": "AWS::IAM::Policy",
+                          "aws:cdk:cloudformation:props": {
+                            "policyDocument": {
+                              "Statement": [
+                                {
+                                  "Action": "lambda:InvokeFunction",
+                                  "Effect": "Allow",
+                                  "Resource": [
+                                    {
+                                      "Fn::GetAtt": ["CustomerPaymentLambdaFF0A5221", "Arn"]
+                                    },
+                                    {
+                                      "Fn::Join": [
+                                        "",
+                                        [
+                                          {
+                                            "Fn::GetAtt": ["CustomerPaymentLambdaFF0A5221", "Arn"]
+                                          },
+                                          ":*"
+                                        ]
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "Action": [
+                                    "logs:CreateLogDelivery",
+                                    "logs:GetLogDelivery",
+                                    "logs:UpdateLogDelivery",
+                                    "logs:DeleteLogDelivery",
+                                    "logs:ListLogDeliveries",
+                                    "logs:PutResourcePolicy",
+                                    "logs:DescribeResourcePolicies",
+                                    "logs:DescribeLogGroups"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": "*"
+                                },
+                                {
+                                  "Action": [
+                                    "xray:PutTraceSegments",
+                                    "xray:PutTelemetryRecords",
+                                    "xray:GetSamplingRules",
+                                    "xray:GetSamplingTargets"
+                                  ],
+                                  "Effect": "Allow",
+                                  "Resource": "*"
+                                }
+                              ],
+                              "Version": "2012-10-17"
+                            },
+                            "policyName": "CustomerPaymentStateMachineRoleDefaultPolicy79258FC2",
+                            "roles": [
+                              {
+                                "Ref": "CustomerPaymentStateMachineRoleEE7FF056"
+                              }
+                            ]
+                          }
+                        },
+                        "constructInfo": {
+                          "fqn": "aws-cdk-lib.aws_iam.CfnPolicy",
+                          "version": "2.158.0"
+                        }
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_iam.Policy",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_iam.Role",
+                  "version": "2.158.0"
+                }
+              },
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachine/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::StepFunctions::StateMachine",
+                  "aws:cdk:cloudformation:props": {
+                    "definitionString": {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "{\"StartAt\":\"InvokeCustomerPayment\",\"States\":{\"InvokeCustomerPayment\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
+                          {
+                            "Fn::GetAtt": ["CustomerPaymentLambdaFF0A5221", "Arn"]
+                          },
+                          "\",\"Parameters\":\"$\"}}}"
+                        ]
+                      ]
+                    },
+                    "loggingConfiguration": {
+                      "destinations": [
+                        {
+                          "cloudWatchLogsLogGroup": {
+                            "logGroupArn": {
+                              "Fn::GetAtt": ["AccountWorkflowLogs4F77612E", "Arn"]
+                            }
+                          }
+                        }
+                      ],
+                      "level": "ALL"
+                    },
+                    "roleArn": {
+                      "Fn::GetAtt": ["CustomerPaymentStateMachineRoleEE7FF056", "Arn"]
+                    },
+                    "stateMachineName": "Pashasha-CustomerPayment",
+                    "stateMachineType": "EXPRESS",
                     "tracingConfiguration": {
                       "enabled": true
                     }
@@ -3335,6 +3914,46 @@
                                       ]
                                     },
                                     {
+                                      "Action": [
+                                        "dynamodb:BatchGetItem",
+                                        "dynamodb:GetRecords",
+                                        "dynamodb:GetShardIterator",
+                                        "dynamodb:Query",
+                                        "dynamodb:GetItem",
+                                        "dynamodb:Scan",
+                                        "dynamodb:ConditionCheckItem",
+                                        "dynamodb:BatchWriteItem",
+                                        "dynamodb:PutItem",
+                                        "dynamodb:UpdateItem",
+                                        "dynamodb:DeleteItem",
+                                        "dynamodb:DescribeTable"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": [
+                                        {
+                                          "Fn::GetAtt": ["AdministratorsTable2813DFBD", "Arn"]
+                                        },
+                                        {
+                                          "Fn::Join": [
+                                            "",
+                                            [
+                                              {
+                                                "Fn::GetAtt": ["AdministratorsTable2813DFBD", "Arn"]
+                                              },
+                                              "/index/*"
+                                            ]
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "Action": "states:StartExecution",
+                                      "Effect": "Allow",
+                                      "Resource": {
+                                        "Ref": "CustomerPaymentStateMachine4EB00B2D"
+                                      }
+                                    },
+                                    {
                                       "Action": "sns:Publish",
                                       "Effect": "Allow",
                                       "Resource": {
@@ -3413,7 +4032,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:cde3ab66a6ad7e2afbbfdf6407ebd11477ace9b5963faeede2c00016165265d2"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:6682c90a2643aa97e7de8d8e27139f5277e4eebcf6f4fce57ab5251ead56154c"
                             },
                             "name": "web",
                             "portMappings": [
@@ -3466,6 +4085,12 @@
                                 }
                               },
                               {
+                                "name": "ADMINISTRATORS_TABLE_NAME",
+                                "value": {
+                                  "Ref": "AdministratorsTable2813DFBD"
+                                }
+                              },
+                              {
                                 "name": "PAYMENTS_TABLE_NAME",
                                 "value": {
                                   "Ref": "PaymentsTable48A42630"
@@ -3515,6 +4140,12 @@
                                 "name": "ACCOUNT_WORKFLOW_ARN_ADMINISTRATOR",
                                 "value": {
                                   "Ref": "AccountProvisioningAdministrator6CD3C1AD"
+                                }
+                              },
+                              {
+                                "name": "CUSTOMER_PAYMENT_SFN_ARN",
+                                "value": {
+                                  "Ref": "CustomerPaymentStateMachine4EB00B2D"
                                 }
                               },
                               {
@@ -4116,6 +4747,22 @@
           "CivilServantsTableName": {
             "id": "CivilServantsTableName",
             "path": "SecurityGuardPaymentsBackendStack/CivilServantsTableName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "AdministratorsTableName": {
+            "id": "AdministratorsTableName",
+            "path": "SecurityGuardPaymentsBackendStack/AdministratorsTableName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "CustomerPaymentStateMachineArn": {
+            "id": "CustomerPaymentStateMachineArn",
+            "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentStateMachineArn",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.158.0"
