@@ -886,6 +886,52 @@
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/AccountCounterTable/Resource"
       }
     },
+    "SupportTicketsTable98A8DE97": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "supportCode",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "customerId",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "byCustomer",
+            "KeySchema": [
+              {
+                "AttributeName": "customerId",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "supportCode",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "supportCode",
+            "KeyType": "HASH"
+          }
+        ],
+        "TableName": "Pashasha-Support"
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/SupportTicketsTable/Resource"
+      }
+    },
     "UserAssetsBucket8B59E294": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
@@ -1090,6 +1136,16 @@
         "aws:cdk:path": "SecurityGuardPaymentsBackendStack/PaymentsNotificationsTopic/Resource"
       }
     },
+    "SupportNotificationsTopicC49E4FA4": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "Pashasha Support",
+        "TopicName": "Pashasha-Support"
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsBackendStack/SupportNotificationsTopic/Resource"
+      }
+    },
     "CustomerPaymentLambdaServiceRoleE5D0A150": {
       "Type": "AWS::IAM::Role",
       "Properties": {
@@ -1170,6 +1226,13 @@
               }
             },
             {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SupportNotificationsTopicC49E4FA4"
+              }
+            },
+            {
               "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
               "Effect": "Allow",
               "Resource": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K"
@@ -1206,7 +1269,10 @@
             "PAYMENT_FAILURE_SNS_TOPIC_ARN": {
               "Ref": "PaymentsNotificationsTopic4A627B6C"
             },
-            "ECLIPSE_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K"
+            "ECLIPSE_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K",
+            "SUPPORT_TOPIC_ARN": {
+              "Ref": "SupportNotificationsTopicC49E4FA4"
+            }
           }
         },
         "Handler": "index.handler",
@@ -2646,10 +2712,50 @@
               ]
             },
             {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["SupportTicketsTable98A8DE97", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["SupportTicketsTable98A8DE97", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
               "Action": "states:StartExecution",
               "Effect": "Allow",
               "Resource": {
                 "Ref": "CustomerPaymentStateMachine4EB00B2D"
+              }
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SupportNotificationsTopicC49E4FA4"
               }
             },
             {
@@ -2812,11 +2918,23 @@
               {
                 "Name": "TENANT_WALLET_ID",
                 "Value": ""
+              },
+              {
+                "Name": "SUPPORT_TOPIC_ARN",
+                "Value": {
+                  "Ref": "SupportNotificationsTopicC49E4FA4"
+                }
+              },
+              {
+                "Name": "SUPPORT_TABLE_NAME",
+                "Value": {
+                  "Ref": "SupportTicketsTable98A8DE97"
+                }
               }
             ],
             "Essential": true,
             "Image": {
-              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:6682c90a2643aa97e7de8d8e27139f5277e4eebcf6f4fce57ab5251ead56154c"
+              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:2c2ad1fd4e8ec94cae8582d01c5b680d4ddb43e31ca9358f2f738d21368133f3"
             },
             "LogConfiguration": {
               "LogDriver": "awslogs",
@@ -3269,6 +3387,11 @@
         "Ref": "CustomerPaymentStateMachine4EB00B2D"
       }
     },
+    "SupportTopicArn": {
+      "Value": {
+        "Ref": "SupportNotificationsTopicC49E4FA4"
+      }
+    },
     "PaymentsTableName": {
       "Value": {
         "Ref": "PaymentsTable48A42630"
@@ -3282,6 +3405,11 @@
     "AccountCounterTableName": {
       "Value": {
         "Ref": "AccountCounterTable225C6EF1"
+      }
+    },
+    "SupportTicketsTableName": {
+      "Value": {
+        "Ref": "SupportTicketsTable98A8DE97"
       }
     },
     "ExportsOutputFnGetAttBackendDistribution025C1152DomainNameAA03E149": {

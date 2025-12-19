@@ -1261,6 +1261,73 @@
               "version": "2.158.0"
             }
           },
+          "SupportTicketsTable": {
+            "id": "SupportTicketsTable",
+            "path": "SecurityGuardPaymentsBackendStack/SupportTicketsTable",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/SupportTicketsTable/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::DynamoDB::Table",
+                  "aws:cdk:cloudformation:props": {
+                    "attributeDefinitions": [
+                      {
+                        "attributeName": "supportCode",
+                        "attributeType": "S"
+                      },
+                      {
+                        "attributeName": "customerId",
+                        "attributeType": "S"
+                      }
+                    ],
+                    "billingMode": "PAY_PER_REQUEST",
+                    "globalSecondaryIndexes": [
+                      {
+                        "indexName": "byCustomer",
+                        "keySchema": [
+                          {
+                            "attributeName": "customerId",
+                            "keyType": "HASH"
+                          },
+                          {
+                            "attributeName": "supportCode",
+                            "keyType": "RANGE"
+                          }
+                        ],
+                        "projection": {
+                          "projectionType": "ALL"
+                        }
+                      }
+                    ],
+                    "keySchema": [
+                      {
+                        "attributeName": "supportCode",
+                        "keyType": "HASH"
+                      }
+                    ],
+                    "tableName": "Pashasha-Support"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_dynamodb.CfnTable",
+                  "version": "2.158.0"
+                }
+              },
+              "ScalingRole": {
+                "id": "ScalingRole",
+                "path": "SecurityGuardPaymentsBackendStack/SupportTicketsTable/ScalingRole",
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.Resource",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_dynamodb.Table",
+              "version": "2.158.0"
+            }
+          },
           "UserAssetsBucket": {
             "id": "UserAssetsBucket",
             "path": "SecurityGuardPaymentsBackendStack/UserAssetsBucket",
@@ -1538,6 +1605,31 @@
               "version": "2.158.0"
             }
           },
+          "SupportNotificationsTopic": {
+            "id": "SupportNotificationsTopic",
+            "path": "SecurityGuardPaymentsBackendStack/SupportNotificationsTopic",
+            "children": {
+              "Resource": {
+                "id": "Resource",
+                "path": "SecurityGuardPaymentsBackendStack/SupportNotificationsTopic/Resource",
+                "attributes": {
+                  "aws:cdk:cloudformation:type": "AWS::SNS::Topic",
+                  "aws:cdk:cloudformation:props": {
+                    "displayName": "Pashasha Support",
+                    "topicName": "Pashasha-Support"
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "aws-cdk-lib.aws_sns.CfnTopic",
+                  "version": "2.158.0"
+                }
+              }
+            },
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.aws_sns.Topic",
+              "version": "2.158.0"
+            }
+          },
           "CustomerPaymentLambda": {
             "id": "CustomerPaymentLambda",
             "path": "SecurityGuardPaymentsBackendStack/CustomerPaymentLambda",
@@ -1646,6 +1738,13 @@
                                   }
                                 },
                                 {
+                                  "Action": "sns:Publish",
+                                  "Effect": "Allow",
+                                  "Resource": {
+                                    "Ref": "SupportNotificationsTopicC49E4FA4"
+                                  }
+                                },
+                                {
                                   "Action": [
                                     "secretsmanager:GetSecretValue",
                                     "secretsmanager:DescribeSecret"
@@ -1728,7 +1827,10 @@
                         "PAYMENT_FAILURE_SNS_TOPIC_ARN": {
                           "Ref": "PaymentsNotificationsTopic4A627B6C"
                         },
-                        "ECLIPSE_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K"
+                        "ECLIPSE_SECRET_ARN": "arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K",
+                        "SUPPORT_TOPIC_ARN": {
+                          "Ref": "SupportNotificationsTopicC49E4FA4"
+                        }
                       }
                     },
                     "handler": "index.handler",
@@ -3947,10 +4049,50 @@
                                       ]
                                     },
                                     {
+                                      "Action": [
+                                        "dynamodb:BatchGetItem",
+                                        "dynamodb:GetRecords",
+                                        "dynamodb:GetShardIterator",
+                                        "dynamodb:Query",
+                                        "dynamodb:GetItem",
+                                        "dynamodb:Scan",
+                                        "dynamodb:ConditionCheckItem",
+                                        "dynamodb:BatchWriteItem",
+                                        "dynamodb:PutItem",
+                                        "dynamodb:UpdateItem",
+                                        "dynamodb:DeleteItem",
+                                        "dynamodb:DescribeTable"
+                                      ],
+                                      "Effect": "Allow",
+                                      "Resource": [
+                                        {
+                                          "Fn::GetAtt": ["SupportTicketsTable98A8DE97", "Arn"]
+                                        },
+                                        {
+                                          "Fn::Join": [
+                                            "",
+                                            [
+                                              {
+                                                "Fn::GetAtt": ["SupportTicketsTable98A8DE97", "Arn"]
+                                              },
+                                              "/index/*"
+                                            ]
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
                                       "Action": "states:StartExecution",
                                       "Effect": "Allow",
                                       "Resource": {
                                         "Ref": "CustomerPaymentStateMachine4EB00B2D"
+                                      }
+                                    },
+                                    {
+                                      "Action": "sns:Publish",
+                                      "Effect": "Allow",
+                                      "Resource": {
+                                        "Ref": "SupportNotificationsTopicC49E4FA4"
                                       }
                                     },
                                     {
@@ -4032,7 +4174,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:6682c90a2643aa97e7de8d8e27139f5277e4eebcf6f4fce57ab5251ead56154c"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:2c2ad1fd4e8ec94cae8582d01c5b680d4ddb43e31ca9358f2f738d21368133f3"
                             },
                             "name": "web",
                             "portMappings": [
@@ -4151,6 +4293,18 @@
                               {
                                 "name": "TENANT_WALLET_ID",
                                 "value": ""
+                              },
+                              {
+                                "name": "SUPPORT_TOPIC_ARN",
+                                "value": {
+                                  "Ref": "SupportNotificationsTopicC49E4FA4"
+                                }
+                              },
+                              {
+                                "name": "SUPPORT_TABLE_NAME",
+                                "value": {
+                                  "Ref": "SupportTicketsTable98A8DE97"
+                                }
                               }
                             ],
                             "secrets": [
@@ -4768,6 +4922,14 @@
               "version": "2.158.0"
             }
           },
+          "SupportTopicArn": {
+            "id": "SupportTopicArn",
+            "path": "SecurityGuardPaymentsBackendStack/SupportTopicArn",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
           "PaymentsTableName": {
             "id": "PaymentsTableName",
             "path": "SecurityGuardPaymentsBackendStack/PaymentsTableName",
@@ -4787,6 +4949,14 @@
           "AccountCounterTableName": {
             "id": "AccountCounterTableName",
             "path": "SecurityGuardPaymentsBackendStack/AccountCounterTableName",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "SupportTicketsTableName": {
+            "id": "SupportTicketsTableName",
+            "path": "SecurityGuardPaymentsBackendStack/SupportTicketsTableName",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.158.0"
