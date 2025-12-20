@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/e948d071ffb3e313a15c1413897728bbbd39ee09f4f593f3067ef15d3c3e8f81.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/e8e7d57664c25286487f35d2c41386094d28d9c5cbcc3f34cd6c1f0a842586fa.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
