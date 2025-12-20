@@ -178,10 +178,35 @@
         "aws:cdk:path": "SecurityGuardPaymentsFrontendStack/AmplifyApp/PrimaryBranch/Resource"
       }
     },
+    "AmplifyAppCustomDomain520C9CD9": {
+      "Type": "AWS::Amplify::Domain",
+      "Properties": {
+        "AppId": {
+          "Fn::GetAtt": ["AmplifyApp6046A70F", "AppId"]
+        },
+        "AutoSubDomainCreationPatterns": ["*", "pr*"],
+        "AutoSubDomainIAMRole": {
+          "Fn::GetAtt": ["AmplifyAppRole0364E92A", "Arn"]
+        },
+        "DomainName": "pashasha.com",
+        "EnableAutoSubDomain": true,
+        "SubDomainSettings": [
+          {
+            "BranchName": {
+              "Fn::GetAtt": ["AmplifyAppPrimaryBranch02455E21", "BranchName"]
+            },
+            "Prefix": "www"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "SecurityGuardPaymentsFrontendStack/AmplifyApp/CustomDomain/Resource"
+      }
+    },
     "CDKMetadata": {
       "Type": "AWS::CDK::Metadata",
       "Properties": {
-        "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2NWw7CIBBF19J/mGKjiZ8+FmBSF2BGSlNaoKSAxhD2bqnEr5ucO/dMA7vDESKr8O0o7yaq5BPi3SOfyIoeUaKG2M5KkGtvciaC2irZfyCu5GxtLi4LGj6kRFrh5rDw7foWvA1+2xWaCKOo7IDAqlP5WOcsylLGbP0rzdwJGF39avbQrMPRSUmXYLzUAtpffgFDSPTHxwAAAA=="
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/z2NywrCMBBFv6X7ZFqLgktfe6F+gIxpSlPzokkUCfl3mxpc3eFc7pkWNrs9xKbCt6Osf1IpHhBvHtmTLOgeBSqInZGcnAedMxFUVorhA3EhR2tzcZpRszFfF6NQ6JRIx50JM1t31+Bt8Kuh0EQaitKOCE11KL/rnEVeypj9Rf43a9NzmFz9arfQLvvJCUHnoL1QHLpffgGcHvMo2AAAAA=="
       },
       "Metadata": {
         "aws:cdk:path": "SecurityGuardPaymentsFrontendStack/CDKMetadata/Default"
@@ -210,6 +235,9 @@
           ]
         ]
       }
+    },
+    "AmplifyCustomDomain": {
+      "Value": "https://www.pashasha.com"
     }
   },
   "Parameters": {

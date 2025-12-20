@@ -4174,7 +4174,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:2c2ad1fd4e8ec94cae8582d01c5b680d4ddb43e31ca9358f2f738d21368133f3"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:4a671498201cce7b41d8a40f0bd45f3d370d2ec0f46322071933b4cab7e85893"
                             },
                             "name": "web",
                             "portMappings": [
@@ -5272,6 +5272,46 @@
                   "fqn": "@aws-cdk/aws-amplify-alpha.Branch",
                   "version": "2.158.0-alpha.0"
                 }
+              },
+              "CustomDomain": {
+                "id": "CustomDomain",
+                "path": "SecurityGuardPaymentsFrontendStack/AmplifyApp/CustomDomain",
+                "children": {
+                  "Resource": {
+                    "id": "Resource",
+                    "path": "SecurityGuardPaymentsFrontendStack/AmplifyApp/CustomDomain/Resource",
+                    "attributes": {
+                      "aws:cdk:cloudformation:type": "AWS::Amplify::Domain",
+                      "aws:cdk:cloudformation:props": {
+                        "appId": {
+                          "Fn::GetAtt": ["AmplifyApp6046A70F", "AppId"]
+                        },
+                        "autoSubDomainCreationPatterns": ["*", "pr*"],
+                        "autoSubDomainIamRole": {
+                          "Fn::GetAtt": ["AmplifyAppRole0364E92A", "Arn"]
+                        },
+                        "domainName": "pashasha.com",
+                        "enableAutoSubDomain": true,
+                        "subDomainSettings": [
+                          {
+                            "branchName": {
+                              "Fn::GetAtt": ["AmplifyAppPrimaryBranch02455E21", "BranchName"]
+                            },
+                            "prefix": "www"
+                          }
+                        ]
+                      }
+                    },
+                    "constructInfo": {
+                      "fqn": "aws-cdk-lib.aws_amplify.CfnDomain",
+                      "version": "2.158.0"
+                    }
+                  }
+                },
+                "constructInfo": {
+                  "fqn": "@aws-cdk/aws-amplify-alpha.Domain",
+                  "version": "2.158.0-alpha.0"
+                }
               }
             },
             "constructInfo": {
@@ -5290,6 +5330,14 @@
           "AmplifyDefaultDomain": {
             "id": "AmplifyDefaultDomain",
             "path": "SecurityGuardPaymentsFrontendStack/AmplifyDefaultDomain",
+            "constructInfo": {
+              "fqn": "aws-cdk-lib.CfnOutput",
+              "version": "2.158.0"
+            }
+          },
+          "AmplifyCustomDomain": {
+            "id": "AmplifyCustomDomain",
+            "path": "SecurityGuardPaymentsFrontendStack/AmplifyCustomDomain",
             "constructInfo": {
               "fqn": "aws-cdk-lib.CfnOutput",
               "version": "2.158.0"

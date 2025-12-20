@@ -18,7 +18,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/b439e633df6ae14a332e33f35baa3e6325d7ae4d120cf32f3e8b57a2044b6435.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/e948d071ffb3e313a15c1413897728bbbd39ee09f4f593f3067ef15d3c3e8f81.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsBackendStack.assets"],
@@ -770,7 +770,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-deploy-role-732439976770-eu-west-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::732439976770:role/cdk-hnb659fds-cfn-exec-role-732439976770-eu-west-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/19f9111490d922b9bc8db2e153fcac4204bc579ba8440d3b64669f9db2391bd0.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-732439976770-eu-west-1/0681b073b698b0a745e9ab78ff4dbb6e08a6f879cb5147e1a265df582e532709.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": ["SecurityGuardPaymentsFrontendStack.assets"],
@@ -803,6 +803,12 @@
             "data": "AmplifyAppPrimaryBranch02455E21"
           }
         ],
+        "/SecurityGuardPaymentsFrontendStack/AmplifyApp/CustomDomain/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AmplifyAppCustomDomain520C9CD9"
+          }
+        ],
         "/SecurityGuardPaymentsFrontendStack/AmplifyAppId": [
           {
             "type": "aws:cdk:logicalId",
@@ -813,6 +819,12 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "AmplifyDefaultDomain"
+          }
+        ],
+        "/SecurityGuardPaymentsFrontendStack/AmplifyCustomDomain": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AmplifyCustomDomain"
           }
         ],
         "/SecurityGuardPaymentsFrontendStack/CDKMetadata/Default": [
