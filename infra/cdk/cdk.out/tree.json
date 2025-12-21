@@ -241,7 +241,10 @@
                       "aws:cdk:cloudformation:type": "AWS::EC2::NatGateway",
                       "aws:cdk:cloudformation:props": {
                         "allocationId": {
-                          "Fn::GetAtt": ["BackendVpcPublicSubnet1EIP58477CDB", "AllocationId"]
+                          "Fn::GetAtt": [
+                            "BackendVpcPublicSubnet1EIP58477CDB",
+                            "AllocationId"
+                          ]
                         },
                         "subnetId": {
                           "Ref": "BackendVpcPublicSubnet1Subnet9D3515AA"
@@ -699,8 +702,14 @@
                     "adminCreateUserConfig": {
                       "allowAdminCreateUserOnly": false
                     },
-                    "aliasAttributes": ["email", "phone_number"],
-                    "autoVerifiedAttributes": ["email", "phone_number"],
+                    "aliasAttributes": [
+                      "email",
+                      "phone_number"
+                    ],
+                    "autoVerifiedAttributes": [
+                      "email",
+                      "phone_number"
+                    ],
                     "emailVerificationMessage": "The verification code to your new account is {####}",
                     "emailVerificationSubject": "Verify your new account",
                     "schema": [
@@ -727,7 +736,10 @@
                     ],
                     "smsConfiguration": {
                       "snsCallerArn": {
-                        "Fn::GetAtt": ["CognitoSmsRole3E5A1370", "Arn"]
+                        "Fn::GetAtt": [
+                          "CognitoSmsRole3E5A1370",
+                          "Arn"
+                        ]
                       },
                       "externalId": "CognitoSmsRoleExternal"
                     },
@@ -755,7 +767,10 @@
                     "attributes": {
                       "aws:cdk:cloudformation:type": "AWS::Cognito::UserPoolClient",
                       "aws:cdk:cloudformation:props": {
-                        "allowedOAuthFlows": ["implicit", "code"],
+                        "allowedOAuthFlows": [
+                          "implicit",
+                          "code"
+                        ],
                         "allowedOAuthFlowsUserPoolClient": true,
                         "allowedOAuthScopes": [
                           "profile",
@@ -764,13 +779,17 @@
                           "openid",
                           "aws.cognito.signin.user.admin"
                         ],
-                        "callbackUrLs": ["https://example.com"],
+                        "callbackUrLs": [
+                          "https://example.com"
+                        ],
                         "explicitAuthFlows": [
                           "ALLOW_USER_PASSWORD_AUTH",
                           "ALLOW_USER_SRP_AUTH",
                           "ALLOW_REFRESH_TOKEN_AUTH"
                         ],
-                        "supportedIdentityProviders": ["COGNITO"],
+                        "supportedIdentityProviders": [
+                          "COGNITO"
+                        ],
                         "userPoolId": {
                           "Ref": "UserPool6BA7E5F2"
                         }
@@ -1350,9 +1369,16 @@
                     "corsConfiguration": {
                       "corsRules": [
                         {
-                          "allowedHeaders": ["*"],
-                          "allowedMethods": ["GET", "PUT"],
-                          "allowedOrigins": ["*"]
+                          "allowedHeaders": [
+                            "*"
+                          ],
+                          "allowedMethods": [
+                            "GET",
+                            "PUT"
+                          ],
+                          "allowedOrigins": [
+                            "*"
+                          ]
                         }
                       ]
                     },
@@ -1408,14 +1434,20 @@
                               },
                               "Resource": [
                                 {
-                                  "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                  "Fn::GetAtt": [
+                                    "UserAssetsBucket8B59E294",
+                                    "Arn"
+                                  ]
                                 },
                                 {
                                   "Fn::Join": [
                                     "",
                                     [
                                       {
-                                        "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                        "Fn::GetAtt": [
+                                          "UserAssetsBucket8B59E294",
+                                          "Arn"
+                                        ]
                                       },
                                       "/*"
                                     ]
@@ -1715,14 +1747,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["PaymentsTable48A42630", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "PaymentsTable48A42630",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["PaymentsTable48A42630", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "PaymentsTable48A42630",
+                                              "Arn"
+                                            ]
                                           },
                                           "/index/*"
                                         ]
@@ -1835,7 +1873,10 @@
                     },
                     "handler": "index.handler",
                     "role": {
-                      "Fn::GetAtt": ["CustomerPaymentLambdaServiceRoleE5D0A150", "Arn"]
+                      "Fn::GetAtt": [
+                        "CustomerPaymentLambdaServiceRoleE5D0A150",
+                        "Arn"
+                      ]
                     },
                     "runtime": "nodejs20.x"
                   }
@@ -2091,21 +2132,30 @@
                                   "Action": "cognito-idp:AdminCreateUser",
                                   "Effect": "Allow",
                                   "Resource": {
-                                    "Fn::GetAtt": ["UserPool6BA7E5F2", "Arn"]
+                                    "Fn::GetAtt": [
+                                      "UserPool6BA7E5F2",
+                                      "Arn"
+                                    ]
                                   }
                                 },
                                 {
                                   "Action": "cognito-idp:AdminAddUserToGroup",
                                   "Effect": "Allow",
                                   "Resource": {
-                                    "Fn::GetAtt": ["UserPool6BA7E5F2", "Arn"]
+                                    "Fn::GetAtt": [
+                                      "UserPool6BA7E5F2",
+                                      "Arn"
+                                    ]
                                   }
                                 },
                                 {
                                   "Action": "cognito-idp:AdminSetUserPassword",
                                   "Effect": "Allow",
                                   "Resource": {
-                                    "Fn::GetAtt": ["UserPool6BA7E5F2", "Arn"]
+                                    "Fn::GetAtt": [
+                                      "UserPool6BA7E5F2",
+                                      "Arn"
+                                    ]
                                   }
                                 },
                                 {
@@ -2126,14 +2176,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["CustomersTableB554B793", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "CustomersTableB554B793",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["CustomersTableB554B793", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "CustomersTableB554B793",
+                                              "Arn"
+                                            ]
                                           },
                                           "/index/*"
                                         ]
@@ -2159,14 +2215,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["CivilServantsTableC16F2C77", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "CivilServantsTableC16F2C77",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["CivilServantsTableC16F2C77", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "CivilServantsTableC16F2C77",
+                                              "Arn"
+                                            ]
                                           },
                                           "/index/*"
                                         ]
@@ -2192,7 +2254,10 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["AccountCounterTable225C6EF1", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "AccountCounterTable225C6EF1",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Ref": "AWS::NoValue"
@@ -2229,7 +2294,10 @@
                                       "",
                                       [
                                         {
-                                          "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                          "Fn::GetAtt": [
+                                            "UserAssetsBucket8B59E294",
+                                            "Arn"
+                                          ]
                                         },
                                         "/*"
                                       ]
@@ -2326,7 +2394,10 @@
                     },
                     "handler": "index.handler",
                     "role": {
-                      "Fn::GetAtt": ["AccountWorkflowLambdaServiceRole4DD86BD4", "Arn"]
+                      "Fn::GetAtt": [
+                        "AccountWorkflowLambdaServiceRole4DD86BD4",
+                        "Arn"
+                      ]
                     },
                     "runtime": "nodejs20.x"
                   }
@@ -2489,7 +2560,10 @@
                     },
                     "handler": "index.handler",
                     "role": {
-                      "Fn::GetAtt": ["AccountWorkflowNotifierServiceRole01B1B6E3", "Arn"]
+                      "Fn::GetAtt": [
+                        "AccountWorkflowNotifierServiceRole01B1B6E3",
+                        "Arn"
+                      ]
                     },
                     "runtime": "nodejs20.x"
                   }
@@ -2819,14 +2893,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "AccountWorkflowLambda45EAA938",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "AccountWorkflowLambda45EAA938",
+                                              "Arn"
+                                            ]
                                           },
                                           ":*"
                                         ]
@@ -2839,14 +2919,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "AccountWorkflowNotifierCF707EBD",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "AccountWorkflowNotifierCF707EBD",
+                                              "Arn"
+                                            ]
                                           },
                                           ":*"
                                         ]
@@ -2918,35 +3004,59 @@
                         [
                           "{\"StartAt\":\"CivilServantCreateCognitoUser\",\"States\":{\"CivilServantCreateCognitoUser\":{\"Next\":\"CivilServantCreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"CivilServantCreateProfileRecord\":{\"Next\":\"CivilServantCreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"CivilServantCreateEclipseCustomer\":{\"Next\":\"CivilServantCreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CivilServantCreateEclipseWallet\":{\"Next\":\"CivilServantEnsureGuardAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"CivilServantEnsureGuardAssets\":{\"Next\":\"CivilServantUpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"ensureGuardAssets\"}},\"CivilServantUpdateProfileWithEclipseIds\":{\"Next\":\"CivilServantNotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CivilServantNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}},\"CivilServantNotifyWorkflowSuccess\":{\"Next\":\"CivilServantAccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowNotifierCF707EBD",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\",\"eclipseCustomerId.$\":\"$.eclipseCustomerId\",\"eclipseWalletId.$\":\"$.eclipseWalletId\"}}}},\"CivilServantAccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"CivilServantNotifyWorkflowFailure\":{\"Next\":\"CivilServantAccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowNotifierCF707EBD",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"status\":\"failure\",\"message.$\":\"$.error.Cause\",\"context\":{\"type\":0,\"value.$\":\"$.error\"}}},\"CivilServantAccountWorkflowFailed\":{\"Type\":\"Fail\",\"Cause\":\"Account provisioning failed\"}}}"
                         ]
@@ -2957,7 +3067,10 @@
                         {
                           "cloudWatchLogsLogGroup": {
                             "logGroupArn": {
-                              "Fn::GetAtt": ["AccountWorkflowLogs4F77612E", "Arn"]
+                              "Fn::GetAtt": [
+                                "AccountWorkflowLogs4F77612E",
+                                "Arn"
+                              ]
                             }
                           }
                         }
@@ -2965,7 +3078,10 @@
                       "level": "ALL"
                     },
                     "roleArn": {
-                      "Fn::GetAtt": ["AccountProvisioningCivilServantRoleD1BCF1C2", "Arn"]
+                      "Fn::GetAtt": [
+                        "AccountProvisioningCivilServantRoleD1BCF1C2",
+                        "Arn"
+                      ]
                     },
                     "stateMachineName": "Pashasha-AccountProvisioning-CivilServant",
                     "tracingConfiguration": {
@@ -3042,14 +3158,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "AccountWorkflowLambda45EAA938",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "AccountWorkflowLambda45EAA938",
+                                              "Arn"
+                                            ]
                                           },
                                           ":*"
                                         ]
@@ -3062,14 +3184,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "AccountWorkflowNotifierCF707EBD",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "AccountWorkflowNotifierCF707EBD",
+                                              "Arn"
+                                            ]
                                           },
                                           ":*"
                                         ]
@@ -3141,35 +3269,59 @@
                         [
                           "{\"StartAt\":\"CustomerCreateCognitoUser\",\"States\":{\"CustomerCreateCognitoUser\":{\"Next\":\"CustomerCreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"CustomerCreateProfileRecord\":{\"Next\":\"CustomerCreateEclipseCustomer\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"CustomerCreateEclipseCustomer\":{\"Next\":\"CustomerCreateEclipseWallet\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseCustomer\"}},\"CustomerCreateEclipseWallet\":{\"Next\":\"CustomerEnsureGuardAssets\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createEclipseWallet\"}},\"CustomerEnsureGuardAssets\":{\"Next\":\"CustomerUpdateProfileWithEclipseIds\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"ensureGuardAssets\"}},\"CustomerUpdateProfileWithEclipseIds\":{\"Next\":\"CustomerNotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"CustomerNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"updateProfile\"}},\"CustomerNotifyWorkflowSuccess\":{\"Next\":\"CustomerAccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowNotifierCF707EBD",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\",\"eclipseCustomerId.$\":\"$.eclipseCustomerId\",\"eclipseWalletId.$\":\"$.eclipseWalletId\"}}}},\"CustomerAccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"CustomerNotifyWorkflowFailure\":{\"Next\":\"CustomerAccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowNotifierCF707EBD",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"status\":\"failure\",\"message.$\":\"$.error.Cause\",\"context\":{\"type\":0,\"value.$\":\"$.error\"}}},\"CustomerAccountWorkflowFailed\":{\"Type\":\"Fail\",\"Cause\":\"Account provisioning failed\"}}}"
                         ]
@@ -3180,7 +3332,10 @@
                         {
                           "cloudWatchLogsLogGroup": {
                             "logGroupArn": {
-                              "Fn::GetAtt": ["AccountWorkflowLogs4F77612E", "Arn"]
+                              "Fn::GetAtt": [
+                                "AccountWorkflowLogs4F77612E",
+                                "Arn"
+                              ]
                             }
                           }
                         }
@@ -3188,7 +3343,10 @@
                       "level": "ALL"
                     },
                     "roleArn": {
-                      "Fn::GetAtt": ["AccountProvisioningCustomerRole55F01B27", "Arn"]
+                      "Fn::GetAtt": [
+                        "AccountProvisioningCustomerRole55F01B27",
+                        "Arn"
+                      ]
                     },
                     "stateMachineName": "Pashasha-AccountProvisioning-Customer",
                     "tracingConfiguration": {
@@ -3265,14 +3423,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "AccountWorkflowLambda45EAA938",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "AccountWorkflowLambda45EAA938",
+                                              "Arn"
+                                            ]
                                           },
                                           ":*"
                                         ]
@@ -3285,14 +3449,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "AccountWorkflowNotifierCF707EBD",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "AccountWorkflowNotifierCF707EBD",
+                                              "Arn"
+                                            ]
                                           },
                                           ":*"
                                         ]
@@ -3364,19 +3534,31 @@
                         [
                           "{\"StartAt\":\"AdministratorCreateCognitoUser\",\"States\":{\"AdministratorCreateCognitoUser\":{\"Next\":\"AdministratorCreateProfileRecord\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createCognito\"}},\"AdministratorCreateProfileRecord\":{\"Next\":\"AdministratorNotifyWorkflowSuccess\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Catch\":[{\"ErrorEquals\":[\"States.ALL\"],\"ResultPath\":\"$.error\",\"Next\":\"AdministratorNotifyWorkflowFailure\"}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowLambda45EAA938", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowLambda45EAA938",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"state\":{\"type\":0,\"value.$\":\"$\"},\"step\":\"createProfile\"}},\"AdministratorNotifyWorkflowSuccess\":{\"Next\":\"AdministratorAccountWorkflowSucceeded\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowNotifierCF707EBD",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"status\":\"success\",\"message.$\":\"States.Format('Account provisioning succeeded for {}', $.type)\",\"context\":{\"type\":1,\"value\":{\"type.$\":\"$.type\",\"profileId.$\":\"$.profileId\",\"cognitoUsername.$\":\"$.cognitoUsername\",\"cognitoSub.$\":\"$.cognitoSub\"}}}},\"AdministratorAccountWorkflowSucceeded\":{\"Type\":\"Succeed\"},\"AdministratorNotifyWorkflowFailure\":{\"Next\":\"AdministratorAccountWorkflowFailed\",\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$.notification\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["AccountWorkflowNotifierCF707EBD", "Arn"]
+                            "Fn::GetAtt": [
+                              "AccountWorkflowNotifierCF707EBD",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":{\"status\":\"failure\",\"message.$\":\"$.error.Cause\",\"context\":{\"type\":0,\"value.$\":\"$.error\"}}},\"AdministratorAccountWorkflowFailed\":{\"Type\":\"Fail\",\"Cause\":\"Account provisioning failed\"}}}"
                         ]
@@ -3387,7 +3569,10 @@
                         {
                           "cloudWatchLogsLogGroup": {
                             "logGroupArn": {
-                              "Fn::GetAtt": ["AccountWorkflowLogs4F77612E", "Arn"]
+                              "Fn::GetAtt": [
+                                "AccountWorkflowLogs4F77612E",
+                                "Arn"
+                              ]
                             }
                           }
                         }
@@ -3395,7 +3580,10 @@
                       "level": "ALL"
                     },
                     "roleArn": {
-                      "Fn::GetAtt": ["AccountProvisioningAdministratorRole10529F79", "Arn"]
+                      "Fn::GetAtt": [
+                        "AccountProvisioningAdministratorRole10529F79",
+                        "Arn"
+                      ]
                     },
                     "stateMachineName": "Pashasha-AccountProvisioning-Administrator",
                     "tracingConfiguration": {
@@ -3480,14 +3668,20 @@
                                   "Effect": "Allow",
                                   "Resource": [
                                     {
-                                      "Fn::GetAtt": ["CustomerPaymentLambdaFF0A5221", "Arn"]
+                                      "Fn::GetAtt": [
+                                        "CustomerPaymentLambdaFF0A5221",
+                                        "Arn"
+                                      ]
                                     },
                                     {
                                       "Fn::Join": [
                                         "",
                                         [
                                           {
-                                            "Fn::GetAtt": ["CustomerPaymentLambdaFF0A5221", "Arn"]
+                                            "Fn::GetAtt": [
+                                              "CustomerPaymentLambdaFF0A5221",
+                                              "Arn"
+                                            ]
                                           },
                                           ":*"
                                         ]
@@ -3559,7 +3753,10 @@
                         [
                           "{\"StartAt\":\"InvokeCustomerPayment\",\"States\":{\"InvokeCustomerPayment\":{\"End\":true,\"Retry\":[{\"ErrorEquals\":[\"Lambda.ClientExecutionTimeoutException\",\"Lambda.ServiceException\",\"Lambda.AWSLambdaException\",\"Lambda.SdkClientException\"],\"IntervalSeconds\":2,\"MaxAttempts\":6,\"BackoffRate\":2}],\"Type\":\"Task\",\"ResultPath\":\"$\",\"Resource\":\"",
                           {
-                            "Fn::GetAtt": ["CustomerPaymentLambdaFF0A5221", "Arn"]
+                            "Fn::GetAtt": [
+                              "CustomerPaymentLambdaFF0A5221",
+                              "Arn"
+                            ]
                           },
                           "\",\"Parameters\":\"$\"}}}"
                         ]
@@ -3570,7 +3767,10 @@
                         {
                           "cloudWatchLogsLogGroup": {
                             "logGroupArn": {
-                              "Fn::GetAtt": ["AccountWorkflowLogs4F77612E", "Arn"]
+                              "Fn::GetAtt": [
+                                "AccountWorkflowLogs4F77612E",
+                                "Arn"
+                              ]
                             }
                           }
                         }
@@ -3578,7 +3778,10 @@
                       "level": "ALL"
                     },
                     "roleArn": {
-                      "Fn::GetAtt": ["CustomerPaymentStateMachineRoleEE7FF056", "Arn"]
+                      "Fn::GetAtt": [
+                        "CustomerPaymentStateMachineRoleEE7FF056",
+                        "Arn"
+                      ]
                     },
                     "stateMachineName": "Pashasha-CustomerPayment",
                     "stateMachineType": "EXPRESS",
@@ -3878,14 +4081,20 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::GetAtt": ["CustomersTableB554B793", "Arn"]
+                                          "Fn::GetAtt": [
+                                            "CustomersTableB554B793",
+                                            "Arn"
+                                          ]
                                         },
                                         {
                                           "Fn::Join": [
                                             "",
                                             [
                                               {
-                                                "Fn::GetAtt": ["CustomersTableB554B793", "Arn"]
+                                                "Fn::GetAtt": [
+                                                  "CustomersTableB554B793",
+                                                  "Arn"
+                                                ]
                                               },
                                               "/index/*"
                                             ]
@@ -3911,14 +4120,20 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::GetAtt": ["CivilServantsTableC16F2C77", "Arn"]
+                                          "Fn::GetAtt": [
+                                            "CivilServantsTableC16F2C77",
+                                            "Arn"
+                                          ]
                                         },
                                         {
                                           "Fn::Join": [
                                             "",
                                             [
                                               {
-                                                "Fn::GetAtt": ["CivilServantsTableC16F2C77", "Arn"]
+                                                "Fn::GetAtt": [
+                                                  "CivilServantsTableC16F2C77",
+                                                  "Arn"
+                                                ]
                                               },
                                               "/index/*"
                                             ]
@@ -3944,14 +4159,20 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::GetAtt": ["PaymentsTable48A42630", "Arn"]
+                                          "Fn::GetAtt": [
+                                            "PaymentsTable48A42630",
+                                            "Arn"
+                                          ]
                                         },
                                         {
                                           "Fn::Join": [
                                             "",
                                             [
                                               {
-                                                "Fn::GetAtt": ["PaymentsTable48A42630", "Arn"]
+                                                "Fn::GetAtt": [
+                                                  "PaymentsTable48A42630",
+                                                  "Arn"
+                                                ]
                                               },
                                               "/index/*"
                                             ]
@@ -3975,14 +4196,20 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                          "Fn::GetAtt": [
+                                            "UserAssetsBucket8B59E294",
+                                            "Arn"
+                                          ]
                                         },
                                         {
                                           "Fn::Join": [
                                             "",
                                             [
                                               {
-                                                "Fn::GetAtt": ["UserAssetsBucket8B59E294", "Arn"]
+                                                "Fn::GetAtt": [
+                                                  "UserAssetsBucket8B59E294",
+                                                  "Arn"
+                                                ]
                                               },
                                               "/*"
                                             ]
@@ -4008,7 +4235,10 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::GetAtt": ["AccountCounterTable225C6EF1", "Arn"]
+                                          "Fn::GetAtt": [
+                                            "AccountCounterTable225C6EF1",
+                                            "Arn"
+                                          ]
                                         },
                                         {
                                           "Ref": "AWS::NoValue"
@@ -4033,14 +4263,20 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::GetAtt": ["AdministratorsTable2813DFBD", "Arn"]
+                                          "Fn::GetAtt": [
+                                            "AdministratorsTable2813DFBD",
+                                            "Arn"
+                                          ]
                                         },
                                         {
                                           "Fn::Join": [
                                             "",
                                             [
                                               {
-                                                "Fn::GetAtt": ["AdministratorsTable2813DFBD", "Arn"]
+                                                "Fn::GetAtt": [
+                                                  "AdministratorsTable2813DFBD",
+                                                  "Arn"
+                                                ]
                                               },
                                               "/index/*"
                                             ]
@@ -4066,14 +4302,20 @@
                                       "Effect": "Allow",
                                       "Resource": [
                                         {
-                                          "Fn::GetAtt": ["SupportTicketsTable98A8DE97", "Arn"]
+                                          "Fn::GetAtt": [
+                                            "SupportTicketsTable98A8DE97",
+                                            "Arn"
+                                          ]
                                         },
                                         {
                                           "Fn::Join": [
                                             "",
                                             [
                                               {
-                                                "Fn::GetAtt": ["SupportTicketsTable98A8DE97", "Arn"]
+                                                "Fn::GetAtt": [
+                                                  "SupportTicketsTable98A8DE97",
+                                                  "Arn"
+                                                ]
                                               },
                                               "/index/*"
                                             ]
@@ -4133,7 +4375,10 @@
                                       ],
                                       "Effect": "Allow",
                                       "Resource": {
-                                        "Fn::GetAtt": ["UserPool6BA7E5F2", "Arn"]
+                                        "Fn::GetAtt": [
+                                          "UserPool6BA7E5F2",
+                                          "Arn"
+                                        ]
                                       }
                                     }
                                   ],
@@ -4174,7 +4419,7 @@
                           {
                             "essential": true,
                             "image": {
-                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:4b3bb4766aa7e45384fb9d95b6ebaddb7b3a023cab1e43529425ecd778589841"
+                              "Fn::Sub": "732439976770.dkr.ecr.eu-west-1.${AWS::URLSuffix}/cdk-hnb659fds-container-assets-732439976770-eu-west-1:ecd32042f5a06d01da45367bde6e17e0a2e00de4e6a25b9df9e29bd6e5403e9d"
                             },
                             "name": "web",
                             "portMappings": [
@@ -4337,14 +4582,22 @@
                         ],
                         "cpu": "1024",
                         "executionRoleArn": {
-                          "Fn::GetAtt": ["BackendFargateServiceTaskDefExecutionRoleAEEBC172", "Arn"]
+                          "Fn::GetAtt": [
+                            "BackendFargateServiceTaskDefExecutionRoleAEEBC172",
+                            "Arn"
+                          ]
                         },
                         "family": "SecurityGuardPaymentsBackendStackBackendFargateServiceTaskDef8BD4B29A",
                         "memory": "4096",
                         "networkMode": "awsvpc",
-                        "requiresCompatibilities": ["FARGATE"],
+                        "requiresCompatibilities": [
+                          "FARGATE"
+                        ],
                         "taskRoleArn": {
-                          "Fn::GetAtt": ["BackendFargateServiceTaskDefTaskRole75B7E3C0", "Arn"]
+                          "Fn::GetAtt": [
+                            "BackendFargateServiceTaskDefTaskRole75B7E3C0",
+                            "Arn"
+                          ]
                         }
                       }
                     },
@@ -4464,10 +4717,16 @@
                                       "Resource": "*"
                                     },
                                     {
-                                      "Action": ["logs:CreateLogStream", "logs:PutLogEvents"],
+                                      "Action": [
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                      ],
                                       "Effect": "Allow",
                                       "Resource": {
-                                        "Fn::GetAtt": ["BackendLogGroupDA10F1B2", "Arn"]
+                                        "Fn::GetAtt": [
+                                          "BackendLogGroupDA10F1B2",
+                                          "Arn"
+                                        ]
                                       }
                                     },
                                     {
@@ -4675,7 +4934,10 @@
                                       },
                                       "/",
                                       {
-                                        "Fn::GetAtt": ["BackendFargateService29076574", "Name"]
+                                        "Fn::GetAtt": [
+                                          "BackendFargateService29076574",
+                                          "Name"
+                                        ]
                                       }
                                     ]
                                   ]
@@ -4784,11 +5046,16 @@
                       "origins": [
                         {
                           "domainName": {
-                            "Fn::GetAtt": ["BackendFargateServiceLBA38260FE", "DNSName"]
+                            "Fn::GetAtt": [
+                              "BackendFargateServiceLBA38260FE",
+                              "DNSName"
+                            ]
                           },
                           "id": "SecurityGuardPaymentsBackendStackBackendDistributionOrigin17F178CC9",
                           "customOriginConfig": {
-                            "originSslProtocols": ["TLSv1.2"],
+                            "originSslProtocols": [
+                              "TLSv1.2"
+                            ],
                             "originProtocolPolicy": "http-only"
                           }
                         }
@@ -5170,7 +5437,10 @@
                       }
                     ],
                     "iamServiceRole": {
-                      "Fn::GetAtt": ["AmplifyAppRole0364E92A", "Arn"]
+                      "Fn::GetAtt": [
+                        "AmplifyAppRole0364E92A",
+                        "Arn"
+                      ]
                     },
                     "name": "security-guard-payments-frontend",
                     "platform": "WEB"
@@ -5192,7 +5462,10 @@
                       "aws:cdk:cloudformation:type": "AWS::Amplify::Branch",
                       "aws:cdk:cloudformation:props": {
                         "appId": {
-                          "Fn::GetAtt": ["AmplifyApp6046A70F", "AppId"]
+                          "Fn::GetAtt": [
+                            "AmplifyApp6046A70F",
+                            "AppId"
+                          ]
                         },
                         "branchName": "main",
                         "enableAutoBuild": false,
@@ -5284,18 +5557,30 @@
                       "aws:cdk:cloudformation:type": "AWS::Amplify::Domain",
                       "aws:cdk:cloudformation:props": {
                         "appId": {
-                          "Fn::GetAtt": ["AmplifyApp6046A70F", "AppId"]
+                          "Fn::GetAtt": [
+                            "AmplifyApp6046A70F",
+                            "AppId"
+                          ]
                         },
-                        "autoSubDomainCreationPatterns": ["*", "pr*"],
+                        "autoSubDomainCreationPatterns": [
+                          "*",
+                          "pr*"
+                        ],
                         "autoSubDomainIamRole": {
-                          "Fn::GetAtt": ["AmplifyAppRole0364E92A", "Arn"]
+                          "Fn::GetAtt": [
+                            "AmplifyAppRole0364E92A",
+                            "Arn"
+                          ]
                         },
                         "domainName": "pashasha.com",
                         "enableAutoSubDomain": true,
                         "subDomainSettings": [
                           {
                             "branchName": {
-                              "Fn::GetAtt": ["AmplifyAppPrimaryBranch02455E21", "BranchName"]
+                              "Fn::GetAtt": [
+                                "AmplifyAppPrimaryBranch02455E21",
+                                "BranchName"
+                              ]
                             },
                             "prefix": "www"
                           }
