@@ -11,14 +11,13 @@ const env = {
   region: process.env.CDK_DEFAULT_REGION ?? 'eu-west-1',
 };
 
-// Keep existing stack names to avoid recreating resources (e.g., Amplify/CloudFront).
-const backendStack = new PashashaPayBackendStack(app, 'SecurityGuardPaymentsBackendStack', {
+const backendStack = new PashashaPayBackendStack(app, 'PashashaPayBackendStack', {
   env,
 });
 
 const context = app.node.tryGetContext('frontend') ?? {};
 
-new PashashaPayFrontendStack(app, 'SecurityGuardPaymentsFrontendStack', {
+new PashashaPayFrontendStack(app, 'PashashaPayFrontendStack', {
   env,
   backendEndpoint: backendStack.apiEndpoint,
   backendSecureEndpoint: backendStack.secureApiEndpoint,

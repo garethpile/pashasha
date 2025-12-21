@@ -9,10 +9,10 @@
     "build": "tsc",
     "watch": "tsc -w",
     "synth": "AWS_PROFILE=pashashapay-eu cdk synth",
-    "deploy:backend": "AWS_PROFILE=pashashapay-eu cdk deploy SecurityGuardPaymentsBackendStack",
-    "deploy:frontend": "AWS_PROFILE=pashashapay-eu cdk deploy SecurityGuardPaymentsFrontendStack",
-    "destroy:backend": "AWS_PROFILE=pashashapay-eu cdk destroy SecurityGuardPaymentsBackendStack",
-    "destroy:frontend": "AWS_PROFILE=pashashapay-eu cdk destroy SecurityGuardPaymentsFrontendStack"
+    "deploy:backend": "AWS_PROFILE=pashashapay-eu cdk deploy PashashaPayBackendStack",
+    "deploy:frontend": "AWS_PROFILE=pashashapay-eu cdk deploy PashashaPayFrontendStack",
+    "destroy:backend": "AWS_PROFILE=pashashapay-eu cdk destroy PashashaPayBackendStack",
+    "destroy:frontend": "AWS_PROFILE=pashashapay-eu cdk destroy PashashaPayFrontendStack"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

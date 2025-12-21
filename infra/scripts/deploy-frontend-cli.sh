@@ -3,8 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
-STACK_NAME="${AMPLIFY_STACK_NAME:-SecurityGuardPaymentsFrontendStack}"
-BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-SecurityGuardPaymentsBackendStack}"
+STACK_NAME="${AMPLIFY_STACK_NAME:-PashashaPayFrontendStack}"
+BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-PashashaPayBackendStack}"
 REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-eu-west-1}}"
 APP_ID="${AMPLIFY_APP_ID:-}"
 BRANCH_NAME="${AMPLIFY_BRANCH:-main}"

@@ -69,6 +69,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     const cluster = new ecs.Cluster(this, 'BackendCluster', {
       vpc,
       containerInsights: true,
+      clusterName: 'PashashaPay-BackendCluster',
     });
 
     const userPool = new cognito.UserPool(this, 'UserPool', {
@@ -102,6 +103,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
           mutable: true,
         },
       },
+      userPoolName: 'PashashaPay-UserPool',
     });
 
     const userPoolClient = userPool.addClient('WebClient', {
@@ -109,26 +111,27 @@ export class PashashaPayBackendStack extends cdk.Stack {
         userPassword: true,
         userSrp: true,
       },
+      userPoolClientName: 'PashashaPay-WebClient',
     });
 
     new cognito.CfnUserPoolGroup(this, 'AdministratorsGroup', {
       userPoolId: userPool.userPoolId,
-      groupName: 'Administrators',
+      groupName: 'PashashaPay-Administrators',
     });
     new cognito.CfnUserPoolGroup(this, 'CustomersGroup', {
       userPoolId: userPool.userPoolId,
-      groupName: 'Customers',
+      groupName: 'PashashaPay-Customers',
     });
     new cognito.CfnUserPoolGroup(this, 'CivilServantsGroup', {
       userPoolId: userPool.userPoolId,
-      groupName: 'CivilServants',
+      groupName: 'PashashaPay-CivilServants',
     });
 
     const customersTable = new dynamodb.Table(this, 'CustomersTable', {
       partitionKey: { name: 'customerId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      tableName: 'sgp-customers',
+      tableName: 'PashashaPay-Customers',
     });
     customersTable.addGlobalSecondaryIndex({
       indexName: 'accountNumber',
@@ -148,7 +151,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
       partitionKey: { name: 'civilServantId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      tableName: 'sgp-civil-servants',
+      tableName: 'PashashaPay-Civil-servants',
     });
     civilServantsTable.addGlobalSecondaryIndex({
       indexName: 'accountNumber',
@@ -173,7 +176,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
       partitionKey: { name: 'username', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      tableName: 'sgp-administrators',
+      tableName: 'PashashaPay-Administrators',
     });
     administratorsTable.addGlobalSecondaryIndex({
       indexName: 'email',
@@ -185,7 +188,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
       partitionKey: { name: 'paymentId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      tableName: 'sgp-payments',
+      tableName: 'PashashaPay-Payments',
     });
     paymentsTable.addGlobalSecondaryIndex({
       indexName: 'byCustomer',
@@ -206,14 +209,14 @@ export class PashashaPayBackendStack extends cdk.Stack {
       sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      tableName: 'sgp-account-counters',
+      tableName: 'PashashaPay-Account-counters',
     });
 
     const supportTicketsTable = new dynamodb.Table(this, 'SupportTicketsTable', {
       partitionKey: { name: 'supportCode', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
-      tableName: 'Pashasha-Support',
+      tableName: 'PashashaPay-Support',
     });
     supportTicketsTable.addGlobalSecondaryIndex({
       indexName: 'byCustomer',
@@ -223,6 +226,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     const userAssetsBucket = new s3.Bucket(this, 'UserAssetsBucket', {
+      bucketName: 'PashashaPay-user-assets',
       autoDeleteObjects: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       encryption: s3.BucketEncryption.S3_MANAGED,
@@ -237,13 +241,13 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     const logGroup = new logs.LogGroup(this, 'BackendLogGroup', {
-      logGroupName: '/security-guard-payments/backend',
+      logGroupName: '/pashashapay/backend',
       retention: logs.RetentionDays.ONE_MONTH,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     const workflowLogGroup = new logs.LogGroup(this, 'AccountWorkflowLogs', {
-      logGroupName: '/security-guard-payments/account-workflow',
+      logGroupName: '/pashashapay/account-workflow',
       retention: logs.RetentionDays.ONE_MONTH,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
@@ -256,17 +260,17 @@ export class PashashaPayBackendStack extends cdk.Stack {
     );
 
     const signupTopic = new sns.Topic(this, 'SignupNotificationsTopic', {
-      topicName: 'Pashasha-AccountProvisioning',
+      topicName: 'PashashaPay-AccountProvisioning',
       displayName: 'Pashasha Account Provisioning',
     });
 
     const paymentsTopic = new sns.Topic(this, 'PaymentsNotificationsTopic', {
-      topicName: 'Pashasha-Payments',
+      topicName: 'PashashaPay-Payments',
       displayName: 'Pashasha Payments',
     });
 
     const supportTopic = new sns.Topic(this, 'SupportNotificationsTopic', {
-      topicName: 'Pashasha-Support',
+      topicName: 'PashashaPay-Support',
       displayName: 'Pashasha Support',
     });
 
@@ -597,7 +601,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     })();
 
     const accountWorkflowCivil = new sfn.StateMachine(this, 'AccountProvisioningCivilServant', {
-      stateMachineName: 'Pashasha-AccountProvisioning-CivilServant',
+      stateMachineName: 'PashashaPay-AccountProvisioning-CivilServant',
       definitionBody: sfn.DefinitionBody.fromChainable(civilDefinition),
       tracingEnabled: true,
       logs: {
@@ -607,7 +611,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     const accountWorkflowCustomer = new sfn.StateMachine(this, 'AccountProvisioningCustomer', {
-      stateMachineName: 'Pashasha-AccountProvisioning-Customer',
+      stateMachineName: 'PashashaPay-AccountProvisioning-Customer',
       definitionBody: sfn.DefinitionBody.fromChainable(customerDefinition),
       tracingEnabled: true,
       logs: {
@@ -617,7 +621,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     const accountWorkflowAdmin = new sfn.StateMachine(this, 'AccountProvisioningAdministrator', {
-      stateMachineName: 'Pashasha-AccountProvisioning-Administrator',
+      stateMachineName: 'PashashaPay-AccountProvisioning-Administrator',
       definitionBody: sfn.DefinitionBody.fromChainable(adminDefinition),
       tracingEnabled: true,
       logs: {
@@ -627,7 +631,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     const customerPaymentStateMachine = new sfn.StateMachine(this, 'CustomerPaymentStateMachine', {
-      stateMachineName: 'Pashasha-CustomerPayment',
+      stateMachineName: 'PashashaPay-CustomerPayment',
       definitionBody: sfn.DefinitionBody.fromChainable(
         new sfnTasks.LambdaInvoke(this, 'InvokeCustomerPayment', {
           lambdaFunction: customerPaymentLambda,
@@ -665,11 +669,14 @@ export class PashashaPayBackendStack extends cdk.Stack {
         memoryLimitMiB: 4096,
         desiredCount: 1,
         publicLoadBalancer: true,
+        serviceName: 'PashashaPay-BackendService',
+        loadBalancerName: 'PashashaPay-Backend-ALB',
+        targetGroupName: 'PashashaPay-Backend-TG',
         taskImageOptions: {
           image: containerImage,
           containerPort: 4000,
           logDriver: ecs.LogDrivers.awsLogs({
-            streamPrefix: 'backend',
+            streamPrefix: 'pashashapay-backend',
             logGroup,
           }),
           environment: {
@@ -785,7 +792,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'BackendLoadBalancerDns', {
       value: this.loadBalancerDnsName,
-      exportName: 'SecurityGuardPaymentsBackendAlbDns',
+      exportName: 'PashashaPayBackendAlbDns',
     });
     new cdk.CfnOutput(this, 'BackendServiceSecurityGroup', {
       value: service.service.connections.securityGroups[0].securityGroupId,

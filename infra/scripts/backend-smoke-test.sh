@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-STACK_NAME="${STACK_NAME:-SecurityGuardPaymentsBackendStack}"
+STACK_NAME="${STACK_NAME:-PashashaPayBackendStack}"
 REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-eu-west-1}}"
 ENDPOINT="${BACKEND_ENDPOINT:-}"
 
