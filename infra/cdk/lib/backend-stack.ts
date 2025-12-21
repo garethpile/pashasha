@@ -226,7 +226,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     const userAssetsBucket = new s3.Bucket(this, 'UserAssetsBucket', {
-      bucketName: 'PashashaPay-user-assets',
+      bucketName: 'pashashapay-user-assets',
       autoDeleteObjects: true,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
       encryption: s3.BucketEncryption.S3_MANAGED,
@@ -669,9 +669,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
         memoryLimitMiB: 4096,
         desiredCount: 1,
         publicLoadBalancer: true,
-        serviceName: 'PashashaPay-BackendService',
-        loadBalancerName: 'PashashaPay-Backend-ALB',
-        targetGroupName: 'PashashaPay-Backend-TG',
+        serviceName: 'Pashasha-BackendService',
         taskImageOptions: {
           image: containerImage,
           containerPort: 4000,
