@@ -2,21 +2,40 @@
 
 // Simple helper to mark a sandbox withdrawal as SUCCESSFUL in Eclipse.
 // Usage:
-//   ECLIPSE_API_BASE=... ECLIPSE_TENANT_ID=... ECLIPSE_CLIENT_ID=... ECLIPSE_CLIENT_SECRET=... \
 //   node scripts/mark-withdrawal-success.js --walletId 2549317 --withdrawalId 347874 --status SUCCESSFUL
+// You can override defaults via args or env vars:
+//   ECLIPSE_API_BASE, ECLIPSE_TENANT_ID, ECLIPSE_CLIENT_ID/SECRET, ECLIPSE_TENANT_IDENTITY/PASSWORD
 
-const args = require('minimist')(process.argv.slice(2));
+function parseArgs(argv) {
+  const out = {};
+  for (let i = 0; i < argv.length; i++) {
+    const part = argv[i];
+    if (!part.startsWith('--')) continue;
+    const key = part.slice(2);
+    const next = argv[i + 1];
+    if (next && !next.startsWith('--')) {
+      out[key] = next;
+      i += 1;
+    } else {
+      out[key] = true;
+    }
+  }
+  return out;
+}
+
+const args = parseArgs(process.argv.slice(2));
 
 const {
   walletId,
   withdrawalId,
   status = 'SUCCESSFUL',
-  apiBase = process.env.ECLIPSE_API_BASE || 'https://sandbox.api.eftcorp.co.za',
-  tenantId = process.env.ECLIPSE_TENANT_ID,
+  apiBase = process.env.ECLIPSE_API_BASE ||
+    'https://eclipse-java-sandbox.ukheshe.rocks/eclipse-conductor/rest/v1',
+  tenantId = process.env.ECLIPSE_TENANT_ID || '11246478',
   clientId = process.env.ECLIPSE_CLIENT_ID,
   clientSecret = process.env.ECLIPSE_CLIENT_SECRET,
-  tenantIdentity = process.env.ECLIPSE_TENANT_IDENTITY,
-  tenantPassword = process.env.ECLIPSE_TENANT_PASSWORD,
+  tenantIdentity = process.env.ECLIPSE_TENANT_IDENTITY || 'gareth@m360.co.za',
+  tenantPassword = process.env.ECLIPSE_TENANT_PASSWORD || 'cegNiz-5vedhy-noxbad',
 } = args;
 
 if (!walletId || !withdrawalId) {
@@ -52,7 +71,7 @@ async function getToken() {
   }
 
   // Fallback: tenant identity/password (sandbox)
-  const loginUrl = `${apiBase.replace(/\/$/, '')}/authentication/login`;
+  const loginUrl = `${apiBase.replace(/\/$/, '')}/eclipse-conductor/rest/v1/authentication/login`;
   const res = await fetch(loginUrl, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
