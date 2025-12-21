@@ -10,7 +10,7 @@ services:
     image: postgres:16-alpine
     container_name: sg-payments-postgres
     environment:
-      POSTGRES_DB: securityguardpayments
+      POSTGRES_DB: pashashapay
       POSTGRES_USER: guard_admin
       POSTGRES_PASSWORD: local_secret
     ports:
@@ -18,7 +18,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U guard_admin -d securityguardpayments"]
+      test: ["CMD-SHELL", "pg_isready -U guard_admin -d pashashapay"]
       interval: 5s
       timeout: 3s
       retries: 5

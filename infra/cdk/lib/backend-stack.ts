@@ -19,7 +19,7 @@ import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
 import * as sfnTasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import * as lambdaNode from 'aws-cdk-lib/aws-lambda-nodejs';
 
-export interface SecurityGuardPaymentsBackendStackProps extends cdk.StackProps {
+export interface PashashaPayBackendStackProps extends cdk.StackProps {
   /**
    * Optional path to the directory (`docker build` context) that should be used for the backend container.
    * Defaults to the repository root (../../.. relative to this file).
@@ -33,7 +33,7 @@ export interface SecurityGuardPaymentsBackendStackProps extends cdk.StackProps {
   readonly dockerFilePath?: string;
 }
 
-export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
+export class PashashaPayBackendStack extends cdk.Stack {
   public readonly backendService: ecs.FargateService;
   public readonly backendListener: elbv2.ApplicationListener;
   public readonly loadBalancerDnsName: string;
@@ -42,7 +42,7 @@ export class SecurityGuardPaymentsBackendStack extends cdk.Stack {
   public readonly userPoolId: string;
   public readonly userPoolClientId: string;
 
-  constructor(scope: Construct, id: string, props: SecurityGuardPaymentsBackendStackProps = {}) {
+  constructor(scope: Construct, id: string, props: PashashaPayBackendStackProps = {}) {
     super(scope, id, props);
 
     const cognitoSmsRole = new iam.Role(this, 'CognitoSmsRole', {

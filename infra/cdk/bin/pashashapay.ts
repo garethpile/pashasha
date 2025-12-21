@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { SecurityGuardPaymentsBackendStack } from '../lib/backend-stack';
-import { SecurityGuardPaymentsFrontendStack } from '../lib/frontend-stack';
+import { PashashaPayBackendStack } from '../lib/backend-stack';
+import { PashashaPayFrontendStack } from '../lib/frontend-stack';
 
 const app = new cdk.App();
 
@@ -11,17 +11,14 @@ const env = {
   region: process.env.CDK_DEFAULT_REGION ?? 'eu-west-1',
 };
 
-const backendStack = new SecurityGuardPaymentsBackendStack(
-  app,
-  'SecurityGuardPaymentsBackendStack',
-  {
-    env,
-  }
-);
+// Keep existing stack names to avoid recreating resources (e.g., Amplify/CloudFront).
+const backendStack = new PashashaPayBackendStack(app, 'SecurityGuardPaymentsBackendStack', {
+  env,
+});
 
 const context = app.node.tryGetContext('frontend') ?? {};
 
-new SecurityGuardPaymentsFrontendStack(app, 'SecurityGuardPaymentsFrontendStack', {
+new PashashaPayFrontendStack(app, 'SecurityGuardPaymentsFrontendStack', {
   env,
   backendEndpoint: backendStack.apiEndpoint,
   backendSecureEndpoint: backendStack.secureApiEndpoint,

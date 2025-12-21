@@ -29,9 +29,9 @@ TARGET="${ENDPOINT}/health"
 
 log "Running smoke test against ${TARGET}"
 
-HTTP_STATUS="$(curl -sS -m 15 -w '%{http_code}' -o /tmp/sgp-smoke-response "$TARGET")"
-BODY="$(cat /tmp/sgp-smoke-response)"
-rm -f /tmp/sgp-smoke-response
+HTTP_STATUS="$(curl -sS -m 15 -w '%{http_code}' -o /tmp/pashasha-smoke-response "$TARGET")"
+BODY="$(cat /tmp/pashasha-smoke-response)"
+rm -f /tmp/pashasha-smoke-response
 
 if [[ "$HTTP_STATUS" != "200" ]]; then
   echo "Smoke test failed: HTTP ${HTTP_STATUS}" >&2

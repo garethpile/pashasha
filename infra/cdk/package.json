@@ -1,18 +1,18 @@
 {
-  "name": "securityguardpayments-infra",
+  "name": "pashashapay-infra",
   "version": "0.1.0",
   "private": true,
   "bin": {
-    "sgp-infra": "bin/securityguardpayments.js"
+    "pashashapay-infra": "bin/pashashapay.js"
   },
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "synth": "AWS_PROFILE=sgp-eu cdk synth",
-    "deploy:backend": "AWS_PROFILE=sgp-eu cdk deploy SecurityGuardPaymentsBackendStack",
-    "deploy:frontend": "AWS_PROFILE=sgp-eu cdk deploy SecurityGuardPaymentsFrontendStack",
-    "destroy:backend": "AWS_PROFILE=sgp-eu cdk destroy SecurityGuardPaymentsBackendStack",
-    "destroy:frontend": "AWS_PROFILE=sgp-eu cdk destroy SecurityGuardPaymentsFrontendStack"
+    "synth": "AWS_PROFILE=pashashapay-eu cdk synth",
+    "deploy:backend": "AWS_PROFILE=pashashapay-eu cdk deploy SecurityGuardPaymentsBackendStack",
+    "deploy:frontend": "AWS_PROFILE=pashashapay-eu cdk deploy SecurityGuardPaymentsFrontendStack",
+    "destroy:backend": "AWS_PROFILE=pashashapay-eu cdk destroy SecurityGuardPaymentsBackendStack",
+    "destroy:frontend": "AWS_PROFILE=pashashapay-eu cdk destroy SecurityGuardPaymentsFrontendStack"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

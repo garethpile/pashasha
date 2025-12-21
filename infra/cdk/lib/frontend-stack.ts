@@ -3,7 +3,7 @@ import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { Construct } from 'constructs';
 import * as amplify from '@aws-cdk/aws-amplify-alpha';
 
-export interface SecurityGuardPaymentsFrontendStackProps extends cdk.StackProps {
+export interface PashashaPayFrontendStackProps extends cdk.StackProps {
   /**
    * Fully qualified URL for the backend API (e.g. http://alb-dns-name)
    * This value is exposed to Next.js as NEXT_PUBLIC_API_BASE_URL.
@@ -31,7 +31,7 @@ export interface SecurityGuardPaymentsFrontendStackProps extends cdk.StackProps 
   readonly repositoryOwner?: string;
 
   /**
-   * Optional GitHub repository name (e.g. "securityguardpayments").
+   * Optional GitHub repository name (e.g. "pashashapay").
    */
   readonly repositoryName?: string;
 
@@ -47,11 +47,11 @@ export interface SecurityGuardPaymentsFrontendStackProps extends cdk.StackProps 
   readonly branchName?: string;
 }
 
-export class SecurityGuardPaymentsFrontendStack extends cdk.Stack {
+export class PashashaPayFrontendStack extends cdk.Stack {
   public readonly amplifyApp: amplify.App;
   public readonly primaryBranch: amplify.Branch;
 
-  constructor(scope: Construct, id: string, props: SecurityGuardPaymentsFrontendStackProps) {
+  constructor(scope: Construct, id: string, props: PashashaPayFrontendStackProps) {
     super(scope, id, props);
 
     const legacyBackend = props.backendEndpoint.replace(/\/$/, '');
@@ -113,8 +113,8 @@ export class SecurityGuardPaymentsFrontendStack extends cdk.Stack {
         : undefined;
 
     const appProps: amplify.AppProps = {
-      appName: 'security-guard-payments-frontend',
-      description: 'Amplify hosted Next.js frontend for the Security Guard tip platform.',
+      appName: 'pashashapay-frontend',
+      description: 'Amplify hosted Next.js frontend for the Pashasha tip platform.',
       buildSpec,
       environmentVariables: envVars,
       autoBranchDeletion: true,

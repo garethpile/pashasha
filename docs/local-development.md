@@ -6,7 +6,7 @@
 npm install
 ```
 
-This bootstraps workspace dependencies and links the shared `@securityguardpayments/contracts` package into the frontend and backend projects.
+This bootstraps workspace dependencies and links the shared `@pashashapay/contracts` package into the frontend and backend projects.
 
 ## 2. Prepare Environment Files
 
@@ -66,7 +66,7 @@ npm run check
 Any shared types or client utilities should live in `packages/contracts`. After modifying, rebuild:
 
 ```bash
-npm run build --workspace @securityguardpayments/contracts
+npm run build --workspace @pashashapay/contracts
 ```
 
 This keeps generated declaration files (`dist/`) in sync for both frontend and backend consumers.

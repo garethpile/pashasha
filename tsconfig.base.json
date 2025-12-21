@@ -10,7 +10,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "paths": {
-      "@securityguardpayments/contracts": ["packages/contracts/src/index.ts"]
+      "@pashashapay/contracts": ["packages/contracts/src/index.ts"]
     },
     "strict": true,
     "forceConsistentCasingInFileNames": true,
