@@ -15,6 +15,9 @@ coverage/
 tmp/
 temp/
 
+# CDK synthesized assets
+infra/cdk/cdk.out/
+
 # Env
 .env
 .env.*
