@@ -114,11 +114,13 @@ export default function SignupPage() {
     <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 px-4 py-8 md:py-12">
       <div className="mx-auto max-w-3xl rounded-3xl bg-white/70 p-6 sm:p-8 shadow-xl backdrop-blur">
         <div className="flex flex-col items-start gap-4">
-          <div className="inline-flex flex-wrap items-center justify-center gap-2 rounded-full border border-orange-200 bg-white p-1 text-sm font-semibold text-slate-700 shadow-sm">
+          <div className="flex w-full flex-col items-stretch gap-2 sm:max-w-xs">
             <button
               type="button"
-              className={`min-w-[120px] sm:min-w-[140px] rounded-full px-3 sm:px-4 py-2 transition text-sm sm:text-base ${
-                isCustomer ? 'bg-white text-orange-600 shadow' : 'text-slate-700'
+              className={`w-full rounded-full px-4 py-2 transition text-sm sm:text-base ${
+                isCustomer
+                  ? 'bg-white text-orange-600 shadow border border-orange-200'
+                  : 'text-slate-700 border border-slate-200'
               }`}
               onClick={() => setForm((prev) => ({ ...prev, role: 'CUSTOMER' }))}
             >
@@ -126,8 +128,10 @@ export default function SignupPage() {
             </button>
             <button
               type="button"
-              className={`min-w-[120px] sm:min-w-[140px] rounded-full px-3 sm:px-4 py-2 transition text-sm sm:text-base ${
-                !isCustomer ? 'bg-white text-orange-600 shadow' : 'text-slate-700'
+              className={`w-full rounded-full px-4 py-2 transition text-sm sm:text-base ${
+                !isCustomer
+                  ? 'bg-white text-orange-600 shadow border border-orange-200'
+                  : 'text-slate-700 border border-slate-200'
               }`}
               onClick={() => setForm((prev) => ({ ...prev, role: 'CIVIL_SERVANT' }))}
             >
@@ -167,7 +171,7 @@ export default function SignupPage() {
             </label>
           </div>
 
-          <div className="relative grid gap-3 md:grid-cols-2 md:items-center">
+          <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
             <label className="text-sm font-semibold text-slate-600">
               Email <span className="text-rose-600">*</span>
               <input
@@ -178,15 +182,12 @@ export default function SignupPage() {
                 placeholder="you@example.com"
               />
             </label>
-            <div className="md:hidden text-center text-xs font-semibold text-orange-600">
+
+            <div className="flex items-center justify-center text-xs font-semibold text-orange-600">
               <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-600">AND / OR</span>
             </div>
-            <div className="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:flex">
-              <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
-                AND / OR
-              </span>
-            </div>
-            <label className="text-sm font-semibold text-slate-600 md:col-start-2">
+
+            <label className="text-sm font-semibold text-slate-600">
               Mobile <span className="text-rose-600">*</span>
               <input
                 value={form.phoneNumber}
@@ -195,9 +196,6 @@ export default function SignupPage() {
                 placeholder="+27..."
               />
             </label>
-            <div className="mt-1 text-center text-xs font-semibold text-slate-500 md:hidden">
-              <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-600">AND / OR</span>
-            </div>
           </div>
 
           <label className="text-sm font-semibold text-slate-600">
