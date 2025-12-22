@@ -60,8 +60,10 @@ export class PashashaPayFrontendStack extends cdk.Stack {
       ''
     );
     const envVars = {
-      NEXT_PUBLIC_API_BASE_URL: `${normalizedBackend}/api/guards`,
+      // Point public calls at the base API; clients append subpaths (e.g., /guards).
+      NEXT_PUBLIC_API_BASE_URL: `${normalizedBackend}/api`,
       NEXT_PUBLIC_BACKEND_API_ROOT: `${normalizedBackend}/api`,
+      // Kept for backward compatibility where the ALB host is still needed.
       NEXT_PUBLIC_LEGACY_BACKEND_BASE: legacyBackend,
       NEXT_PUBLIC_COGNITO_USER_POOL_ID: props.cognitoUserPoolId,
       NEXT_PUBLIC_COGNITO_CLIENT_ID: props.cognitoUserPoolClientId,

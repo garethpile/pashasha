@@ -116,15 +116,15 @@ export class PashashaPayBackendStack extends cdk.Stack {
 
     new cognito.CfnUserPoolGroup(this, 'AdministratorsGroup', {
       userPoolId: userPool.userPoolId,
-      groupName: 'PashashaPay-Administrators',
+      groupName: 'Administrators',
     });
     new cognito.CfnUserPoolGroup(this, 'CustomersGroup', {
       userPoolId: userPool.userPoolId,
-      groupName: 'PashashaPay-Customers',
+      groupName: 'Customers',
     });
     new cognito.CfnUserPoolGroup(this, 'CivilServantsGroup', {
       userPoolId: userPool.userPoolId,
-      groupName: 'PashashaPay-CivilServants',
+      groupName: 'CivilServants',
     });
 
     const customersTable = new dynamodb.Table(this, 'CustomersTable', {
@@ -253,11 +253,33 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     // Eclipse sandbox secret (contains ECLIPSE_API_BASE, ECLIPSE_TENANT_ID, etc.)
-    const eclipseSecret = secretsmanager.Secret.fromSecretCompleteArn(
-      this,
-      'EclipseSandboxSecret',
-      'arn:aws:secretsmanager:eu-west-1:732439976770:secret:prod/pashashapay/eclipse-GLKO1K'
-    );
+    const eclipseSecretArn =
+      process.env.ECLIPSE_SECRET_ARN ?? this.node.tryGetContext('ECLIPSE_SECRET_ARN');
+
+    const eclipseSecret =
+      eclipseSecretArn && eclipseSecretArn.length > 0
+        ? secretsmanager.Secret.fromSecretCompleteArn(
+            this,
+            'EclipseSandboxSecret',
+            eclipseSecretArn
+          )
+        : new secretsmanager.Secret(this, 'EclipseSandboxSecret', {
+            secretName: 'pashashapay/eclipse',
+            description: 'Eclipse sandbox credentials for PashashaPay',
+            secretObjectValue: {
+              ECLIPSE_API_BASE: cdk.SecretValue.unsafePlainText(
+                'https://eclipse-java-sandbox.ukheshe.rocks'
+              ),
+              ECLIPSE_TENANT_ID: cdk.SecretValue.unsafePlainText(''),
+              ECLIPSE_CLIENT_ID: cdk.SecretValue.unsafePlainText(''),
+              ECLIPSE_CLIENT_SECRET: cdk.SecretValue.unsafePlainText(''),
+              ECLIPSE_TENANT_IDENTITY: cdk.SecretValue.unsafePlainText(''),
+              ECLIPSE_TENANT_PASSWORD: cdk.SecretValue.unsafePlainText(''),
+              ECLIPSE_CALLBACK_BASE: cdk.SecretValue.unsafePlainText(''),
+              ECLIPSE_WEBHOOK_SECRET: cdk.SecretValue.unsafePlainText('placeholder'),
+            },
+            removalPolicy: cdk.RemovalPolicy.DESTROY,
+          });
 
     const signupTopic = new sns.Topic(this, 'SignupNotificationsTopic', {
       topicName: 'PashashaPay-AccountProvisioning',
@@ -295,15 +317,14 @@ export class PashashaPayBackendStack extends cdk.Stack {
     supportTopic.grantPublish(customerPaymentLambda);
     eclipseSecret.grantRead(customerPaymentLambda);
 
-    const guardPortalBaseUrl =
-      props?.env?.region && props?.env?.region.startsWith('eu-')
-        ? (process.env.GUARD_PORTAL_BASE_URL ?? 'https://main.d2vxflzymkt19g.amplifyapp.com')
-        : (process.env.GUARD_PORTAL_BASE_URL ?? 'https://main.d2vxflzymkt19g.amplifyapp.com');
+    const defaultGuardPortal = 'https://dev.pashasha.com';
+    const guardPortalBaseUrl = process.env.GUARD_PORTAL_BASE_URL ?? defaultGuardPortal;
 
     const workflowFunction = new lambdaNode.NodejsFunction(this, 'AccountWorkflowLambda', {
       entry: path.join(__dirname, '../../lambda/account-workflow/handler.ts'),
       handler: 'handler',
       runtime: cdk.aws_lambda.Runtime.NODEJS_20_X,
+      timeout: cdk.Duration.seconds(30),
       environment: {
         USER_POOL_ID: userPool.userPoolId,
         CUSTOMERS_TABLE_NAME: customersTable.tableName,
@@ -731,7 +752,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     const scaling = service.service.autoScaleTaskCount({
-      minCapacity: 2,
+      minCapacity: 1,
       maxCapacity: 8,
     });
 
