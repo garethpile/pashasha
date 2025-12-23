@@ -482,6 +482,7 @@ export default function CivilServantManagementPage() {
             saving={profileSaving}
             feedback={message}
             showWorkFields={false}
+            showEclipseAccount
             onViewQr={() => selected?.civilServantId && fetchQrUrl(selected.civilServantId, true)}
             onGenerateQr={() => selected?.civilServantId && regenerateQr(selected.civilServantId)}
             qrLoading={qrLoading}

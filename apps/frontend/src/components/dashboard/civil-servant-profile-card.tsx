@@ -30,6 +30,7 @@ export function CivilServantProfileCard({
   feedback,
   showWorkFields = true,
   occupationOptions,
+  showEclipseAccount = false,
   onViewQr,
   onGenerateQr,
   qrLoading,
@@ -48,6 +49,7 @@ export function CivilServantProfileCard({
   feedback?: string | null;
   showWorkFields?: boolean;
   occupationOptions?: { value: string; label: string }[];
+  showEclipseAccount?: boolean;
   onViewQr?: () => void;
   onGenerateQr?: () => void;
   qrLoading?: boolean;
@@ -200,7 +202,7 @@ export function CivilServantProfileCard({
               />
             </label>
             <label className="text-xs font-semibold text-slate-600">
-              Wallet ID
+              Pashasha Wallet ID
               <input
                 value={data.walletId ?? 'Not linked'}
                 disabled
@@ -208,7 +210,7 @@ export function CivilServantProfileCard({
               />
             </label>
             <label className="text-xs font-semibold text-slate-600">
-              Servant Token
+              Pashasha Token
               <input
                 value={data.guardToken ?? 'Not issued'}
                 disabled
@@ -309,24 +311,14 @@ export function CivilServantProfileCard({
             )}
           </div>
 
-          {(data.eclipseCustomerId || data.eclipseWalletId) && (
-            <div className="grid gap-3 md:grid-cols-2">
-              <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.15em] text-slate-500">
-                  Eclipse customer
-                </p>
-                <p className="text-sm font-semibold text-slate-800 md:text-base">
-                  {data.eclipseCustomerId ?? '—'}
-                </p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[11px] uppercase tracking-[0.15em] text-slate-500">
-                  Eclipse wallet
-                </p>
-                <p className="text-sm font-semibold text-slate-800 md:text-base">
-                  {data.eclipseWalletId ?? '—'}
-                </p>
-              </div>
+          {showEclipseAccount && data.eclipseCustomerId && (
+            <div className="space-y-1">
+              <p className="text-[11px] uppercase tracking-[0.15em] text-slate-500">
+                Eclipse account
+              </p>
+              <p className="text-sm font-semibold text-slate-800 md:text-base">
+                {data.eclipseCustomerId}
+              </p>
             </div>
           )}
         </div>
