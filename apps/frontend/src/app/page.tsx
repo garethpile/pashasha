@@ -35,6 +35,7 @@ type GuardProfile = {
   occupation?: string;
   primarySite?: string;
   homeAddress?: string;
+  eclipseCustomerId?: string;
   eclipseWalletId?: string;
 };
 

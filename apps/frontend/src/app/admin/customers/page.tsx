@@ -172,7 +172,14 @@ export default function CustomerManagementPage() {
       }
     };
     void loadDetails();
-  }, [selected?.customerId]);
+  }, [
+    selected?.customerId,
+    selected?.firstName,
+    selected?.familyName,
+    selected?.email,
+    selected?.phoneNumber,
+    selected?.address,
+  ]);
 
   const pendingReservationsTotal = reservations.reduce((sum, row) => {
     const value = Number(row.amount ?? 0);
