@@ -9,7 +9,7 @@ applications:
         preBuild:
           commands:
             - npm ci --workspaces --ignore-scripts --prefer-offline=false --no-audit --progress=false
-            - npm run build --workspace contracts
+            - npm run build --workspace @pashashapay/contracts
         build:
           commands:
             - NPM_CONFIG_WORKSPACES=false NPM_CONFIG_WORKSPACE=false NPM_CONFIG_WORKSPACES_ENABLED=false npm run build --workspace frontend
