@@ -144,15 +144,15 @@ export class PashashaPayFrontendStack extends cdk.Stack {
     this.amplifyApp = app;
     this.primaryBranch = branch;
 
-    // Custom domain: www.pashasha.com -> Amplify
+    // Custom domain: dev.pashasha.com -> Amplify
     const domain = app.addDomain('CustomDomain', {
-      domainName: 'pashasha.com',
-      enableAutoSubdomain: true,
+      domainName: 'dev.pashasha.com',
+      enableAutoSubdomain: false,
     });
-    domain.mapSubDomain(branch, 'www');
+    domain.mapRoot(branch);
 
     new cdk.CfnOutput(this, 'AmplifyCustomDomain', {
-      value: `https://www.pashasha.com`,
+      value: `https://dev.pashasha.com`,
     });
   }
 }
