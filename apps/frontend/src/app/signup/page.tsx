@@ -111,21 +111,21 @@ export default function SignupPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 px-4 py-8 md:py-12">
-      <div className="mx-auto max-w-4xl rounded-3xl bg-white/75 p-6 sm:p-8 shadow-xl backdrop-blur">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl font-bold text-slate-900">
+    <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 px-4 py-10 md:py-16">
+      <div className="mx-auto max-w-5xl rounded-[32px] bg-white/80 p-6 sm:p-10 shadow-2xl backdrop-blur-sm ring-1 ring-orange-100/80">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-2xl space-y-2">
+            <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">
               {isCustomer ? 'Create a Customer Account' : 'Create a Civil Servant Account'}
             </h1>
-            <p className="mt-2 text-slate-600">
+            <p className="text-base text-slate-600 sm:text-lg">
               {isCustomer
                 ? 'A customer account will allow you to easily pay civil servants and track the progress of those payments. Complete your details below.'
                 : 'A civil servant account will allow you to be easily paid for your services. You will also be able to track payments to you and payouts. Complete your details below.'}
             </p>
           </div>
           <div className="flex items-center justify-center">
-            <div className="flex rounded-full border border-orange-200 bg-orange-50 px-1 py-1 shadow-sm">
+            <div className="flex rounded-full border border-orange-200 bg-orange-50 px-1 py-1 shadow-sm shadow-orange-100">
               <button
                 type="button"
                 className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
@@ -147,7 +147,7 @@ export default function SignupPage() {
             </div>
           </div>
         </div>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-3 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="mt-10 space-y-4 sm:space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             <label className="text-sm font-semibold text-slate-600">
               First name <span className="text-rose-600">*</span>
@@ -155,7 +155,7 @@ export default function SignupPage() {
                 required
                 value={form.firstName}
                 onChange={(e) => setForm((prev) => ({ ...prev, firstName: e.target.value }))}
-                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
               />
             </label>
             <label className="text-sm font-semibold text-slate-600">
@@ -164,7 +164,7 @@ export default function SignupPage() {
                 required
                 value={form.familyName}
                 onChange={(e) => setForm((prev) => ({ ...prev, familyName: e.target.value }))}
-                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
               />
             </label>
           </div>
@@ -176,7 +176,7 @@ export default function SignupPage() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
-                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder="you@example.com"
               />
             </label>
@@ -186,7 +186,7 @@ export default function SignupPage() {
               <input
                 value={form.phoneNumber}
                 onChange={(e) => setForm((prev) => ({ ...prev, phoneNumber: e.target.value }))}
-                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 placeholder="+27..."
               />
             </label>
@@ -204,7 +204,7 @@ export default function SignupPage() {
               required
               value={form.address}
               onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))}
-              className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
+              className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
             />
           </label>
 
@@ -222,7 +222,7 @@ export default function SignupPage() {
                       otherOccupation: e.target.value === 'Other' ? prev.otherOccupation : '',
                     }))
                   }
-                  className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 >
                   <option value="">Select occupation</option>
                   <option value="Security Guard">Security Guard</option>
@@ -241,7 +241,7 @@ export default function SignupPage() {
                     onChange={(e) =>
                       setForm((prev) => ({ ...prev, otherOccupation: e.target.value }))
                     }
-                    className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                    className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
                     placeholder="Enter your occupation"
                   />
                 </label>
@@ -258,7 +258,7 @@ export default function SignupPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={form.password}
                   onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 pr-12"
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 pr-12 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
                   placeholder="Minimum 8 chars, upper/lower/number"
                 />
                 <button
@@ -279,7 +279,7 @@ export default function SignupPage() {
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 pr-12"
+                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 pr-12 shadow-sm focus:border-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-100"
                 />
                 <button
                   type="button"
@@ -296,7 +296,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-2xl bg-orange-500 px-6 py-3 text-white shadow-lg transition hover:bg-orange-600 disabled:opacity-60"
+            className="w-full rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 px-6 py-3 text-white shadow-lg transition hover:from-orange-600 hover:to-orange-700 disabled:opacity-60"
           >
             {loading ? 'Submitting...' : 'Submit'}
           </button>
