@@ -6,10 +6,9 @@ import Image from 'next/image';
 import {
   DashboardNameCard,
   DashboardPaymentsCard,
-  DashboardProfileCard,
-  DashboardProfileField,
   DashboardTransaction,
 } from '../../../components/dashboard/cards';
+import { CivilServantProfileCard } from '../../../components/dashboard/civil-servant-profile-card';
 import { mapDashboardTransactions } from '../../../components/dashboard/transactions';
 import { DashboardKycCard } from '../../../components/dashboard/kyc-card';
 
@@ -138,21 +137,6 @@ export default function CivilServantManagementPage() {
       setError(err?.message ?? 'Unable to delete civil servant.');
     }
   };
-
-  const selectedProfileFields: DashboardProfileField[] = useMemo(() => {
-    if (!selected) return [];
-    return [
-      { id: 'firstName', label: 'First Name', value: profileForm.firstName },
-      { id: 'familyName', label: 'Last Name', value: profileForm.familyName },
-      { id: 'email', label: 'Email', value: profileForm.email },
-      { id: 'phoneNumber', label: 'Phone', value: profileForm.phoneNumber ?? '—' },
-      { id: 'address', label: 'Address', value: profileForm.address ?? '—', span: 2 },
-      { label: 'Pashasha Account', value: selected.accountNumber, mono: true },
-      { label: 'Wallet ID', value: selected.eclipseWalletId ?? '—', mono: true },
-      { label: 'Eclipse Customer', value: selected.eclipseCustomerId ?? '—', mono: true },
-      { label: 'QR Token', value: selected.guardToken ?? '—', mono: true },
-    ];
-  }, [profileForm, selected]);
 
   const regenerateQr = async (id: string) => {
     setError(null);
@@ -314,6 +298,55 @@ export default function CivilServantManagementPage() {
     );
   }, [results]);
 
+  const resetProfileForm = () => {
+    if (!selected) return;
+    setProfileForm({
+      firstName: selected.firstName ?? '',
+      familyName: selected.familyName ?? '',
+      email: selected.email ?? '',
+      phoneNumber: selected.phoneNumber ?? '',
+      address: selected.address ?? '',
+    });
+  };
+
+  const handleProfileFieldChange = (field: string, value: string) => {
+    setProfileForm((prev) => {
+      if (field === 'homeAddress' || field === 'primarySite') {
+        return { ...prev, address: value };
+      }
+      if (field in prev) {
+        return { ...prev, [field]: value } as typeof prev;
+      }
+      return prev;
+    });
+  };
+
+  const saveProfile = async () => {
+    if (!selected) return;
+    setProfileSaving(true);
+    setError(null);
+    setMessage(null);
+    try {
+      const updated = (await adminApi.updateCivilServant(selected.civilServantId, {
+        firstName: profileForm.firstName,
+        familyName: profileForm.familyName,
+        email: profileForm.email,
+        phoneNumber: profileForm.phoneNumber || undefined,
+        address: profileForm.address || undefined,
+      })) as CivilServant;
+      setSelected(updated);
+      setResults((prev) =>
+        prev.map((c) => (c.civilServantId === updated.civilServantId ? updated : c))
+      );
+      setProfileEditing(false);
+      setMessage('Profile updated.');
+    } catch (err: any) {
+      setError(err?.message ?? 'Unable to update profile.');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-end">
@@ -369,9 +402,7 @@ export default function CivilServantManagementPage() {
             return (
               <li
                 key={id}
-                className={`flex items-center justify-between border-b border-slate-100 px-6 py-4 ${
-                  selected?.civilServantId === id ? 'bg-orange-50' : ''
-                }`}
+                className={`flex items-center justify-between border-b border-slate-100 px-6 py-4 ${selected?.civilServantId === id ? 'bg-orange-50' : ''}`}
               >
                 <div>
                   <p className="text-base font-semibold text-slate-900">
@@ -422,146 +453,40 @@ export default function CivilServantManagementPage() {
             accountNumber={selected.accountNumber}
           />
 
-          <DashboardProfileCard
-            title="Profile"
+          <CivilServantProfileCard
+            data={{
+              firstName: profileForm.firstName,
+              familyName: profileForm.familyName,
+              occupation: undefined,
+              primarySite: profileForm.address,
+              email: profileForm.email,
+              phoneNumber: profileForm.phoneNumber,
+              homeAddress: profileForm.address,
+              accountNumber: selected.accountNumber ?? null,
+              walletId: selected.eclipseWalletId ?? null,
+              guardToken: selected.guardToken ?? null,
+              eclipseCustomerId: selected.eclipseCustomerId ?? null,
+              eclipseWalletId: selected.eclipseWalletId ?? null,
+              qrUrl: qrUrl ?? null,
+            }}
             collapsed={profileCollapsed}
             onToggle={() => setProfileCollapsed((v) => !v)}
-            fields={selectedProfileFields}
             editing={profileEditing}
-            onFieldChange={(fieldId, value) =>
-              setProfileForm((prev) => ({
-                ...prev,
-                [fieldId]: value,
-              }))
-            }
-            actions={
-              <button
-                type="button"
-                onClick={() => setProfileEditing((v) => !v)}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                aria-label="Edit profile"
-                title="Edit profile"
-              >
-                ✎
-              </button>
-            }
-            footer={
-              profileEditing && (
-                <div className="mt-4 flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!selected) return;
-                      setProfileForm({
-                        firstName: selected.firstName ?? '',
-                        familyName: selected.familyName ?? '',
-                        email: selected.email ?? '',
-                        phoneNumber: selected.phoneNumber ?? '',
-                        address: selected.address ?? '',
-                      });
-                      setProfileEditing(false);
-                    }}
-                    className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    disabled={profileSaving}
-                    onClick={async () => {
-                      if (!selected) return;
-                      setProfileSaving(true);
-                      try {
-                        const updated = (await adminApi.updateCivilServant(
-                          selected.civilServantId,
-                          {
-                            firstName: profileForm.firstName,
-                            familyName: profileForm.familyName,
-                            email: profileForm.email,
-                            phoneNumber: profileForm.phoneNumber || undefined,
-                            address: profileForm.address || undefined,
-                          }
-                        )) as CivilServant;
-                        setSelected(updated);
-                        setResults((prev) =>
-                          prev.map((c) =>
-                            c.civilServantId === updated.civilServantId ? updated : c
-                          )
-                        );
-                        setProfileEditing(false);
-                      } catch (err: any) {
-                        setError(err?.message ?? 'Unable to update profile.');
-                      } finally {
-                        setProfileSaving(false);
-                      }
-                    }}
-                    className="btn-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                  >
-                    {profileSaving ? 'Saving...' : 'Save'}
-                  </button>
-                </div>
-              )
-            }
-          >
-            <div className="grid gap-5 md:grid-cols-[auto_1fr] md:items-start">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.15em] text-slate-500">QR image</p>
-                {qrUrl ? (
-                  <Image
-                    src={qrUrl}
-                    alt="QR code"
-                    width={112}
-                    height={112}
-                    className="mt-2 h-28 w-28 cursor-pointer rounded-lg border border-slate-200 bg-white object-contain p-2 shadow-sm"
-                    onClick={() => setQrPreview(qrUrl)}
-                  />
-                ) : (
-                  <p className="mt-2 text-sm text-slate-500">No QR yet</p>
-                )}
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="btn-primary px-3 py-2 text-xs font-semibold text-white md:px-4 md:text-sm"
-                    onClick={() => {
-                      if (selected?.civilServantId) {
-                        fetchQrUrl(selected.civilServantId, true);
-                      }
-                    }}
-                    disabled={!selected?.qrCodeKey || qrLoading}
-                  >
-                    {qrLoading ? 'Loading...' : 'View QR image'}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-primary px-3 py-2 text-xs font-semibold text-white md:px-4 md:text-sm"
-                    onClick={() =>
-                      selected?.civilServantId && regenerateQr(selected.civilServantId)
-                    }
-                  >
-                    Generate QR code
-                  </button>
-                </div>
-              </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                <div className="space-y-1">
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-500">
-                    Eclipse customer
-                  </p>
-                  <p className="text-sm font-semibold text-slate-800 md:text-base">
-                    {selected.eclipseCustomerId ?? '—'}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[11px] uppercase tracking-[0.15em] text-slate-500">
-                    Eclipse wallet
-                  </p>
-                  <p className="text-sm font-semibold text-slate-800 md:text-base">
-                    {selected.eclipseWalletId ?? '—'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </DashboardProfileCard>
+            onEditToggle={() => setProfileEditing((v) => !v)}
+            onFieldChange={handleProfileFieldChange}
+            onCancel={() => {
+              resetProfileForm();
+              setProfileEditing(false);
+            }}
+            onSave={saveProfile}
+            saving={profileSaving}
+            feedback={message}
+            showWorkFields={false}
+            onViewQr={() => selected?.civilServantId && fetchQrUrl(selected.civilServantId, true)}
+            onGenerateQr={() => selected?.civilServantId && regenerateQr(selected.civilServantId)}
+            qrLoading={qrLoading}
+            canViewQr={Boolean(selected?.qrCodeKey)}
+          />
 
           <DashboardKycCard profileType="civil-servant" profileId={selected.civilServantId} />
 

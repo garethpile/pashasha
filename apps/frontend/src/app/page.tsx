@@ -20,6 +20,7 @@ import {
   DashboardCivilServantKycCard,
   DashboardCustomerKycCard,
 } from '../components/dashboard/kyc-card';
+import { CivilServantProfileCard } from '../components/dashboard/civil-servant-profile-card';
 
 type GuardProfile = {
   civilServantId: string;
@@ -508,258 +509,59 @@ function CivilServantDashboard() {
           accountNumber={profile.accountNumber}
         />
 
-        <section className="w-full max-w-4xl self-center rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-          <header className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-            <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Profile</p>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (profileEditing) {
-                    resetGuardProfileForm();
-                  }
-                  setProfileEditing((v) => !v);
-                }}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                title={profileEditing ? 'Cancel editing' : 'Edit profile'}
-                aria-label="Edit profile"
-              >
-                ✎
-              </button>
-              <button
-                type="button"
-                onClick={() => setProfileCollapsed((v) => !v)}
-                className="text-sm font-semibold text-orange-600"
-              >
-                {profileCollapsed ? '▼' : '▲'}
-              </button>
-            </div>
-          </header>
-
-          {!profileCollapsed && (
-            <div className="mt-6 space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="text-xs font-semibold text-slate-600">
-                  First Name
-                  <input
-                    value={guardProfileForm.firstName}
-                    onChange={(e) =>
-                      setGuardProfileForm((prev) => ({ ...prev, firstName: e.target.value }))
-                    }
-                    disabled={!profileEditing}
-                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                      profileEditing ? 'bg-white' : 'bg-slate-50'
-                    }`}
-                  />
-                </label>
-                <label className="text-xs font-semibold text-slate-600">
-                  Last Name
-                  <input
-                    value={guardProfileForm.familyName}
-                    onChange={(e) =>
-                      setGuardProfileForm((prev) => ({ ...prev, familyName: e.target.value }))
-                    }
-                    disabled={!profileEditing}
-                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                      profileEditing ? 'bg-white' : 'bg-slate-50'
-                    }`}
-                  />
-                </label>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="text-xs font-semibold text-slate-600">
-                  Occupation
-                  <select
-                    value={guardProfileForm.occupation}
-                    onChange={(e) =>
-                      setGuardProfileForm((prev) => ({ ...prev, occupation: e.target.value }))
-                    }
-                    disabled={!profileEditing}
-                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                      profileEditing ? 'bg-white' : 'bg-slate-50'
-                    }`}
-                  >
-                    {[
-                      { value: '', label: 'Select occupation' },
-                      { value: 'Security Guard', label: 'Security Guard' },
-                      { value: 'Parking Attendant', label: 'Parking Attendant' },
-                      { value: 'Golf Caddy', label: 'Golf Caddy' },
-                      { value: 'Unemployed', label: 'Unemployed' },
-                      { value: 'Other', label: 'Other' },
-                    ].map((option) => (
-                      <option key={option.value || option.label} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <label className="text-xs font-semibold text-slate-600">
-                  Primary Site
-                  <input
-                    value={guardProfileForm.primarySite}
-                    onChange={(e) =>
-                      setGuardProfileForm((prev) => ({ ...prev, primarySite: e.target.value }))
-                    }
-                    disabled={!profileEditing}
-                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                      profileEditing ? 'bg-white' : 'bg-slate-50'
-                    }`}
-                  />
-                </label>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <label className="text-xs font-semibold text-slate-600">
-                  Email
-                  <input
-                    type="email"
-                    value={guardProfileForm.email}
-                    onChange={(e) =>
-                      setGuardProfileForm((prev) => ({ ...prev, email: e.target.value }))
-                    }
-                    disabled={!profileEditing}
-                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                      profileEditing ? 'bg-white' : 'bg-slate-50'
-                    }`}
-                  />
-                </label>
-                <label className="text-xs font-semibold text-slate-600">
-                  Phone
-                  <input
-                    value={guardProfileForm.phoneNumber}
-                    onChange={(e) =>
-                      setGuardProfileForm((prev) => ({ ...prev, phoneNumber: e.target.value }))
-                    }
-                    disabled={!profileEditing}
-                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                      profileEditing ? 'bg-white' : 'bg-slate-50'
-                    }`}
-                  />
-                </label>
-              </div>
-
-              <label className="text-xs font-semibold text-slate-600">
-                Home Address
-                <input
-                  value={guardProfileForm.homeAddress}
-                  onChange={(e) =>
-                    setGuardProfileForm((prev) => ({ ...prev, homeAddress: e.target.value }))
-                  }
-                  disabled={!profileEditing}
-                  className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                    profileEditing ? 'bg-white' : 'bg-slate-50'
-                  }`}
-                />
-              </label>
-
-              <div className="grid gap-4 md:grid-cols-3">
-                <label className="text-xs font-semibold text-slate-600">
-                  Pashasha Account
-                  <input
-                    value={profile.accountNumber ?? 'Not issued'}
-                    disabled
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 font-mono text-sm text-slate-700"
-                  />
-                </label>
-                <label className="text-xs font-semibold text-slate-600">
-                  Wallet ID
-                  <input
-                    value={profile.eclipseWalletId ?? 'Not linked'}
-                    disabled
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 font-mono text-sm text-slate-700"
-                  />
-                </label>
-                <label className="text-xs font-semibold text-slate-600">
-                  Servant Token
-                  <input
-                    value={profile.guardToken ?? 'Not issued'}
-                    disabled
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 font-mono text-sm text-slate-700"
-                  />
-                </label>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                {profileFeedback && (
-                  <p
-                    className={`text-sm ${profileFeedback.includes('updated') ? 'text-emerald-600' : 'text-rose-600'}`}
-                  >
-                    {profileFeedback}
-                  </p>
-                )}
-                {profileEditing && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        resetGuardProfileForm();
-                        setProfileEditing(false);
-                      }}
-                      className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleGuardProfileSave}
-                      disabled={profileSaving}
-                      className="btn-primary px-5 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                    >
-                      {profileSaving ? 'Saving...' : 'Save profile'}
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div className="mt-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  QR code
-                </p>
-                {qrUrl ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => setShowQrModal(true)}
-                      className="mt-3 inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-3 transition hover:border-sky-300"
-                    >
-                      <Image
-                        src={qrUrl}
-                        alt="Guard QR code"
-                        className="h-32 w-32 rounded-xl border border-slate-100 object-contain"
-                        width={128}
-                        height={128}
-                      />
-                    </button>
-                    <p className="mt-2 text-xs text-slate-500">
-                      Tap the QR code to enlarge it and let customers scan it.
-                    </p>
-                  </>
-                ) : (
-                  <p className="mt-2 text-xs text-slate-500">QR code not generated yet.</p>
-                )}
-              </div>
-            </div>
-          )}
-        </section>
-
-        <DashboardCivilServantKycCard />
+        <CivilServantProfileCard
+          data={{
+            firstName: guardProfileForm.firstName,
+            familyName: guardProfileForm.familyName,
+            occupation: guardProfileForm.occupation,
+            primarySite: guardProfileForm.primarySite,
+            email: guardProfileForm.email,
+            phoneNumber: guardProfileForm.phoneNumber,
+            homeAddress: guardProfileForm.homeAddress,
+            accountNumber: profile.accountNumber,
+            walletId: profile.eclipseWalletId,
+            guardToken: profile.guardToken,
+            eclipseCustomerId: profile.eclipseCustomerId,
+            eclipseWalletId: profile.eclipseWalletId,
+            qrUrl,
+          }}
+          collapsed={profileCollapsed}
+          onToggle={() => setProfileCollapsed((v) => !v)}
+          editing={profileEditing}
+          onEditToggle={() => {
+            if (profileEditing) {
+              resetGuardProfileForm();
+            }
+            setProfileEditing((v) => !v);
+          }}
+          onFieldChange={(field, value) =>
+            setGuardProfileForm((prev) => ({ ...prev, [field]: value }))
+          }
+          onCancel={() => {
+            resetGuardProfileForm();
+            setProfileEditing(false);
+          }}
+          onSave={handleGuardProfileSave}
+          saving={profileSaving}
+          feedback={profileFeedback}
+          showWorkFields
+          onViewQr={() => setShowQrModal(true)}
+        />
 
         <DashboardPaymentsCard
           title={
             <div className="whitespace-pre leading-tight">
-              <span className="block">TRANSACTION</span>
-              <span className="block">HISTORY</span>
+              <span className="block">TRANSACTIONS</span>
             </div>
           }
           collapsed={paymentsCollapsed}
           onToggle={() => setPaymentsCollapsed((v) => !v)}
           metrics={transactionMetrics}
-          actions={
+          rightActions={
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={handleTransactionsRefresh}
+                onClick={() => loadTransactions(txOffset, payoutBalance)}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 aria-label="Refresh transactions"
                 title="Refresh"

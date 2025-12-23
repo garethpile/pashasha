@@ -247,16 +247,20 @@ const SupportPage = () => {
                 >
                   {selected.status}
                 </span>
-                {isAdmin && (
+                {(isAdmin || selected.status === 'ACTIVE') && (
                   <button
                     type="button"
                     onClick={() =>
-                      handleStatusChange(selected.status === 'ACTIVE' ? 'CLOSED' : 'ACTIVE')
+                      handleStatusChange(
+                        isAdmin && selected.status === 'CLOSED' ? 'ACTIVE' : 'CLOSED'
+                      )
                     }
                     disabled={statusUpdating}
                     className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
                   >
-                    Mark {selected.status === 'ACTIVE' ? 'Closed' : 'Active'}
+                    {isAdmin
+                      ? `Mark ${selected.status === 'ACTIVE' ? 'Closed' : 'Active'}`
+                      : 'Mark Closed'}
                   </button>
                 )}
               </div>
