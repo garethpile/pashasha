@@ -354,6 +354,7 @@ export function DashboardKycCard({
                         onChange={(e) => {
                           const selected = e.target.files?.[0] ?? null;
                           setSelectedFiles((prev) => ({ ...prev, [doc.type]: selected }));
+                          e.target.value = '';
                         }}
                         disabled={isBusy}
                       />
@@ -559,6 +560,7 @@ export function DashboardCustomerKycCard() {
                         onChange={(e) => {
                           const selected = e.target.files?.[0] ?? null;
                           setSelectedFiles((prev) => ({ ...prev, [doc.type]: selected }));
+                          e.target.value = '';
                         }}
                         disabled={isBusy}
                       />
@@ -764,6 +766,7 @@ export function DashboardCivilServantKycCard() {
                         onChange={(e) => {
                           const selected = e.target.files?.[0] ?? null;
                           setSelectedFiles((prev) => ({ ...prev, [doc.type]: selected }));
+                          e.target.value = '';
                         }}
                         disabled={isBusy}
                       />
