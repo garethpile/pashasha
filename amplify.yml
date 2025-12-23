@@ -9,9 +9,10 @@ applications:
         preBuild:
           commands:
             - npm ci --workspaces --ignore-scripts --prefer-offline=false --no-audit --progress=false
+            - npm run build --workspace contracts
         build:
           commands:
-            - npm run build --workspace frontend
+            - NPM_CONFIG_WORKSPACES=false NPM_CONFIG_WORKSPACE=false NPM_CONFIG_WORKSPACES_ENABLED=false npm run build --workspace frontend
       artifacts:
         baseDirectory: apps/frontend/.next
         files:
