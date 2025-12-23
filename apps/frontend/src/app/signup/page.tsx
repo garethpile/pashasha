@@ -112,34 +112,10 @@ export default function SignupPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-100 px-4 py-8 md:py-12">
-      <div className="mx-auto max-w-3xl rounded-3xl bg-white/70 p-6 sm:p-8 shadow-xl backdrop-blur">
-        <div className="flex flex-col items-start gap-4">
-          <div className="flex w-full flex-col items-stretch gap-2 sm:max-w-xs">
-            <button
-              type="button"
-              className={`w-full rounded-full px-4 py-2 transition text-sm sm:text-base ${
-                isCustomer
-                  ? 'bg-white text-orange-600 shadow border border-orange-200'
-                  : 'text-slate-700 border border-slate-200'
-              }`}
-              onClick={() => setForm((prev) => ({ ...prev, role: 'CUSTOMER' }))}
-            >
-              Customer
-            </button>
-            <button
-              type="button"
-              className={`w-full rounded-full px-4 py-2 transition text-sm sm:text-base ${
-                !isCustomer
-                  ? 'bg-white text-orange-600 shadow border border-orange-200'
-                  : 'text-slate-700 border border-slate-200'
-              }`}
-              onClick={() => setForm((prev) => ({ ...prev, role: 'CIVIL_SERVANT' }))}
-            >
-              Civil servant
-            </button>
-          </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+      <div className="mx-auto max-w-4xl rounded-3xl bg-white/75 p-6 sm:p-8 shadow-xl backdrop-blur">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="max-w-2xl">
+            <h1 className="text-3xl font-bold text-slate-900">
               {isCustomer ? 'Create a Customer Account' : 'Create a Civil Servant Account'}
             </h1>
             <p className="mt-2 text-slate-600">
@@ -147,6 +123,28 @@ export default function SignupPage() {
                 ? 'A customer account will allow you to easily pay civil servants and track the progress of those payments. Complete your details below.'
                 : 'A civil servant account will allow you to be easily paid for your services. You will also be able to track payments to you and payouts. Complete your details below.'}
             </p>
+          </div>
+          <div className="flex items-center justify-center">
+            <div className="flex rounded-full border border-orange-200 bg-orange-50 px-1 py-1 shadow-sm">
+              <button
+                type="button"
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  isCustomer ? 'bg-white text-orange-600 shadow' : 'text-slate-700'
+                }`}
+                onClick={() => setForm((prev) => ({ ...prev, role: 'CUSTOMER' }))}
+              >
+                Customer
+              </button>
+              <button
+                type="button"
+                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  !isCustomer ? 'bg-white text-orange-600 shadow' : 'text-slate-700'
+                }`}
+                onClick={() => setForm((prev) => ({ ...prev, role: 'CIVIL_SERVANT' }))}
+              >
+                Civil servant
+              </button>
+            </div>
           </div>
         </div>
         <form onSubmit={handleSubmit} className="mt-8 space-y-3 sm:space-y-4">
@@ -171,7 +169,7 @@ export default function SignupPage() {
             </label>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-[1fr_auto_1fr] md:items-center">
+          <div className="relative grid gap-4 md:grid-cols-2 md:items-center">
             <label className="text-sm font-semibold text-slate-600">
               Email <span className="text-rose-600">*</span>
               <input
@@ -183,10 +181,6 @@ export default function SignupPage() {
               />
             </label>
 
-            <div className="flex items-center justify-center text-xs font-semibold text-orange-600">
-              <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-600">AND / OR</span>
-            </div>
-
             <label className="text-sm font-semibold text-slate-600">
               Mobile <span className="text-rose-600">*</span>
               <input
@@ -196,6 +190,12 @@ export default function SignupPage() {
                 placeholder="+27..."
               />
             </label>
+
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <span className="rounded-full bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600 shadow-sm">
+                AND / OR
+              </span>
+            </div>
           </div>
 
           <label className="text-sm font-semibold text-slate-600">

@@ -25,6 +25,15 @@ export interface PashashaPayFrontendStackProps extends cdk.StackProps {
   /** AWS region that hosts the Cognito resources and API. */
   readonly awsRegion: string;
 
+  /** Optional custom domain (e.g., dev.pashasha.com or pashasha.com). */
+  readonly domainName?: string;
+
+  /** Optional subdomain to map when using a parent domain (e.g., "dev" when domainName is "pashasha.com"). */
+  readonly domainSubdomain?: string;
+
+  /** Whether Amplify should enable auto subdomains for branches. Defaults to false. */
+  readonly enableAutoSubdomain?: boolean;
+
   /**
    * Optional GitHub repository owner (e.g. "acme-org") for connected Amplify builds.
    */
@@ -78,14 +87,16 @@ export class PashashaPayFrontendStack extends cdk.Stack {
           frontend: {
             phases: {
               preBuild: {
-                commands: ['npm install'],
+                commands: [
+                  'npm ci --workspaces --prefer-offline=false --no-audit --progress=false',
+                ],
               },
               build: {
                 commands: ['npm run build --workspace frontend'],
               },
             },
             artifacts: {
-              baseDirectory: 'apps/frontend/out',
+              baseDirectory: 'apps/frontend/.next',
               files: ['**/*'],
             },
             cache: {
@@ -144,15 +155,25 @@ export class PashashaPayFrontendStack extends cdk.Stack {
     this.amplifyApp = app;
     this.primaryBranch = branch;
 
-    // Custom domain: dev.pashasha.com -> Amplify
-    const domain = app.addDomain('CustomDomain', {
-      domainName: 'dev.pashasha.com',
-      enableAutoSubdomain: false,
-    });
-    domain.mapRoot(branch);
+    if (props.domainName) {
+      const domain = app.addDomain('CustomDomain', {
+        domainName: props.domainName,
+        enableAutoSubdomain: props.enableAutoSubdomain ?? false,
+      });
 
-    new cdk.CfnOutput(this, 'AmplifyCustomDomain', {
-      value: `https://dev.pashasha.com`,
-    });
+      if (props.domainSubdomain) {
+        domain.mapSubDomain(branch, props.domainSubdomain);
+      } else {
+        domain.mapRoot(branch);
+      }
+
+      const domainUrl = props.domainSubdomain
+        ? `https://${props.domainSubdomain}.${props.domainName}`
+        : `https://${props.domainName}`;
+
+      new cdk.CfnOutput(this, 'AmplifyCustomDomain', {
+        value: domainUrl,
+      });
+    }
   }
 }
