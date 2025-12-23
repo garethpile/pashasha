@@ -25,15 +25,6 @@ export interface PashashaPayFrontendStackProps extends cdk.StackProps {
   /** AWS region that hosts the Cognito resources and API. */
   readonly awsRegion: string;
 
-  /** Optional custom domain (e.g., dev.pashasha.com or pashasha.com). */
-  readonly domainName?: string;
-
-  /** Optional subdomain to map when using a parent domain (e.g., "dev" when domainName is "pashasha.com"). */
-  readonly domainSubdomain?: string;
-
-  /** Whether Amplify should enable auto subdomains for branches. Defaults to false. */
-  readonly enableAutoSubdomain?: boolean;
-
   /**
    * Optional GitHub repository owner (e.g. "acme-org") for connected Amplify builds.
    */
@@ -83,7 +74,7 @@ export class PashashaPayFrontendStack extends cdk.Stack {
       version: '1.0',
       applications: [
         {
-          appRoot: '.',
+          appRoot: 'apps/frontend',
           frontend: {
             phases: {
               preBuild: {
@@ -96,11 +87,11 @@ export class PashashaPayFrontendStack extends cdk.Stack {
               },
             },
             artifacts: {
-              baseDirectory: 'apps/frontend/.next',
+              baseDirectory: '.next',
               files: ['**/*'],
             },
             cache: {
-              paths: ['node_modules/**/*', 'apps/frontend/node_modules/**/*'],
+              paths: ['node_modules/**/*'],
             },
           },
           customRules: [
@@ -154,26 +145,5 @@ export class PashashaPayFrontendStack extends cdk.Stack {
 
     this.amplifyApp = app;
     this.primaryBranch = branch;
-
-    if (props.domainName) {
-      const domain = app.addDomain('CustomDomain', {
-        domainName: props.domainName,
-        enableAutoSubdomain: props.enableAutoSubdomain ?? false,
-      });
-
-      if (props.domainSubdomain) {
-        domain.mapSubDomain(branch, props.domainSubdomain);
-      } else {
-        domain.mapRoot(branch);
-      }
-
-      const domainUrl = props.domainSubdomain
-        ? `https://${props.domainSubdomain}.${props.domainName}`
-        : `https://${props.domainName}`;
-
-      new cdk.CfnOutput(this, 'AmplifyCustomDomain', {
-        value: domainUrl,
-      });
-    }
   }
 }

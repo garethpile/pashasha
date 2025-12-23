@@ -28,7 +28,4 @@ new PashashaPayFrontendStack(app, 'PashashaPayFrontendStack', {
   repositoryName: context.repositoryName,
   githubTokenSecretArn: context.githubTokenSecretArn,
   branchName: context.branchName,
-  domainName: context.domainName,
-  domainSubdomain: context.domainSubdomain,
-  enableAutoSubdomain: context.enableAutoSubdomain,
 });

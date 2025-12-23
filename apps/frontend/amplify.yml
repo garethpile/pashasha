@@ -1,6 +1,7 @@
 version: 1
 applications:
-  - frontend:
+  - appRoot: apps/frontend
+    frontend:
       phases:
         preBuild:
           commands:
@@ -9,10 +10,9 @@ applications:
           commands:
             - npm run build --workspace frontend
       artifacts:
-        baseDirectory: apps/frontend/.next
+        baseDirectory: .next
         files:
           - '**/*'
       cache:
         paths:
           - 'node_modules/**/*'
-          - 'apps/frontend/node_modules/**/*'
