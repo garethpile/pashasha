@@ -1,11 +1,14 @@
 version: 1
 applications:
   - appRoot: apps/frontend
+    env:
+      variables:
+        HUSKY: '0'
     frontend:
       phases:
         preBuild:
           commands:
-            - HUSKY=0 npm ci --workspaces --prefer-offline=false --no-audit --progress=false
+            - npm ci --workspaces --ignore-scripts --prefer-offline=false --no-audit --progress=false
         build:
           commands:
             - npm run build --workspace frontend
