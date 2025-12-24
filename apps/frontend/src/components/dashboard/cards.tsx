@@ -201,6 +201,9 @@ export function DashboardPaymentsCard({
     (showAvailableBalanceColumn ? 1 : 0) +
     (showExpiresColumn ? 1 : 0);
 
+  // Limit visible rows to 10; additional rows remain accessible via scroll.
+  const visibleTransactions = transactions.slice(0, 10);
+
   return (
     <section className="w-full max-w-4xl self-center rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
       <header className="grid items-center gap-3 border-b border-slate-100 pb-3 sm:grid-cols-[1fr_auto_1fr]">
@@ -235,88 +238,51 @@ export function DashboardPaymentsCard({
       {!collapsed && (
         <div className="mt-6 overflow-hidden rounded-2xl border border-slate-100">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-100 text-sm">
-              <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-4 py-3">Date</th>
-                  <th className="px-4 py-3">Amount</th>
-                  {showBalanceColumn && <th className="px-4 py-3">Balance</th>}
-                  {showAvailableBalanceColumn && <th className="px-4 py-3">Available</th>}
-                  <th className="px-4 py-3">Id</th>
-                  <th className="px-4 py-3">Type</th>
-                  <th className="px-4 py-3">Description</th>
-                  <th className="px-4 py-3">Reference</th>
-                  {showExpiresColumn && <th className="px-4 py-3">Expires</th>}
-                  <th className="px-4 py-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {loading && (
+            <div className="max-h-[520px] overflow-y-auto">
+              <table className="min-w-full divide-y divide-slate-100 text-sm">
+                <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                   <tr>
-                    <td colSpan={totalColumns} className="px-4 py-4 text-sm text-slate-500">
-                      Loading transactions...
-                    </td>
+                    <th className="px-4 py-3">Date</th>
+                    <th className="px-4 py-3">Amount</th>
+                    {showBalanceColumn && <th className="px-4 py-3">Balance</th>}
+                    {showAvailableBalanceColumn && <th className="px-4 py-3">Available</th>}
+                    <th className="px-4 py-3">Id</th>
+                    <th className="px-4 py-3">Type</th>
+                    <th className="px-4 py-3">Description</th>
+                    <th className="px-4 py-3">Reference</th>
+                    {showExpiresColumn && <th className="px-4 py-3">Expires</th>}
+                    <th className="px-4 py-3">Status</th>
                   </tr>
-                )}
-                {!loading && transactions.length === 0 && (
-                  <tr>
-                    <td colSpan={totalColumns} className="px-4 py-4 text-sm text-slate-500">
-                      {emptyLabel}
-                    </td>
-                  </tr>
-                )}
-                {!loading &&
-                  transactions.map((payment) => {
-                    const statusUpper = (payment.status ?? '').toUpperCase();
-                    const statusClass =
-                      statusUpper === 'SUCCESSFUL'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : statusUpper.includes('PEND')
-                          ? 'bg-amber-100 text-amber-700'
-                          : 'bg-sky-100 text-sky-700';
-                    return (
-                      <tr key={payment.id}>
-                        <td className="px-4 py-3 text-slate-600">
-                          {payment.createdAt
-                            ? new Date(payment.createdAt).toLocaleString('en-ZA', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : '—'}
-                        </td>
-                        <td className="px-4 py-3 font-semibold text-slate-900">
-                          {formatCurrency(payment.amount)}
-                        </td>
-                        {showBalanceColumn && (
-                          <td className="px-4 py-3 font-semibold text-slate-900">
-                            {payment.balance !== undefined ? formatCurrency(payment.balance) : '—'}
-                          </td>
-                        )}
-                        {showAvailableBalanceColumn && (
-                          <td className="px-4 py-3 font-semibold text-slate-900">
-                            {payment.availableBalance !== undefined
-                              ? formatCurrency(payment.availableBalance)
-                              : '—'}
-                          </td>
-                        )}
-                        <td className="px-4 py-3 text-slate-800">
-                          <p className="font-semibold">{payment.id}</p>
-                          <p className="text-xs text-slate-500">
-                            {payment.externalId ?? payment.reference ?? ''}
-                          </p>
-                        </td>
-                        <td className="px-4 py-3 text-slate-800">{payment.paymentType ?? '—'}</td>
-                        <td className="px-4 py-3 text-slate-600">{payment.description ?? '—'}</td>
-                        <td className="px-4 py-3 text-slate-600">
-                          {payment.reference ?? payment.externalId ?? '—'}
-                        </td>
-                        {showExpiresColumn && (
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white">
+                  {loading && (
+                    <tr>
+                      <td colSpan={totalColumns} className="px-4 py-4 text-sm text-slate-500">
+                        Loading transactions...
+                      </td>
+                    </tr>
+                  )}
+                  {!loading && transactions.length === 0 && (
+                    <tr>
+                      <td colSpan={totalColumns} className="px-4 py-4 text-sm text-slate-500">
+                        {emptyLabel}
+                      </td>
+                    </tr>
+                  )}
+                  {!loading &&
+                    visibleTransactions.map((payment) => {
+                      const statusUpper = (payment.status ?? '').toUpperCase();
+                      const statusClass =
+                        statusUpper === 'SUCCESSFUL'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : statusUpper.includes('PEND')
+                            ? 'bg-amber-100 text-amber-700'
+                            : 'bg-sky-100 text-sky-700';
+                      return (
+                        <tr key={payment.id}>
                           <td className="px-4 py-3 text-slate-600">
-                            {payment.expiresAt
-                              ? new Date(payment.expiresAt).toLocaleString('en-ZA', {
+                            {payment.createdAt
+                              ? new Date(payment.createdAt).toLocaleString('en-ZA', {
                                   year: 'numeric',
                                   month: '2-digit',
                                   day: '2-digit',
@@ -325,39 +291,80 @@ export function DashboardPaymentsCard({
                                 })
                               : '—'}
                           </td>
-                        )}
-                        <td className="px-4 py-3">
-                          <span
-                            className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
-                          >
-                            {payment.status ?? 'unknown'}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-              </tbody>
-            </table>
-            {pagination && (
-              <div className="flex items-center justify-between px-4 py-3 text-sm text-slate-600">
-                <button
-                  type="button"
-                  onClick={pagination.onPrev}
-                  className="rounded-full border border-slate-200 px-4 py-2 font-semibold text-slate-700 disabled:opacity-50"
-                  disabled={!pagination.hasPrev || pagination.disabled}
-                >
-                  Previous
-                </button>
-                <button
-                  type="button"
-                  onClick={pagination.onNext}
-                  className="rounded-full border border-slate-200 px-4 py-2 font-semibold text-slate-700 disabled:opacity-50"
-                  disabled={!pagination.hasNext || pagination.disabled}
-                >
-                  Next
-                </button>
-              </div>
-            )}
+                          <td className="px-4 py-3 font-semibold text-slate-900">
+                            {formatCurrency(payment.amount)}
+                          </td>
+                          {showBalanceColumn && (
+                            <td className="px-4 py-3 font-semibold text-slate-900">
+                              {payment.balance !== undefined
+                                ? formatCurrency(payment.balance)
+                                : '—'}
+                            </td>
+                          )}
+                          {showAvailableBalanceColumn && (
+                            <td className="px-4 py-3 font-semibold text-slate-900">
+                              {payment.availableBalance !== undefined
+                                ? formatCurrency(payment.availableBalance)
+                                : '—'}
+                            </td>
+                          )}
+                          <td className="px-4 py-3 text-slate-800">
+                            <p className="font-semibold">{payment.id}</p>
+                            <p className="text-xs text-slate-500">
+                              {payment.externalId ?? payment.reference ?? ''}
+                            </p>
+                          </td>
+                          <td className="px-4 py-3 text-slate-800">{payment.paymentType ?? '—'}</td>
+                          <td className="px-4 py-3 text-slate-600">{payment.description ?? '—'}</td>
+                          <td className="px-4 py-3 text-slate-600">
+                            {payment.reference ?? payment.externalId ?? '—'}
+                          </td>
+                          {showExpiresColumn && (
+                            <td className="px-4 py-3 text-slate-600">
+                              {payment.expiresAt
+                                ? new Date(payment.expiresAt).toLocaleString('en-ZA', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })
+                                : '—'}
+                            </td>
+                          )}
+                          <td className="px-4 py-3">
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-semibold ${statusClass}`}
+                            >
+                              {payment.status ?? 'unknown'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+              {pagination && (
+                <div className="flex items-center justify-between px-4 py-3 text-sm text-slate-600">
+                  <button
+                    type="button"
+                    onClick={pagination.onPrev}
+                    className="rounded-full border border-slate-200 px-4 py-2 font-semibold text-slate-700 disabled:opacity-50"
+                    disabled={!pagination.hasPrev || pagination.disabled}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    onClick={pagination.onNext}
+                    className="rounded-full border border-slate-200 px-4 py-2 font-semibold text-slate-700 disabled:opacity-50"
+                    disabled={!pagination.hasNext || pagination.disabled}
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

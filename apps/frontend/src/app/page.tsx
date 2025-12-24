@@ -549,6 +549,8 @@ function CivilServantDashboard() {
           onViewQr={() => setShowQrModal(true)}
         />
 
+        <DashboardCivilServantKycCard />
+
         <DashboardPaymentsCard
           title={
             <div className="whitespace-pre leading-tight">

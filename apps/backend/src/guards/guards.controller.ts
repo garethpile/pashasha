@@ -69,6 +69,9 @@ export class GuardsController {
       'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=300',
       'X-Guard-Landing-Url': landingUrl,
+      // Allow the QR image to be embedded when the frontend is served from a different domain
+      // (e.g., CloudFront domain versus API domain).
+      'Cross-Origin-Resource-Policy': 'cross-origin',
     });
     res.send(buffer);
   }
