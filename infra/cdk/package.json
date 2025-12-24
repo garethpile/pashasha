@@ -8,11 +8,11 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "synth": "AWS_PROFILE=pashashapay-eu cdk synth",
-    "deploy:backend": "AWS_PROFILE=pashashapay-eu cdk deploy PashashaPayBackendStack",
-    "deploy:frontend": "AWS_PROFILE=pashashapay-eu cdk deploy PashashaPayFrontendStack",
-    "destroy:backend": "AWS_PROFILE=pashashapay-eu cdk destroy PashashaPayBackendStack",
-    "destroy:frontend": "AWS_PROFILE=pashashapay-eu cdk destroy PashashaPayFrontendStack"
+    "synth": "AWS_PROFILE=aws-lean-dev-pile-eu-west-1 cdk synth",
+    "deploy:backend": "AWS_PROFILE=aws-lean-dev-pile-eu-west-1 cdk deploy PashashaPayBackendStack",
+    "deploy:frontend": "AWS_PROFILE=aws-lean-dev-pile-eu-west-1 cdk deploy PashashaPayFrontendStack",
+    "destroy:backend": "AWS_PROFILE=aws-lean-dev-pile-eu-west-1 cdk destroy PashashaPayBackendStack",
+    "destroy:frontend": "AWS_PROFILE=aws-lean-dev-pile-eu-west-1 cdk destroy PashashaPayFrontendStack"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

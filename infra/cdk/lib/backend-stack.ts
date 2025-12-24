@@ -18,6 +18,7 @@ import * as sns from 'aws-cdk-lib/aws-sns';
 import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
 import * as sfnTasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import * as lambdaNode from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export interface PashashaPayBackendStackProps extends cdk.StackProps {
   /**
@@ -669,6 +670,52 @@ export class PashashaPayBackendStack extends cdk.Stack {
       stateMachineType: sfn.StateMachineType.EXPRESS,
     });
 
+    // Publish key ARNs/IDs to SSM for runtime injection and external consumers.
+    const signupTopicArnParam = new ssm.StringParameter(this, 'SignupTopicArnParam', {
+      parameterName: '/pashashapay/topics/signup',
+      stringValue: signupTopic.topicArn,
+    });
+    const paymentsTopicArnParam = new ssm.StringParameter(this, 'PaymentsTopicArnParam', {
+      parameterName: '/pashashapay/topics/payments',
+      stringValue: paymentsTopic.topicArn,
+    });
+    const supportTopicArnParam = new ssm.StringParameter(this, 'SupportTopicArnParam', {
+      parameterName: '/pashashapay/topics/support',
+      stringValue: supportTopic.topicArn,
+    });
+    const accountWorkflowCivilArnParam = new ssm.StringParameter(
+      this,
+      'AccountWorkflowCivilArnParam',
+      {
+        parameterName: '/pashashapay/workflows/account/civilServant',
+        stringValue: accountWorkflowCivil.stateMachineArn,
+      }
+    );
+    const accountWorkflowCustomerArnParam = new ssm.StringParameter(
+      this,
+      'AccountWorkflowCustomerArnParam',
+      {
+        parameterName: '/pashashapay/workflows/account/customer',
+        stringValue: accountWorkflowCustomer.stateMachineArn,
+      }
+    );
+    const accountWorkflowAdminArnParam = new ssm.StringParameter(
+      this,
+      'AccountWorkflowAdminArnParam',
+      {
+        parameterName: '/pashashapay/workflows/account/admin',
+        stringValue: accountWorkflowAdmin.stateMachineArn,
+      }
+    );
+    const customerPaymentStateMachineArnParam = new ssm.StringParameter(
+      this,
+      'CustomerPaymentStateMachineArnParam',
+      {
+        parameterName: '/pashashapay/workflows/customerPayment',
+        stringValue: customerPaymentStateMachine.stateMachineArn,
+      }
+    );
+
     // Default Docker build context to the monorepo root (one level above infra/).
     // Anchor the Docker build context to the monorepo root so required workspace files
     // (package.json, package-lock.json, packages/*, etc.) are always available regardless
@@ -710,17 +757,24 @@ export class PashashaPayBackendStack extends cdk.Stack {
             USER_ASSETS_BUCKET: userAssetsBucket.bucketName,
             COUNTER_TABLE_NAME: accountCounterTable.tableName,
             GUARD_PORTAL_BASE_URL: guardPortalBaseUrl,
-            SIGNUP_SNS_TOPIC_ARN: signupTopic.topicArn,
-            ACCOUNT_WORKFLOW_ARN: accountWorkflowCivil.stateMachineArn,
-            ACCOUNT_WORKFLOW_ARN_CIVIL: accountWorkflowCivil.stateMachineArn,
-            ACCOUNT_WORKFLOW_ARN_CUSTOMER: accountWorkflowCustomer.stateMachineArn,
-            ACCOUNT_WORKFLOW_ARN_ADMINISTRATOR: accountWorkflowAdmin.stateMachineArn,
-            CUSTOMER_PAYMENT_SFN_ARN: customerPaymentStateMachine.stateMachineArn,
             TENANT_WALLET_ID: process.env.TENANT_WALLET_ID ?? '',
-            SUPPORT_TOPIC_ARN: supportTopic.topicArn,
             SUPPORT_TABLE_NAME: supportTicketsTable.tableName,
           },
           secrets: {
+            SIGNUP_SNS_TOPIC_ARN: ecs.Secret.fromSsmParameter(signupTopicArnParam),
+            PAYMENTS_SNS_TOPIC_ARN: ecs.Secret.fromSsmParameter(paymentsTopicArnParam),
+            SUPPORT_TOPIC_ARN: ecs.Secret.fromSsmParameter(supportTopicArnParam),
+            ACCOUNT_WORKFLOW_ARN: ecs.Secret.fromSsmParameter(accountWorkflowCivilArnParam),
+            ACCOUNT_WORKFLOW_ARN_CIVIL: ecs.Secret.fromSsmParameter(accountWorkflowCivilArnParam),
+            ACCOUNT_WORKFLOW_ARN_CUSTOMER: ecs.Secret.fromSsmParameter(
+              accountWorkflowCustomerArnParam
+            ),
+            ACCOUNT_WORKFLOW_ARN_ADMINISTRATOR: ecs.Secret.fromSsmParameter(
+              accountWorkflowAdminArnParam
+            ),
+            CUSTOMER_PAYMENT_SFN_ARN: ecs.Secret.fromSsmParameter(
+              customerPaymentStateMachineArnParam
+            ),
             ECLIPSE_API_BASE: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_API_BASE'),
             ECLIPSE_TENANT_ID: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_TENANT_ID'),
             ECLIPSE_TENANT_IDENTITY: ecs.Secret.fromSecretsManager(

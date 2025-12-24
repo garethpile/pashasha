@@ -14,11 +14,13 @@ import { AdminUsersModule } from './admin-users/admin-users.module';
 import { PaymentsModule } from './payments/payments.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { SupportModule } from './support/support.module';
+import { validateEnv } from './config/env.schema';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      validate: validateEnv,
     }),
     ThrottlerModule.forRoot([
       {

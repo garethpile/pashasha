@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-unsafe-function-type, @typescript-eslint/no-empty-object-type, @typescript-eslint/no-redundant-type-constituents */
 // Temporary shim to satisfy @nestjs/core deep imports when package exports resolution drops @nestjs/common/interfaces.
 declare module '@nestjs/common/interfaces' {
   // Minimal type surface to satisfy @nestjs/core deep imports during Docker builds.
