@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import * as QRCode from 'qrcode';
+import { toBuffer as qrcodeToBuffer } from 'qrcode';
 import { CreateTipIntentDto } from './dto/create-tip-intent.dto';
 import { CreateSandboxTopupDto } from './dto/create-sandbox-topup.dto';
 import { CurrencyCode, GuardProfile, TipIntent } from '@pashashapay/contracts';
@@ -14,6 +14,16 @@ import { CivilServantEntity } from '../profiles/entities/civil-servant.entity';
 import { EclipseService } from '../payments/eclipse.service';
 import { PaymentsService } from '../payments/payments.service';
 import { PaymentWorkflowService } from '../payments/payment-workflow.service';
+
+type PaymentResponse = {
+  paymentId?: string;
+  id?: string;
+  completionUrl?: string | null;
+  redirectUrl?: string | null;
+  qrCodeUrl?: string | null;
+  status?: string;
+  [key: string]: unknown;
+};
 
 const MIN_TIP = 5;
 const MAX_TIP = 2000;
@@ -30,12 +40,26 @@ const guardPortalBase =
 export class GuardsService {
   private readonly logger = new Logger(GuardsService.name);
 
+  private readonly qrToBuffer: (
+    text: string,
+    options?: unknown,
+  ) => Promise<Buffer | string | Uint8Array> = qrcodeToBuffer as (
+    text: string,
+    options?: unknown,
+  ) => Promise<Buffer | string | Uint8Array>;
+
   constructor(
     private readonly repository: CivilServantRepository,
     private readonly eclipse: EclipseService,
     private readonly payments: PaymentsService,
     private readonly paymentWorkflow: PaymentWorkflowService,
   ) {}
+
+  private toStringValue(value: unknown): string | undefined {
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number') return value.toString();
+    return undefined;
+  }
 
   private mapEntityToProfile(
     entity: CivilServantEntity,
@@ -67,17 +91,23 @@ export class GuardsService {
     return this.mapEntityToProfile(entity, token);
   }
 
-  async generateGuardQrCode(token: string, skipValidation = false) {
+  async generateGuardQrCode(
+    token: string,
+    skipValidation = false,
+  ): Promise<{ buffer: Buffer; landingUrl: string }> {
     if (!skipValidation) {
       await this.findGuardByToken(token);
     }
     const landingUrl = guardPortalBase + encodeURIComponent(token);
-    const buffer = await QRCode.toBuffer(landingUrl, {
+    const rawBuffer: unknown = await this.qrToBuffer(landingUrl, {
       width: 512,
       margin: 1,
       type: 'png',
       errorCorrectionLevel: 'H',
     });
+    const buffer = Buffer.isBuffer(rawBuffer)
+      ? rawBuffer
+      : Buffer.from(rawBuffer as Uint8Array);
     return { buffer, landingUrl };
   }
 
@@ -125,12 +155,15 @@ export class GuardsService {
       theirReference: dto.theirReference,
       externalUniqueId: externalId,
     });
-    const paymentId = workflowResult?.paymentId ?? externalId;
+    const paymentId =
+      this.toStringValue(workflowResult?.paymentId ?? workflowResult?.id) ??
+      externalId;
     const authorizationUrl =
-      workflowResult?.authorizationUrl ||
-      workflowResult?.redirectUrl ||
-      workflowResult?.completionUrl ||
-      guardPortalBase + encodeURIComponent(dto.guardToken);
+      this.toStringValue(
+        workflowResult?.authorizationUrl ||
+          workflowResult?.redirectUrl ||
+          workflowResult?.completionUrl,
+      ) || guardPortalBase + encodeURIComponent(dto.guardToken);
 
     const intent: TipIntent = {
       intentId: paymentId,
@@ -179,7 +212,7 @@ export class GuardsService {
 
     const currency = (dto.currency ?? 'ZAR').toUpperCase();
 
-    let paymentResponse: Record<string, any>;
+    let paymentResponse: PaymentResponse;
     const externalId = `sandbox-${randomUUID().replace(/-/g, '')}`;
     try {
       paymentResponse = await this.eclipse.createPayment({
@@ -198,10 +231,9 @@ export class GuardsService {
       });
     } catch (err) {
       // If Eclipse rejects the request, log and return a synthetic success so the demo flow continues.
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       this.logger.warn(
-        `Eclipse sandbox topup failed; returning synthetic success. Error: ${
-          (err as Error)?.message ?? 'Unknown error'
-        }`,
+        `Eclipse sandbox topup failed; returning synthetic success. Error: ${errorMessage}`,
       );
       paymentResponse = {
         id: `sandbox_${randomUUID().replace(/-/g, '')}`,
@@ -209,7 +241,7 @@ export class GuardsService {
         completionUrl: null,
         redirectUrl: null,
         qrCodeUrl: null,
-        error: (err as Error)?.message ?? 'Unknown error',
+        error: errorMessage,
       };
     }
 

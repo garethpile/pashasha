@@ -24,12 +24,12 @@ export class SignupDto {
   @IsNotEmpty()
   familyName!: string;
 
-  @ValidateIf((dto) => !dto.phoneNumber)
+  @ValidateIf((dto: SignupDto) => !dto.phoneNumber)
   @IsEmail()
   @IsNotEmpty()
   email?: string;
 
-  @ValidateIf((dto) => !dto.email)
+  @ValidateIf((dto: SignupDto) => !dto.email)
   @IsPhoneNumber()
   phoneNumber?: string;
 
@@ -41,12 +41,12 @@ export class SignupDto {
   @IsEnum(SignupRole)
   role?: SignupRole;
 
-  @ValidateIf((dto) => dto.role !== SignupRole.CUSTOMER)
+  @ValidateIf((dto: SignupDto) => dto.role !== SignupRole.CUSTOMER)
   @IsString()
   @MinLength(2)
   occupation?: string;
 
-  @ValidateIf((dto) => dto.occupation?.toLowerCase() === 'other')
+  @ValidateIf((dto: SignupDto) => dto.occupation?.toLowerCase() === 'other')
   @IsString()
   @MinLength(2)
   otherOccupation?: string;

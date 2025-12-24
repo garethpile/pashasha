@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { SupportService } from './support.service';
+import type { SupportUser } from './support.service';
 
 @Controller('support')
 export class SupportController {
@@ -9,14 +10,14 @@ export class SupportController {
 
   @Roles('Customers', 'CivilServants', 'Administrators')
   @Get('prepare')
-  async prepare(@CurrentUser() user: any) {
+  async prepare(@CurrentUser() user: SupportUser) {
     return this.support.prepareTicket(user);
   }
 
   @Roles('Customers', 'CivilServants', 'Administrators')
   @Post('tickets')
   async createTicket(
-    @CurrentUser() user: any,
+    @CurrentUser() user: SupportUser,
     @Body()
     body: {
       message?: string;
@@ -34,7 +35,7 @@ export class SupportController {
   @Roles('Customers', 'CivilServants', 'Administrators')
   @Get('tickets')
   async listTickets(
-    @CurrentUser() user: any,
+    @CurrentUser() user: SupportUser,
     @Query('status') status?: string,
   ) {
     const items = await this.support.listTickets(user, status);
@@ -44,7 +45,7 @@ export class SupportController {
   @Roles('Customers', 'CivilServants', 'Administrators')
   @Get('tickets/:supportCode')
   async getTicket(
-    @CurrentUser() user: any,
+    @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
   ) {
     return this.support.getTicketForUser(user, supportCode);
@@ -53,7 +54,7 @@ export class SupportController {
   @Roles('Customers', 'CivilServants', 'Administrators')
   @Post('tickets/:supportCode/comments')
   async addComment(
-    @CurrentUser() user: any,
+    @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
     @Body() body: { message?: string },
   ) {
@@ -63,7 +64,7 @@ export class SupportController {
   @Roles('Customers', 'CivilServants', 'Administrators')
   @Post('tickets/:supportCode/status')
   async updateStatusUser(
-    @CurrentUser() user: any,
+    @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
     @Body() body: { status?: string },
   ) {
@@ -90,7 +91,7 @@ export class SupportController {
   @Roles('Administrators')
   @Post('admin/tickets/:supportCode/comments')
   async adminComment(
-    @CurrentUser() user: any,
+    @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
     @Body() body: { message?: string },
   ) {
@@ -100,7 +101,7 @@ export class SupportController {
   @Roles('Administrators')
   @Post('admin/tickets/:supportCode/status')
   async adminStatus(
-    @CurrentUser() user: any,
+    @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
     @Body() body: { status?: string },
   ) {

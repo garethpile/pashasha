@@ -21,10 +21,12 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
-    const user = request.user as { ['cognito:groups']?: string[] };
-    const groups = (user?.['cognito:groups'] ?? []).map((g) =>
-      g
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user?: { ['cognito:groups']?: string[] } }>();
+    const user = request.user;
+    const groups = (user?.['cognito:groups'] ?? []).map((group) =>
+      group
         .toString()
         .toLowerCase()
         .replace(/[\s_-]/g, ''),

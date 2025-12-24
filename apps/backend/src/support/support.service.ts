@@ -18,6 +18,60 @@ import {
 import { Inject } from '@nestjs/common';
 import { DYNAMO_DOCUMENT_CLIENT } from '../config/dynamo.config';
 
+export type SupportUser = {
+  sub?: string;
+  username?: string;
+  cognitoUsername?: string;
+  email?: string;
+  phone_number?: string;
+  phoneNumber?: string;
+  given_name?: string;
+  family_name?: string;
+  firstName?: string;
+  lastName?: string;
+  'custom:firstName'?: string;
+  'custom:lastName'?: string;
+  'cognito:groups'?: string[];
+};
+
+type SupportMetadata = {
+  email?: string;
+  phone?: string;
+  phoneNumber?: string;
+  accountNumber?: string;
+  walletId?: string;
+  profileType?: string;
+  firstName?: string;
+  familyName?: string;
+  [key: string]: unknown;
+};
+
+type SupportComment = {
+  id: string;
+  authorType: 'user' | 'admin';
+  authorId: string;
+  authorName: string;
+  message: string;
+  createdAt: string;
+};
+
+type SupportTicket = {
+  supportCode: string;
+  customerId: string;
+  status: 'ACTIVE' | 'CLOSED';
+  summary: string;
+  details?: string;
+  issueType: string;
+  createdAt: string;
+  updatedAt: string;
+  user: ReturnType<SupportService['buildUserInfo']>;
+  firstName?: string;
+  familyName?: string;
+  username?: string;
+  cognitoId?: string;
+  comments: SupportComment[];
+};
+
 @Injectable()
 export class SupportService {
   private readonly logger = new Logger(SupportService.name);
@@ -45,7 +99,7 @@ export class SupportService {
     this.client = new SNSClient({});
   }
 
-  private buildUserInfo(user: any, metadata?: Record<string, any>) {
+  private buildUserInfo(user: SupportUser, metadata?: SupportMetadata) {
     const givenName =
       metadata?.firstName ??
       user?.given_name ??
@@ -60,8 +114,12 @@ export class SupportService {
       sub: user?.sub,
       email: metadata?.email ?? user?.email,
       username: user?.username ?? user?.cognitoUsername,
-      groups: user?.['cognito:groups'],
-      phone: metadata?.phone ?? user?.phone_number ?? user?.phoneNumber,
+      groups: user?.['cognito:groups'] ?? [],
+      phone:
+        metadata?.phone ??
+        metadata?.phoneNumber ??
+        user?.phone_number ??
+        user?.phoneNumber,
       firstName: givenName,
       familyName,
       accountNumber: metadata?.accountNumber,
@@ -70,8 +128,8 @@ export class SupportService {
     };
   }
 
-  private isAdmin(user: any) {
-    const groups: string[] = user?.['cognito:groups'] ?? [];
+  private isAdmin(user: SupportUser) {
+    const groups = user?.['cognito:groups'] ?? [];
     return groups.some((g) => g?.toLowerCase() === 'administrators');
   }
 
@@ -81,7 +139,7 @@ export class SupportService {
     return upper === 'CLOSED' ? 'CLOSED' : 'ACTIVE';
   }
 
-  private userDisplayName(info: Record<string, any>) {
+  private userDisplayName(info: ReturnType<SupportService['buildUserInfo']>) {
     const parts = [info?.firstName, info?.familyName].filter(Boolean);
     if (parts.length) return parts.join(' ');
     return info?.email ?? info?.username ?? 'User';
@@ -102,13 +160,13 @@ export class SupportService {
     return `SUPP-${String(counter).padStart(8, '0')}`;
   }
 
-  async prepareTicket(user: any) {
+  async prepareTicket(user: SupportUser) {
     const supportCode = await this.nextSupportCode();
     const userInfo = this.buildUserInfo(user);
     return { supportCode, user: userInfo };
   }
 
-  private async persistTicket(ticket: Record<string, any>) {
+  private async persistTicket(ticket: SupportTicket): Promise<SupportTicket> {
     try {
       await this.dynamo.send(
         new PutCommand({
@@ -118,8 +176,13 @@ export class SupportService {
         }),
       );
       return ticket;
-    } catch (error: any) {
-      if (error?.name === 'ConditionalCheckFailedException') {
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'name' in error &&
+        error.name === 'ConditionalCheckFailedException'
+      ) {
         // extremely unlikely collision, try again with a new code
         const code = await this.nextSupportCode();
         return this.persistTicket({ ...ticket, supportCode: code });
@@ -129,7 +192,7 @@ export class SupportService {
   }
 
   async createTicket(
-    user: any,
+    user: SupportUser,
     payload: {
       message?: string;
       summary?: string;
@@ -137,7 +200,7 @@ export class SupportService {
       issueType?: string;
       status?: string;
       supportCode?: string;
-      metadata?: Record<string, any>;
+      metadata?: SupportMetadata;
     },
   ) {
     const summary = payload?.summary?.trim() ?? payload?.message?.trim();
@@ -150,10 +213,11 @@ export class SupportService {
     const supportCode = payload?.supportCode ?? (await this.nextSupportCode());
     const now = new Date().toISOString();
     const userInfo = this.buildUserInfo(user, payload?.metadata);
+    const customerId = user?.sub ?? user?.username ?? '';
 
-    const ticket = {
+    const ticket: SupportTicket = {
       supportCode,
-      customerId: user?.sub ?? user?.username,
+      customerId,
       status: this.normalizeStatus(payload?.status) ?? 'ACTIVE',
       summary,
       details,
@@ -169,7 +233,7 @@ export class SupportService {
         {
           id: `${supportCode}-initial`,
           authorType: 'user',
-          authorId: user?.sub ?? user?.username,
+          authorId: user?.sub ?? user?.username ?? '',
           authorName: this.userDisplayName(userInfo),
           message: summary,
           createdAt: now,
@@ -182,8 +246,8 @@ export class SupportService {
     return saved;
   }
 
-  async listTickets(user: any, status?: string) {
-    const customerId = user?.sub ?? user?.username;
+  async listTickets(user: SupportUser, status?: string) {
+    const customerId = user?.sub ?? user?.username ?? '';
     const normalizedStatus = this.normalizeStatus(status);
     const result = await this.dynamo.send(
       new QueryCommand({
@@ -194,13 +258,13 @@ export class SupportService {
       }),
     );
 
-    const items = (result.Items ?? []).filter((item) => {
+    const items = (result.Items ?? []).map((item) => item as SupportTicket);
+    const filtered = items.filter((item) => {
       if (!normalizedStatus) return true;
-      return (item as any).status === normalizedStatus;
+      return item.status === normalizedStatus;
     });
-
-    return items.sort(
-      (a: any, b: any) =>
+    return filtered.sort(
+      (a, b) =>
         new Date(b.updatedAt ?? b.createdAt ?? 0).getTime() -
         new Date(a.updatedAt ?? a.createdAt ?? 0).getTime(),
     );
@@ -217,7 +281,7 @@ export class SupportService {
         TableName: this.tableName,
       }),
     );
-    const items = (result.Items ?? []) as any[];
+    const items = (result.Items ?? []).map((item) => item as SupportTicket);
     const filtered = items.filter((item) => {
       if (normalizedStatus && item.status !== normalizedStatus) return false;
       if (
@@ -233,20 +297,20 @@ export class SupportService {
       return true;
     });
     return filtered.sort(
-      (a: any, b: any) =>
+      (a, b) =>
         new Date(b.updatedAt ?? b.createdAt ?? 0).getTime() -
         new Date(a.updatedAt ?? a.createdAt ?? 0).getTime(),
     );
   }
 
-  async getTicketForUser(user: any, supportCode: string) {
+  async getTicketForUser(user: SupportUser, supportCode: string) {
     const result = await this.dynamo.send(
       new GetCommand({
         TableName: this.tableName,
         Key: { supportCode },
       }),
     );
-    const ticket = result.Item as any;
+    const ticket = result.Item as SupportTicket | undefined;
     if (!ticket) {
       throw new NotFoundException('Ticket not found');
     }
@@ -263,14 +327,14 @@ export class SupportService {
         Key: { supportCode },
       }),
     );
-    const ticket = result.Item as any;
+    const ticket = result.Item as SupportTicket | undefined;
     if (!ticket) {
       throw new NotFoundException('Ticket not found');
     }
     return ticket;
   }
 
-  async addComment(user: any, supportCode: string, message?: string) {
+  async addComment(user: SupportUser, supportCode: string, message?: string) {
     const content = message?.trim();
     if (!content) {
       throw new BadRequestException('message is required');
@@ -281,10 +345,10 @@ export class SupportService {
       : await this.getTicketForUser(user, supportCode);
     const now = new Date().toISOString();
     const userInfo = this.buildUserInfo(user);
-    const comment = {
+    const comment: SupportComment = {
       id: `${supportCode}-${now}`,
       authorType: admin ? 'admin' : 'user',
-      authorId: user?.sub ?? user?.username,
+      authorId: user?.sub ?? user?.username ?? '',
       authorName: admin ? 'Pashasha Support' : this.userDisplayName(userInfo),
       message: content,
       createdAt: now,
@@ -327,7 +391,7 @@ export class SupportService {
     };
   }
 
-  async updateStatus(user: any, supportCode: string, status: string) {
+  async updateStatus(user: SupportUser, supportCode: string, status: string) {
     const normalized = this.normalizeStatus(status);
     if (!normalized) {
       throw new BadRequestException('status must be Active or Closed');
@@ -355,7 +419,7 @@ export class SupportService {
 
   async publishIssue(
     message: string,
-    userInfo: Record<string, any>,
+    userInfo: ReturnType<SupportService['buildUserInfo']>,
     supportCode?: string,
   ) {
     if (!this.topicArn) {

@@ -28,7 +28,9 @@ export class PaymentWorkflowService {
     this.client = new SFNClient({});
   }
 
-  async startCustomerPayment(input: CustomerPaymentInput): Promise<any> {
+  async startCustomerPayment(
+    input: CustomerPaymentInput,
+  ): Promise<Record<string, unknown>> {
     if (!this.arn) {
       throw new Error('Customer payment state machine not configured');
     }
@@ -41,7 +43,10 @@ export class PaymentWorkflowService {
     if (resp.status !== 'SUCCEEDED') {
       throw new Error(`Payment workflow failed: ${resp.status ?? 'unknown'}`);
     }
-    const output = resp.output ? JSON.parse(resp.output) : {};
-    return output;
+    const parsed: unknown = resp.output ? JSON.parse(resp.output) : {};
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+    return { raw: parsed } as Record<string, unknown>;
   }
 }

@@ -6,7 +6,9 @@ import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import * as crypto from 'crypto';
 import { CivilServantRepository } from '../profiles/civil-servant.repository';
+import { CivilServantEntity } from '../profiles/entities/civil-servant.entity';
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
+import type { EclipseWithdrawalRequest } from './eclipse.types';
 
 interface InitiatedPaymentInput {
   paymentId: string;
@@ -20,8 +22,85 @@ interface InitiatedPaymentInput {
   guardToken?: string;
   accountNumber?: string;
   paymentType?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
+
+type AmountLike =
+  | number
+  | string
+  | { value?: number; amount?: number; balance?: number }
+  | null
+  | undefined;
+
+type EclipseReservationRow = {
+  created?: string;
+  createdAt?: string;
+  transactionDate?: string;
+  transactionTime?: string;
+  date?: string;
+  reservationId?: string | number;
+  id?: string | number;
+  reservationID?: string | number;
+  reservation_id?: string | number;
+  uniqueId?: string | number;
+  uniqueReference?: string | number;
+  reference?: string | number;
+  paymentReference?: string | number;
+  description?: string;
+  memo?: string;
+  narration?: string;
+  amount?: AmountLike;
+  value?: AmountLike;
+  currency?: string;
+};
+
+type EclipsePaymentRow = EclipseReservationRow & {
+  paymentId?: string | number;
+  status?: string;
+  paymentStatus?: string;
+  transactionStatus?: string;
+  withdrawalStatus?: string;
+  state?: string;
+  paymentAmount?: AmountLike;
+  fee?: AmountLike;
+  processingFee?: AmountLike;
+  feeAmount?: AmountLike;
+  balance?: AmountLike;
+  runningBalance?: AmountLike;
+  availableBalance?: AmountLike;
+  currentBalance?: AmountLike;
+  balanceAmount?: AmountLike;
+  walletBalance?: AmountLike;
+  balanceAfter?: AmountLike;
+  balanceAfterTxn?: AmountLike;
+  externalUniqueId?: string | number;
+  customerId?: string | number;
+  civilServantId?: string | number;
+  guardId?: string | number;
+  metadata?: Record<string, unknown> & {
+    guardId?: string;
+    guardToken?: string;
+    accountNumber?: string;
+  };
+  associatedPaymentId?: string | number;
+  paymentType?: string;
+  type?: string;
+  walletId?: string | number;
+  destinationWalletId?: string | number;
+  raw?: Record<string, unknown>;
+  theirReference?: string;
+  customerName?: string;
+  firstName?: string;
+  familyName?: string;
+  guardToken?: string;
+  accountNumber?: string | number;
+};
+
+type WithdrawalMetadata = {
+  phoneNumber?: string;
+  deliverToPhone?: string;
+  [key: string]: unknown;
+};
 
 @Injectable()
 export class PaymentsService {
@@ -59,7 +138,7 @@ export class PaymentsService {
     return parts[3] || undefined;
   }
 
-  private parseAmount(value: any): number | undefined {
+  private parseAmount(value: AmountLike): number | undefined {
     if (value === null || value === undefined) return undefined;
     if (typeof value === 'number' && !Number.isNaN(value)) return value;
     if (typeof value === 'object') {
@@ -67,27 +146,87 @@ export class PaymentsService {
       if (value.amount !== undefined) return this.parseAmount(value.amount);
       if (value.balance !== undefined) return this.parseAmount(value.balance);
     }
-    const str = value?.toString?.() ?? '';
+    const str =
+      typeof value === 'string'
+        ? value
+        : typeof value === 'number'
+          ? value.toString()
+          : '';
     const match = str.match(/-?[\d.,]+/);
     if (!match) return undefined;
     const normalized = Number(match[0].replace(/,/g, ''));
     return Number.isNaN(normalized) ? undefined : normalized;
   }
 
-  private buildPaymentMessage(record: PaymentRecord, guard: any) {
+  private toStringValue(value: unknown): string | undefined {
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number') return value.toString();
+    return undefined;
+  }
+
+  private pickString(...values: Array<unknown>): string | undefined {
+    for (const value of values) {
+      const str = this.toStringValue(value);
+      if (str) return str;
+    }
+    return undefined;
+  }
+
+  private pickAmount(...values: AmountLike[]): number | undefined {
+    for (const value of values) {
+      const parsed = this.parseAmount(value);
+      if (parsed !== undefined) return parsed;
+    }
+    return undefined;
+  }
+
+  private getRawAmount(
+    raw: Record<string, unknown> | undefined,
+    ...keys: string[]
+  ): number | undefined {
+    for (const key of keys) {
+      const value = raw?.[key];
+      const parsed = this.parseAmount(value as AmountLike);
+      if (parsed !== undefined) return parsed;
+    }
+    return undefined;
+  }
+
+  private getRawString(
+    raw: Record<string, unknown> | undefined,
+    ...keys: string[]
+  ): string | undefined {
+    for (const key of keys) {
+      const value = raw?.[key];
+      const str = this.toStringValue(value);
+      if (str) return str;
+    }
+    return undefined;
+  }
+
+  private buildPaymentMessage(
+    record: PaymentRecord,
+    guard?: Partial<CivilServantEntity>,
+  ) {
     const amount = Number(record.amount ?? 0);
     const currency = (record.currency ?? 'ZAR').toUpperCase();
     const createdAt =
       record.createdAt ??
-      (record.raw as any)?.created ??
-      (record.raw as any)?.transactionDate ??
+      this.getRawString(
+        record.raw,
+        'created',
+        'transactionDate',
+        'transactionTime',
+        'date',
+      ) ??
       new Date().toISOString();
 
     const payer =
-      (record.metadata as any)?.theirReference ??
-      (record.metadata as any)?.customerName ??
-      record.accountNumber ??
-      'Customer';
+      this.pickString(
+        record.metadata?.theirReference,
+        record.metadata?.customerName,
+        record.accountNumber,
+      ) ?? 'Customer';
 
     const guardName =
       `${guard?.firstName ?? ''} ${guard?.familyName ?? ''}`.trim() ||
@@ -96,7 +235,7 @@ export class PaymentsService {
       [
         'Payment received',
         `From: ${payer}`,
-        `To: ${guardName} (${guard?.accountNumber ?? 'account'})`,
+        `To: ${guardName} (${this.toStringValue(guard?.accountNumber) ?? 'account'})`,
         `Amount: ${currency} ${amount.toFixed(2)}`,
         `Date: ${new Date(createdAt).toLocaleString('en-ZA')}`,
         `Reference: ${record.paymentId}`,
@@ -113,7 +252,9 @@ export class PaymentsService {
       (record.guardToken &&
         (await this.civilServants.findByGuardToken(record.guardToken))) ||
       (record.civilServantId &&
-        (await this.civilServants.get(record.civilServantId as string)));
+        (await this.civilServants.get(
+          this.toStringValue(record.civilServantId) ?? '',
+        )));
 
     if (!guard) {
       return;
@@ -177,13 +318,14 @@ export class PaymentsService {
     // Prefer live data from Eclipse, fall back to Dynamo if unavailable.
     try {
       if ((options?.statusFilter ?? 'successful') === 'pending') {
-        const reservations = await this.eclipse.listReservations({
-          walletId,
-          limit,
-          offset,
-        });
+        const reservations: EclipsePaymentRow[] =
+          (await this.eclipse.listReservations({
+            walletId,
+            limit,
+            offset,
+          })) ?? [];
         const now = new Date().toISOString();
-        const mapped: PaymentRecord[] = (reservations ?? []).map((r: any) => {
+        const mapped: PaymentRecord[] = reservations.map((r) => {
           const created =
             r.created ??
             r.createdAt ??
@@ -207,7 +349,7 @@ export class PaymentsService {
           const amount = this.parseAmount(r.amount ?? r.value ?? 0) ?? 0;
           return {
             paymentId: `reservation-${reservationId ?? uniqueId ?? crypto.randomUUID()}`,
-            externalId: uniqueId ?? null,
+            externalId: this.toStringValue(uniqueId) ?? null,
             status: 'PENDING',
             amount: Number.isNaN(amount) ? 0 : amount,
             currency: r.currency ?? 'ZAR',
@@ -215,7 +357,7 @@ export class PaymentsService {
             walletId,
             raw: {
               ...r,
-              paymentReference: uniqueId ?? reservationId,
+              paymentReference: this.toStringValue(uniqueId ?? reservationId),
               description,
             },
             source: 'reconcile' as const,
@@ -229,21 +371,17 @@ export class PaymentsService {
       }
 
       const includePending = (options?.statusFilter ?? 'successful') === 'all';
-      const pendingReservations: PaymentRecord[] = includePending
-        ? (() => {
-            const now = new Date().toISOString();
-            return [] as PaymentRecord[];
-          })()
-        : [];
+      const pendingReservations: PaymentRecord[] = [];
       if (includePending) {
-        const reservations = await this.eclipse.listReservations({
-          walletId,
-          limit,
-          offset,
-        });
+        const reservations: EclipsePaymentRow[] =
+          (await this.eclipse.listReservations({
+            walletId,
+            limit,
+            offset,
+          })) ?? [];
         const now = new Date().toISOString();
         pendingReservations.push(
-          ...(reservations ?? []).map((r: any) => {
+          ...reservations.map((r) => {
             const created =
               r.created ??
               r.createdAt ??
@@ -267,7 +405,7 @@ export class PaymentsService {
             const amount = this.parseAmount(r.amount ?? r.value ?? 0) ?? 0;
             return {
               paymentId: `reservation-${reservationId ?? uniqueId ?? crypto.randomUUID()}`,
-              externalId: uniqueId ?? null,
+              externalId: this.toStringValue(uniqueId) ?? null,
               status: 'PENDING',
               amount: Number.isNaN(amount) ? 0 : amount,
               currency: r.currency ?? 'ZAR',
@@ -275,7 +413,7 @@ export class PaymentsService {
               walletId,
               raw: {
                 ...r,
-                paymentReference: uniqueId ?? reservationId,
+                paymentReference: this.toStringValue(uniqueId ?? reservationId),
                 description,
               },
               source: 'reconcile' as const,
@@ -292,15 +430,16 @@ export class PaymentsService {
       // Fetch a larger window (capped) and page locally after sorting/expanding.
       const target = Math.max(1, limit) + Math.max(0, offset);
       const fetchLimit = Math.min(200, Math.max(50, target * 5));
-      const eclipsePayments = await this.eclipse.listPayments({
-        walletId,
-        limit: fetchLimit,
-        offset: 0,
-      });
+      const eclipsePayments: EclipsePaymentRow[] =
+        (await this.eclipse.listPayments({
+          walletId,
+          limit: fetchLimit,
+          offset: 0,
+        })) ?? [];
       // Rely on Eclipse listPayments wallet scoping; avoid post-filtering that can drop rows
       // (some withdrawals/reservations do not echo walletId on the row).
-      const normalized: PaymentRecord[] = (eclipsePayments ?? [])
-        .map((p: any) => {
+      const normalized: PaymentRecord[] = eclipsePayments
+        .map((p) => {
           const status =
             p.status ??
             p.paymentStatus ??
@@ -384,9 +523,8 @@ export class PaymentsService {
         expanded.push(rec);
         const fee =
           rec.feeAmount ??
-          Number(
-            (rec as any)?.raw?.fee ?? (rec as any)?.raw?.processingFee ?? 0,
-          );
+          this.getRawAmount(rec.raw, 'fee', 'processingFee') ??
+          0;
         if (fee && fee > 0) {
           expanded.push({
             ...rec,
@@ -479,7 +617,8 @@ export class PaymentsService {
       expanded.push(rec);
       const fee =
         rec.feeAmount ??
-        Number((rec as any)?.raw?.fee ?? (rec as any)?.raw?.processingFee ?? 0);
+        this.getRawAmount(rec.raw, 'fee', 'processingFee') ??
+        0;
       if (fee && fee > 0) {
         expanded.push({
           ...rec,
@@ -534,19 +673,25 @@ export class PaymentsService {
     await this.repo.upsert(record);
   }
 
-  async recordFromWebhook(payload: any) {
-    const paymentId =
-      payload?.paymentId?.toString() ??
-      payload?.id?.toString() ??
-      payload?.paymentReference?.toString();
+  async recordFromWebhook(payload: EclipsePaymentRow) {
+    const paymentId = this.pickString(
+      payload?.paymentId,
+      payload?.id,
+      payload?.paymentReference,
+    );
     if (!paymentId) {
       this.logger.warn('Webhook payload missing paymentId', payload);
       return;
     }
 
     const amount =
-      this.parseAmount(payload?.amount ?? payload?.paymentAmount ?? 0) ?? 0;
-    const fee = this.parseAmount(payload?.fee ?? payload?.feeAmount ?? 0) ?? 0;
+      this.pickAmount(payload?.amount, payload?.paymentAmount, 0) ?? 0;
+    const fee =
+      this.pickAmount(
+        payload?.fee,
+        payload?.feeAmount,
+        payload?.processingFee,
+      ) ?? 0;
     const record: PaymentRecord = {
       paymentId,
       externalId:
@@ -557,13 +702,13 @@ export class PaymentsService {
       feeAmount: fee || undefined,
       paymentType: payload?.paymentType,
       walletId:
-        payload?.walletId?.toString?.() ??
-        payload?.destinationWalletId?.toString?.(),
-      customerId: payload?.customerId?.toString?.(),
+        this.toStringValue(payload?.walletId) ??
+        this.toStringValue(payload?.destinationWalletId),
+      customerId: this.toStringValue(payload?.customerId),
       civilServantId: payload?.metadata?.guardId ?? payload?.guardId,
       guardToken: payload?.metadata?.guardToken,
       accountNumber: payload?.metadata?.accountNumber,
-      associatedPaymentId: payload?.associatedPaymentId?.toString?.(),
+      associatedPaymentId: this.toStringValue(payload?.associatedPaymentId),
       metadata: payload?.metadata,
       raw: payload,
       source: 'webhook',
@@ -627,31 +772,37 @@ export class PaymentsService {
 
   async reconcileRecent(days = 7) {
     const since = Date.now() - days * 24 * 60 * 60 * 1000;
-    const payments = await this.eclipse.listPayments();
+    const payments: EclipsePaymentRow[] =
+      (await this.eclipse.listPayments()) ?? [];
     let synced = 0;
     for (const p of payments) {
-      const createdTs = p.created ? Date.parse(p.created) : Date.now();
+      const createdValue = this.toStringValue(p.created);
+      const createdTs = createdValue ? Date.parse(createdValue) : Date.now();
       if (createdTs < since) continue;
-      const amount = Number(p.amount ?? p.paymentAmount ?? 0);
-      const fee = Number(p.fee ?? 0);
+      const amount = this.pickAmount(p.amount, p.paymentAmount, 0) ?? 0;
+      const fee = this.pickAmount(p.fee, p.feeAmount, p.processingFee, 0) ?? 0;
       const record: PaymentRecord = {
-        paymentId: `${p.paymentId ?? p.id ?? p.paymentReference}`,
-        externalId: p.externalUniqueId ?? p.paymentReference ?? null,
+        paymentId:
+          this.pickString(p.paymentId, p.id, p.paymentReference) ??
+          `payment-${Date.now()}`,
+        externalId:
+          this.pickString(p.externalUniqueId, p.paymentReference) ?? null,
         status: p.status ?? p.paymentStatus ?? 'UNKNOWN',
         amount,
         currency: p.currency ?? 'ZAR',
         feeAmount: fee || undefined,
         paymentType: p.paymentType,
-        walletId: p.walletId?.toString?.(),
-        customerId: p.customerId?.toString?.(),
+        walletId: this.toStringValue(p.walletId),
+        customerId: this.toStringValue(p.customerId),
         civilServantId: p.metadata?.guardId ?? p.guardId,
         guardToken: p.metadata?.guardToken,
         accountNumber: p.metadata?.accountNumber,
-        associatedPaymentId: p.associatedPaymentId?.toString?.(),
+        associatedPaymentId: this.toStringValue(p.associatedPaymentId),
         metadata: p.metadata,
         raw: p,
         source: 'reconcile',
-        createdAt: p.created ?? new Date(createdTs).toISOString(),
+        createdAt:
+          this.toStringValue(p.created) ?? new Date(createdTs).toISOString(),
         updatedAt: new Date().toISOString(),
       };
       await this.repo.upsert(record);
@@ -665,8 +816,8 @@ export class PaymentsService {
     civilServantId: string;
     amount: number;
     currency: string;
-    withdrawalType: string;
-    metadata?: Record<string, any>;
+    withdrawalType: EclipseWithdrawalRequest['type'];
+    metadata?: WithdrawalMetadata;
   }) {
     const {
       walletId,
@@ -677,33 +828,37 @@ export class PaymentsService {
       metadata,
     } = params;
 
-    const withdrawalPayload: any = {
-      type: withdrawalType as any,
+    const withdrawalPayload: EclipseWithdrawalRequest & {
+      externalUniqueId?: string;
+      deliverToPhone?: string;
+      amount: EclipseWithdrawalRequest['amount'] | string;
+    } = {
+      type: withdrawalType,
       walletId,
       amount: { currency, value: amount },
       metadata,
     };
     if (withdrawalType === 'ZA_PAYCORP_ATM') {
-      const sanitizedPhone = (
-        metadata?.phoneNumber ??
-        metadata?.deliverToPhone ??
-        ''
-      ).replace(/\D/g, '');
-      withdrawalPayload.amount = amount.toString();
+      const phone =
+        this.toStringValue(metadata?.phoneNumber) ??
+        this.toStringValue(metadata?.deliverToPhone) ??
+        '';
+      const sanitizedPhone = phone.replace(/\D/g, '');
       withdrawalPayload.deliverToPhone = sanitizedPhone;
       withdrawalPayload.externalUniqueId = randomUUID();
     }
 
-    const withdrawal = await this.eclipse.createWithdrawal(withdrawalPayload);
+    const withdrawal = (await this.eclipse.createWithdrawal(
+      withdrawalPayload,
+    )) as Record<string, unknown> | undefined;
     const withdrawalId =
-      withdrawal?.withdrawalId?.toString() ??
-      withdrawal?.id?.toString() ??
+      this.pickString(withdrawal?.withdrawalId, withdrawal?.id) ??
       `withdraw-${Date.now()}`;
 
     // Record withdrawal as negative amount
     await this.repo.upsert({
       paymentId: withdrawalId,
-      status: withdrawal?.status ?? 'PENDING',
+      status: this.toStringValue(withdrawal?.status) ?? 'PENDING',
       amount: -Math.abs(amount),
       currency,
       paymentType: 'WITHDRAWAL',

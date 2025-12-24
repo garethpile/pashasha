@@ -82,8 +82,9 @@ export class CivilServantRepository {
       if (item) {
         return item;
       }
-    } catch (error: any) {
-      if (error?.name !== 'ResourceNotFoundException') {
+    } catch (error: unknown) {
+      const name = (error as { name?: string })?.name;
+      if (name !== 'ResourceNotFoundException') {
         throw error;
       }
     }

@@ -4,6 +4,7 @@ import {
   AdminCreateUserCommand,
   AdminDeleteUserCommand,
   AdminUpdateUserAttributesCommand,
+  AdminCreateUserCommandOutput,
   CognitoIdentityProviderClient,
   ListUsersInGroupCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
@@ -77,8 +78,9 @@ export class UserProvisioningService {
           Username: username,
         }),
       );
-    } catch (error: any) {
-      if (error?.name === 'UserNotFoundException') {
+    } catch (error: unknown) {
+      const cognitoError = error as { name?: string };
+      if (cognitoError?.name === 'UserNotFoundException') {
         return;
       }
       throw error;
@@ -125,7 +127,7 @@ export class UserProvisioningService {
     );
   }
 
-  private extractSub(response: any) {
+  private extractSub(response: AdminCreateUserCommandOutput) {
     const attributes: Array<{ Name?: string; Value?: string }> =
       response?.User?.Attributes ?? [];
     const sub = attributes.find((attr) => attr.Name === 'sub')?.Value;

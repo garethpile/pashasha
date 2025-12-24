@@ -7,18 +7,22 @@ import {
   HttpStatus,
   Logger,
   Post,
-  RawBodyRequest,
   Req,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { RawBodyRequest } from '@nestjs/common';
+import type { Request } from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
 import { Public } from '../auth/public.decorator';
 import { EclipseService } from './eclipse.service';
-import {
+import type {
   EclipsePaymentRequest,
   EclipseWithdrawalRequest,
   EclipseWalletRequest,
 } from './eclipse.types';
 import { PaymentsService } from './payments.service';
+
+type JsonRequest = Request<ParamsDictionary, unknown, Record<string, unknown>>;
+type RawJsonRequest = RawBodyRequest<JsonRequest>;
 
 @Controller()
 export class PaymentsController {
@@ -36,9 +40,8 @@ export class PaymentsController {
   }
 
   @Get('payments/eclipse/:paymentId')
-  async getPayment(@Req() req: Request) {
-    // Support either path param or body for convenience.
-    const paymentId = (req.params as any)?.paymentId;
+  async getPayment(@Req() req: Request<{ paymentId: string }>) {
+    const paymentId = req.params.paymentId;
     return this.eclipse.getPayment(paymentId);
   }
 
@@ -58,30 +61,26 @@ export class PaymentsController {
   @Post('webhooks/eclipse/payments')
   @HttpCode(HttpStatus.OK)
   async handlePaymentWebhook(
-    @Req() req: RawBodyRequest<Request>,
+    @Req() req: RawJsonRequest,
     @Headers('x-signature') signature?: string,
   ) {
-    const rawBody =
-      ((req as any).rawBody?.toString() ??
-      (req as any).bodyText ??
-      (req as any).text ??
-      (req as any).body)
-        ? JSON.stringify((req as any).body)
-        : '';
+    const rawBody = req.rawBody
+      ? req.rawBody.toString()
+      : JSON.stringify(req.body ?? {});
     const ok = this.eclipse.verifyWebhookSignature(rawBody, signature);
     const meta = {
       signaturePresent: !!signature,
       verified: ok,
       rawLength: rawBody.length,
-      contentType: (req.headers as any)['content-type'],
-      contentLength: (req.headers as any)['content-length'],
+      contentType: req.headers['content-type'],
+      contentLength: req.headers['content-length'],
     };
     const snippet = rawBody.length > 0 ? rawBody.slice(0, 512) : '<empty>';
     this.logger.log(
       `Eclipse webhook received: ${JSON.stringify(meta)} rawSnippet=${snippet}`,
     );
     // Temporarily accept unsigned/failed signatures to debug payload arrival.
-    const payload = (req as any).body ?? {};
+    const payload = req.body ?? {};
     await this.payments.recordFromWebhook(payload);
     return { accepted: ok, signatureVerified: ok };
   }
@@ -89,11 +88,11 @@ export class PaymentsController {
   @Public()
   @Post('webhooks/eclipse/withdrawals')
   @HttpCode(HttpStatus.OK)
-  async handleWithdrawalWebhook(
-    @Req() req: RawBodyRequest<Request>,
+  handleWithdrawalWebhook(
+    @Req() req: RawJsonRequest,
     @Headers('x-signature') signature?: string,
   ) {
-    const rawBody = (req as any).rawBody?.toString() ?? '';
+    const rawBody = req.rawBody ? req.rawBody.toString() : '';
     const ok = this.eclipse.verifyWebhookSignature(rawBody, signature);
     if (!ok) {
       return { accepted: false };
@@ -112,8 +111,8 @@ export class PaymentsController {
    */
   @Post('payments/webhook/test-signature')
   @HttpCode(HttpStatus.OK)
-  async testSignature(
-    @Body('body') body: any,
+  testSignature(
+    @Body('body') body?: Record<string, unknown>,
     @Body('signature') signature?: string,
   ) {
     const raw = body ? JSON.stringify(body) : '';

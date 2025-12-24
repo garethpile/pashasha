@@ -6,6 +6,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { Public } from './public.decorator';
 import { SignupDto } from './dto/signup.dto';
 import { SignupService } from './signup.service';
@@ -21,12 +22,14 @@ export class SignupController {
   ) {}
 
   @Public()
+  @Throttle({ short: { limit: 5, ttl: 60 } })
   @Post('signup')
   async handleSignup(@Body() dto: SignupDto) {
     return this.signup.signup(dto);
   }
 
   @Public()
+  @Throttle({ short: { limit: 10, ttl: 60 } })
   @Get('check-email')
   async checkEmail(@Query('email') email: string) {
     const value = email?.trim();

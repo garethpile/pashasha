@@ -60,11 +60,21 @@ export class EclipseService {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: body.toString(),
       });
-      const data = (await response.json()) as Record<string, any>;
+      const data = this.ensureRecord(await response.json());
+
+      const accessToken =
+        typeof data.access_token === 'string' ? data.access_token : '';
+      const expiresRaw =
+        typeof data.expires_in === 'number'
+          ? data.expires_in
+          : Number(data.expires_in ?? 300);
+      const expiresMs = Number.isFinite(expiresRaw)
+        ? expiresRaw * 1000
+        : 300 * 1000;
 
       this.token = {
-        accessToken: data.access_token,
-        expiresAt: now + (data.expires_in ?? 300) * 1000,
+        accessToken,
+        expiresAt: now + expiresMs,
       };
       return this.token.accessToken;
     }
@@ -84,14 +94,15 @@ export class EclipseService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const data = (await response.json()) as Record<string, any>;
+    const data = this.ensureRecord(await response.json());
 
     // The login endpoint returns { headerName, headerValue, expiresEpochSecs, ... }
-    const bearer = data?.headerValue as string;
+    const bearer = typeof data.headerValue === 'string' ? data.headerValue : '';
     const accessToken = bearer?.replace(/^Bearer\s+/i, '').trim();
-    const expiresAt = data?.expiresEpochSecs
-      ? Number(data.expiresEpochSecs) * 1000
-      : now + 5 * 60 * 1000;
+    const expiresAt =
+      typeof data.expiresEpochSecs === 'number'
+        ? data.expiresEpochSecs * 1000
+        : now + 5 * 60 * 1000;
 
     if (!accessToken) {
       throw new Error('Failed to obtain Eclipse sandbox token via login');
@@ -136,19 +147,7 @@ export class EclipseService {
       body: JSON.stringify(payload),
     });
     const bodyText = await response.text();
-
-    let data: Record<string, any> = {};
-    if (bodyText) {
-      try {
-        data = JSON.parse(bodyText);
-      } catch (err) {
-        this.logger.error(
-          `Eclipse createPayment: failed to parse response JSON (status ${response.status})`,
-          bodyText,
-        );
-        data = { parseError: 'invalid-json', raw: bodyText };
-      }
-    }
+    const data = bodyText ? this.tryParseObject(bodyText) : {};
 
     if (!response.ok) {
       this.logger.error(
@@ -195,18 +194,7 @@ export class EclipseService {
     this.logger.log(`Eclipse listPayments -> ${url}`);
     const response = await fetch(url, { headers });
     const bodyText = await response.text();
-    let data: Record<string, any>[] = [];
-    if (bodyText) {
-      try {
-        data = JSON.parse(bodyText) as Record<string, any>[];
-      } catch (err) {
-        this.logger.error(
-          `Eclipse listPayments: failed to parse response JSON (status ${response.status})`,
-          bodyText,
-        );
-        data = [];
-      }
-    }
+    const data = bodyText ? this.tryParseArray(bodyText) : [];
 
     if (!response.ok) {
       this.logger.error(
@@ -258,15 +246,14 @@ export class EclipseService {
         return [];
       }
 
-      try {
-        return JSON.parse(bodyText) as Record<string, any>[];
-      } catch (err) {
+      const parsed = this.tryParseArray(bodyText);
+      if (parsed.length === 0) {
         this.logger.error(
           `Eclipse listReservations: failed to parse response JSON (status ${response.status})`,
           bodyText,
         );
-        return [];
       }
+      return parsed;
     }
 
     throw new Error(
@@ -310,7 +297,7 @@ export class EclipseService {
       const body = await response.text();
       throw new Error(`Eclipse transfer failed: ${response.status} ${body}`);
     }
-    return (await response.json()) as Record<string, any>;
+    return this.ensureRecord(await response.json());
   }
 
   /**
@@ -325,18 +312,7 @@ export class EclipseService {
     this.logger.log(`Eclipse getPayment -> ${url}`);
     const response = await fetch(url, { headers });
     const bodyText = await response.text();
-    let data: Record<string, any> = {};
-    if (bodyText) {
-      try {
-        data = JSON.parse(bodyText);
-      } catch (err) {
-        this.logger.error(
-          `Eclipse getPayment: failed to parse response JSON (status ${response.status})`,
-          bodyText,
-        );
-        data = { parseError: 'invalid-json', raw: bodyText };
-      }
-    }
+    const data = bodyText ? this.tryParseObject(bodyText) : {};
 
     if (!response.ok) {
       this.logger.error(
@@ -361,8 +337,9 @@ export class EclipseService {
     const payload = {
       ...request,
       amount:
-        typeof (request as any)?.amount === 'number'
-          ? { currency: 'ZAR', value: (request as any).amount }
+        typeof (request as EclipseWithdrawalRequest | undefined)?.amount ===
+        'number'
+          ? { currency: 'ZAR', value: Number(request.amount) }
           : request.amount,
       callbackUrl: this.cfg.callbackBase
         ? `${this.cfg.callbackBase.replace(/\/$/, '')}/webhooks/eclipse/withdrawals`
@@ -380,17 +357,7 @@ export class EclipseService {
       body: JSON.stringify(payload),
     });
     const bodyText = await response.text();
-    let data: Record<string, any> | null = null;
-    if (bodyText) {
-      try {
-        data = JSON.parse(bodyText);
-      } catch (err) {
-        this.logger.error(
-          `Eclipse createWithdrawal: failed to parse response JSON (status ${response.status})`,
-          bodyText,
-        );
-      }
-    }
+    const data = bodyText ? this.tryParseObject(bodyText) : {};
     if (!response.ok) {
       this.logger.error(
         `Eclipse createWithdrawal failed: status=${response.status} ${response.statusText || ''} body=${
@@ -426,7 +393,7 @@ export class EclipseService {
       headers,
       body: JSON.stringify(request),
     });
-    return (await response.json()) as Record<string, any>;
+    return this.ensureRecord(await response.json());
   }
 
   async createCustomer(request: EclipseCustomerRequest) {
@@ -440,7 +407,7 @@ export class EclipseService {
       headers,
       body: JSON.stringify(request),
     });
-    return (await response.json()) as Record<string, any>;
+    return this.ensureRecord(await response.json());
   }
 
   /**
@@ -469,9 +436,9 @@ export class EclipseService {
     }
     const text = await response.text();
     try {
-      return text ? (JSON.parse(text) as Record<string, any>) : {};
+      return text ? this.tryParseObject(text) : {};
     } catch {
-      return { raw: text };
+      return { raw: text } as Record<string, unknown>;
     }
   }
 
@@ -489,7 +456,7 @@ export class EclipseService {
       headers,
       body: JSON.stringify(request),
     });
-    return (await response.json()) as Record<string, any>;
+    return this.ensureRecord(await response.json());
   }
 
   async getWallet(walletId: string | number) {
@@ -503,7 +470,7 @@ export class EclipseService {
       const body = await response.text();
       throw new Error(`Eclipse getWallet failed: ${response.status} ${body}`);
     }
-    return (await response.json()) as Record<string, any>;
+    return this.ensureRecord(await response.json());
   }
 
   /**
@@ -547,6 +514,41 @@ export class EclipseService {
         `Webhook signature verification error: ${(err as Error).message}`,
       );
       return false;
+    }
+  }
+
+  private ensureRecord(value: unknown): Record<string, unknown> {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+      return value as Record<string, unknown>;
+    }
+    return {};
+  }
+
+  private ensureArrayOfRecords(value: unknown): Record<string, unknown>[] {
+    if (!Array.isArray(value)) {
+      return [];
+    }
+    return value.filter(
+      (item): item is Record<string, unknown> =>
+        Boolean(item) && typeof item === 'object' && !Array.isArray(item),
+    );
+  }
+
+  private tryParseObject(text: string): Record<string, unknown> {
+    try {
+      const parsed: unknown = JSON.parse(text);
+      return this.ensureRecord(parsed);
+    } catch {
+      return {};
+    }
+  }
+
+  private tryParseArray(text: string): Record<string, unknown>[] {
+    try {
+      const parsed: unknown = JSON.parse(text);
+      return this.ensureArrayOfRecords(parsed);
+    } catch {
+      return [];
     }
   }
 }

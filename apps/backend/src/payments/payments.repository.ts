@@ -4,7 +4,6 @@ import {
   DynamoDBDocumentClient,
   QueryCommand,
   PutCommand,
-  ScanCommand,
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb';
 import { DYNAMO_DOCUMENT_CLIENT } from '../config/dynamo.config';

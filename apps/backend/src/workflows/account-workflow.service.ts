@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
-import { randomUUID } from 'crypto';
 
 type AccountType = 'customer' | 'civil-servant' | 'administrator';
 
@@ -29,6 +28,8 @@ interface CognitoIdentityLike {
   email?: string;
   given_name?: string;
   family_name?: string;
+  firstName?: string;
+  familyName?: string;
 }
 
 export interface AccountWorkflowInput {
@@ -170,30 +171,33 @@ export class AccountWorkflowService {
     const profile = payload.profile ?? {};
     const cognito = payload.cognitoUser ?? {};
 
-    const firstName =
-      payload.firstName ??
-      profile.firstName ??
-      (cognito as any).given_name ??
-      (cognito as any).firstName;
-    const familyName =
-      payload.familyName ??
-      profile.familyName ??
-      (cognito as any).family_name ??
-      (cognito as any).familyName;
+    const firstName = this.pickString(
+      payload.firstName,
+      profile.firstName,
+      cognito.given_name,
+      cognito.firstName,
+    );
+    const familyName = this.pickString(
+      payload.familyName,
+      profile.familyName,
+      cognito.family_name,
+      cognito.familyName,
+    );
 
-    const cognitoUsername =
-      payload.cognitoUsername ??
-      profile.cognitoUsername ??
-      cognito.username ??
-      (cognito as any).userName ??
-      undefined;
+    const cognitoUsername = this.pickString(
+      payload.cognitoUsername,
+      profile.cognitoUsername,
+      cognito.username,
+      cognito.userName,
+    );
 
-    const cognitoSub =
-      payload.cognitoSub ??
-      profile.cognitoSub ??
-      profile.customerId ??
-      profile.civilServantId ??
-      cognito.sub;
+    const cognitoSub = this.pickString(
+      payload.cognitoSub,
+      profile.cognitoSub,
+      profile.customerId,
+      profile.civilServantId,
+      cognito.sub,
+    );
 
     const profileId =
       payload.profileId?.trim() ??
@@ -249,5 +253,9 @@ export class AccountWorkflowService {
       eclipseWalletId: payload.eclipseWalletId,
       step: 'deleteCognitoUser',
     };
+  }
+
+  private pickString(...values: Array<unknown>): string | undefined {
+    return values.find((value) => typeof value === 'string');
   }
 }

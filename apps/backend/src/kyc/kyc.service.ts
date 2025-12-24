@@ -8,8 +8,6 @@ import { randomUUID } from 'crypto';
 import { StorageService } from '../storage/storage.service';
 import { CustomerRepository } from '../profiles/customer.repository';
 import { CivilServantRepository } from '../profiles/civil-servant.repository';
-import { CustomerEntity } from '../profiles/entities/customer.entity';
-import { CivilServantEntity } from '../profiles/entities/civil-servant.entity';
 import {
   KycDocumentRecord,
   KycDocumentType,

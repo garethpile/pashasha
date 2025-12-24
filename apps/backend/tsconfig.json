@@ -11,7 +11,8 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "types": ["node"],
+    "types": ["node", "jest"],
+    "isolatedModules": true,
     "paths": {
       "@pashashapay/contracts": ["../../packages/contracts/src/index.ts"]
     }

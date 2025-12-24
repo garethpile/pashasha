@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { GuardsModule } from './guards/guards.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
@@ -18,6 +20,13 @@ import { SupportModule } from './support/support.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([
+      {
+        name: 'short',
+        ttl: 60,
+        limit: 10,
+      },
+    ]),
     DynamoConfigModule,
     AuthModule,
     ProfilesModule,
@@ -30,6 +39,12 @@ import { SupportModule } from './support/support.module';
     WorkflowsModule,
     SupportModule,
     HealthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
 })
 export class AppModule {}

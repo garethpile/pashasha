@@ -91,7 +91,8 @@ export class AdminUsersController {
 
   @Roles('Administrators')
   @Delete('customers/:customerId')
-  async deleteCustomer(@Param('customerId') customerId: string) {
+  deleteCustomer(@Param('customerId') _customerId: string) {
+    void _customerId;
     throw new Error(
       'Deletion via admin API is currently disabled while workflows own lifecycle.',
     );
@@ -99,7 +100,8 @@ export class AdminUsersController {
 
   @Roles('Administrators')
   @Delete('civil-servants/:civilServantId')
-  async deleteCivilServant(@Param('civilServantId') civilServantId: string) {
+  deleteCivilServant(@Param('civilServantId') _civilServantId: string) {
+    void _civilServantId;
     throw new Error(
       'Deletion via admin API is currently disabled while workflows own lifecycle.',
     );

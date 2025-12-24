@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { CreateTipIntentDto } from './dto/create-tip-intent.dto';
 import { GuardsService } from './guards.service';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { Public } from '../auth/public.decorator';
 import { CreateSandboxTopupDto } from './dto/create-sandbox-topup.dto';
 

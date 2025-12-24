@@ -21,6 +21,11 @@ export class CivilServantsService {
     private readonly payments: PaymentsService,
   ) {}
 
+  private getMetadata(value: unknown): Record<string, unknown> | undefined {
+    if (!value || typeof value !== 'object') return undefined;
+    return value as Record<string, unknown>;
+  }
+
   async create(dto: CreateCivilServantDto) {
     const now = new Date().toISOString();
     const entity = {
@@ -80,6 +85,8 @@ export class CivilServantsService {
     const { firstName, familyName, occupation, site } = filters;
     const normalize = (value?: string | null) =>
       (value ?? '').toString().toLowerCase();
+    const pickString = (value: unknown) =>
+      typeof value === 'string' ? value : undefined;
 
     return all
       .filter((item) => Boolean(item.guardToken))
@@ -97,14 +104,17 @@ export class CivilServantsService {
           return false;
         }
         if (occupation) {
-          const occ =
-            (item as any)?.occupation ?? (item as any)?.metadata?.occupation;
-          if (!normalize(occ).includes(normalize(occupation))) {
+          const metadata = this.getMetadata(
+            (item as unknown as { metadata?: unknown }).metadata,
+          );
+          const occupationValue =
+            pickString(item.occupation) ?? pickString(metadata?.occupation);
+          if (!normalize(occupationValue).includes(normalize(occupation))) {
             return false;
           }
         }
         if (site) {
-          const primarySite = (item as any)?.primarySite ?? item.address;
+          const primarySite = pickString(item.primarySite) ?? item.address;
           if (!normalize(primarySite).includes(normalize(site))) {
             return false;
           }
@@ -116,10 +126,14 @@ export class CivilServantsService {
         firstName: item.firstName,
         familyName: item.familyName,
         occupation:
-          (item as any)?.occupation ??
-          (item as any)?.metadata?.occupation ??
+          pickString(item.occupation) ??
+          pickString(
+            this.getMetadata(
+              (item as unknown as { metadata?: unknown }).metadata,
+            )?.occupation,
+          ) ??
           'Civil Servant',
-        primarySite: (item as any)?.primarySite ?? item.address ?? '',
+        primarySite: pickString(item.primarySite) ?? item.address ?? '',
         guardToken: item.guardToken,
         accountNumber: item.accountNumber,
         status: item.status ?? 'active',
@@ -155,7 +169,7 @@ export class CivilServantsService {
             updates.address = value;
           }
         } else {
-          (updates as any)[key] = value;
+          updates[key] = value as CivilServantEntity[typeof key];
         }
       }
     }
@@ -172,7 +186,7 @@ export class CivilServantsService {
   }
 
   async regenerateGuardToken(civilServantId: string) {
-    const guard = await this.findOne(civilServantId);
+    await this.findOne(civilServantId);
     const newToken = randomUUID().replace(/-/g, '').slice(0, 16);
     const { buffer } = await this.guardsService.generateGuardQrCode(
       newToken,
@@ -217,36 +231,49 @@ export class CivilServantsService {
     if (!servant.eclipseWalletId) {
       throw new NotFoundException('Wallet not linked for this civil servant');
     }
+
     const wallet = await this.eclipse.getWallet(servant.eclipseWalletId);
-    const parseAmount = (value: any): number | undefined => {
-      if (value === undefined || value === null) {
-        return undefined;
+    if (!wallet || typeof wallet !== 'object') {
+      throw new NotFoundException('Unable to read wallet details');
+    }
+    const walletData = wallet;
+    const parseAmount = (value: unknown): number | undefined => {
+      if (typeof value === 'number') return value;
+      if (typeof value === 'string') {
+        const match = value.match(/-?[\d.,]+/);
+        if (!match) return undefined;
+        const normalized = Number(match[0].replace(/,/g, ''));
+        return Number.isNaN(normalized) ? undefined : normalized;
       }
-      const direct = Number(value);
-      if (!Number.isNaN(direct)) return direct;
-      const match = value.toString().match(/-?[\d.,]+/);
-      if (!match) return undefined;
-      const normalized = Number(match[0].replace(/,/g, ''));
-      return Number.isNaN(normalized) ? undefined : normalized;
+      return undefined;
     };
 
-    const pickFirst = (values: any[]) =>
-      values.find((v) => v !== undefined && v !== null);
+    const pickFirst = <T>(values: T[]) =>
+      values.find((value) => value !== undefined && value !== null);
+
+    const read = (key: string, nested?: string) => {
+      const value = walletData[key];
+      if (!nested) return value;
+      if (value && typeof value === 'object') {
+        return (value as Record<string, unknown>)[nested];
+      }
+      return undefined;
+    };
 
     const availableRaw = pickFirst([
-      wallet?.availableBalance?.value,
-      wallet?.availableBalance,
-      wallet?.balanceAmountAvailable,
+      read('availableBalance', 'value'),
+      read('availableBalance'),
+      read('balanceAmountAvailable'),
     ]);
     const currentRaw = pickFirst([
-      wallet?.currentBalance?.value,
-      wallet?.currentBalance,
-      wallet?.balance?.value,
-      wallet?.balance,
-      wallet?.walletBalance,
-      wallet?.walletBalanceValue,
-      wallet?.balanceAmount,
-      wallet?.currentBalanceAmount,
+      read('currentBalance', 'value'),
+      read('currentBalance'),
+      read('balance', 'value'),
+      read('balance'),
+      read('walletBalance'),
+      read('walletBalanceValue'),
+      read('balanceAmount'),
+      read('currentBalanceAmount'),
     ]);
 
     const availableBalance = parseAmount(availableRaw);
@@ -278,7 +305,7 @@ export class CivilServantsService {
           );
           balance = derived || 0;
         }
-      } catch (err) {
+      } catch {
         // keep balance at 0 if fallback fails
       }
     }
@@ -288,7 +315,8 @@ export class CivilServantsService {
       balance: balance ?? 0,
       availableBalance: availableBalance ?? balance ?? 0,
       currentBalance: currentBalance ?? balance ?? 0,
-      currency: wallet?.currency ?? 'ZAR',
+      currency:
+        typeof walletData.currency === 'string' ? walletData.currency : 'ZAR',
     };
   }
 
@@ -302,32 +330,41 @@ export class CivilServantsService {
       throw new NotFoundException('Wallet not linked for this civil servant');
     }
     const wallet = await this.eclipse.getWallet(servant.eclipseWalletId);
-    const parseAmount = (value: any): number | undefined => {
-      if (value === undefined || value === null) {
-        return undefined;
+    const parseAmount = (value: unknown): number | undefined => {
+      if (typeof value === 'number') return value;
+      if (typeof value === 'string') {
+        const match = value.match(/-?[\d.,]+/);
+        if (!match) return undefined;
+        const normalized = Number(match[0].replace(/,/g, ''));
+        return Number.isNaN(normalized) ? undefined : normalized;
       }
-      const direct = Number(value);
-      if (!Number.isNaN(direct)) return direct;
-      const match = value.toString().match(/-?[\d.,]+/);
-      if (!match) return undefined;
-      const normalized = Number(match[0].replace(/,/g, ''));
-      return Number.isNaN(normalized) ? undefined : normalized;
+      return undefined;
     };
-    const candidates = [
-      wallet?.availableBalance?.value,
-      wallet?.availableBalance,
-      wallet?.currentBalance?.value,
-      wallet?.currentBalance,
-      wallet?.balance?.value,
-      wallet?.balance,
-      wallet?.walletBalance,
-      wallet?.walletBalanceValue,
-      wallet?.balanceAmount,
-      wallet?.currentBalanceAmount,
+    const walletData = wallet && typeof wallet === 'object' ? wallet : {};
+    const walletCurrency =
+      typeof walletData.currency === 'string' ? walletData.currency : 'ZAR';
+    const candidates: unknown[] = [
+      walletData.availableBalance &&
+      typeof walletData.availableBalance === 'object'
+        ? (walletData.availableBalance as Record<string, unknown>).value
+        : undefined,
+      walletData.availableBalance,
+      walletData.currentBalance && typeof walletData.currentBalance === 'object'
+        ? (walletData.currentBalance as Record<string, unknown>).value
+        : undefined,
+      walletData.currentBalance,
+      walletData.balance && typeof walletData.balance === 'object'
+        ? (walletData.balance as Record<string, unknown>).value
+        : undefined,
+      walletData.balance,
+      walletData.walletBalance,
+      walletData.walletBalanceValue,
+      walletData.balanceAmount,
+      walletData.currentBalanceAmount,
     ];
     const rawBalance = candidates
-      .map((c) => parseAmount(c))
-      .find((v) => v !== undefined);
+      .map((candidate) => parseAmount(candidate))
+      .find((value): value is number => value !== undefined);
     let balance = rawBalance ?? 0;
     if (!balance) {
       try {
@@ -337,7 +374,7 @@ export class CivilServantsService {
           0,
         );
         balance = derived || 0;
-      } catch (err) {
+      } catch {
         balance = 0;
       }
     }
@@ -352,8 +389,9 @@ export class CivilServantsService {
       walletId: servant.eclipseWalletId,
       civilServantId: servant.civilServantId,
       amount,
-      currency: wallet?.currency ?? 'ZAR',
-      withdrawalType,
+      currency: walletCurrency,
+      withdrawalType:
+        withdrawalType as unknown as import('../payments/eclipse.types').EclipseWithdrawalType,
       metadata: {
         guardToken: servant.guardToken,
         accountNumber: servant.accountNumber,
