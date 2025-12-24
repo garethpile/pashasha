@@ -208,6 +208,7 @@ function CivilServantDashboard() {
   const [profileEditing, setProfileEditing] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileFeedback, setProfileFeedback] = useState<string | null>(null);
+  const [profileRefreshing, setProfileRefreshing] = useState(false);
 
   const loadTransactions = useCallback(async (offset = 0, currentBalance?: number) => {
     setTxLoading(true);
@@ -272,9 +273,10 @@ function CivilServantDashboard() {
     }
   }, []);
 
-  useEffect(() => {
-    const loadProfile = async () => {
-      setLoading(true);
+  const loadProfile = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      const silent = opts?.silent ?? false;
+      if (!silent) setLoading(true);
       setError(null);
       try {
         const data = await guardApi.getProfile();
@@ -304,11 +306,15 @@ function CivilServantDashboard() {
         setError(err?.message ?? 'Unable to load profile.');
         setProfile(null);
       } finally {
-        setLoading(false);
+        if (!silent) setLoading(false);
       }
-    };
+    },
+    [loadPendingTransactions, loadPayoutInfo, loadTransactions]
+  );
+
+  useEffect(() => {
     void loadProfile();
-  }, [loadPendingTransactions, loadPayoutInfo, loadTransactions]);
+  }, [loadProfile]);
 
   useEffect(() => {
     if (!profile?.guardToken) {
@@ -535,6 +541,15 @@ function CivilServantDashboard() {
             }
             setProfileEditing((v) => !v);
           }}
+          onRefresh={async () => {
+            setProfileRefreshing(true);
+            try {
+              await loadProfile({ silent: true });
+            } finally {
+              setProfileRefreshing(false);
+            }
+          }}
+          refreshing={profileRefreshing}
           onFieldChange={(field, value) =>
             setGuardProfileForm((prev) => ({ ...prev, [field]: value }))
           }

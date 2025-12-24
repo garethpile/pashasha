@@ -36,6 +36,8 @@ export function CivilServantProfileCard({
   onGenerateQr,
   qrLoading,
   canViewQr,
+  onRefresh,
+  refreshing,
 }: {
   title?: string;
   data: CivilServantProfileData;
@@ -56,6 +58,8 @@ export function CivilServantProfileCard({
   onGenerateQr?: () => void;
   qrLoading?: boolean;
   canViewQr?: boolean;
+  onRefresh?: () => void | Promise<void>;
+  refreshing?: boolean;
 }) {
   const qrPresent = Boolean(data.qrUrl);
   const canView = onViewQr && (qrPresent || canViewQr);
@@ -77,6 +81,18 @@ export function CivilServantProfileCard({
           <p className="text-xs uppercase tracking-[0.35em] text-slate-400">{title}</p>
         </div>
         <div className="flex items-center gap-2">
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={refreshing}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              aria-label="Refresh profile"
+              title="Refresh profile"
+            >
+              {refreshing ? '⟳' : '⟲'}
+            </button>
+          )}
           <button
             type="button"
             onClick={onEditToggle}

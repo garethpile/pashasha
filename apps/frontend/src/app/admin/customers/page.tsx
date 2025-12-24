@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { adminApi } from '../../../lib/api/admin';
 import {
   DashboardNameCard,
@@ -56,6 +56,7 @@ export default function CustomerManagementPage() {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [profileEditing, setProfileEditing] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [profileRefreshing, setProfileRefreshing] = useState(false);
   const [profileForm, setProfileForm] = useState({
     firstName: '',
     familyName: '',
@@ -124,6 +125,60 @@ export default function CustomerManagementPage() {
     }
   };
 
+  const refreshFinancials = useCallback(async () => {
+    if (!selected?.customerId) return;
+    setTxLoading(true);
+    setReservationsLoading(true);
+    try {
+      const [tx, pending, walletInfo] = (await Promise.all([
+        adminApi.getCustomerTransactions(selected.customerId),
+        adminApi.getCustomerPendingTransactions(selected.customerId, { limit: 25, offset: 0 }),
+        adminApi.getCustomerWallet(selected.customerId),
+      ])) as [any, any, any];
+      setTransactions(mapDashboardTransactions((tx as any[]) ?? []));
+      setReservations(mapDashboardTransactions((pending as any[]) ?? []));
+      if (walletInfo) {
+        setWallet({
+          balance: walletInfo.balance,
+          availableBalance: walletInfo.availableBalance ?? walletInfo.balance,
+          currentBalance: walletInfo.currentBalance ?? walletInfo.balance,
+          currency: walletInfo.currency,
+        });
+      } else {
+        setWallet(null);
+      }
+    } catch (err: any) {
+      setError(err?.message ?? 'Unable to load financials.');
+    } finally {
+      setTxLoading(false);
+      setReservationsLoading(false);
+    }
+  }, [selected?.customerId]);
+
+  const refreshSelected = async () => {
+    if (!selected?.customerId) return;
+    setProfileRefreshing(true);
+    setError(null);
+    try {
+      const refreshed = (await adminApi.getCustomer(selected.customerId)) as Customer;
+      setSelected(refreshed);
+      setResults((prev) =>
+        prev.map((c) => (c.customerId === refreshed.customerId ? refreshed : c))
+      );
+      setProfileForm({
+        firstName: refreshed.firstName ?? '',
+        familyName: refreshed.familyName ?? '',
+        email: refreshed.email ?? '',
+        phoneNumber: refreshed.phoneNumber ?? '',
+        address: refreshed.address ?? '',
+      });
+    } catch (err: any) {
+      setError(err?.message ?? 'Unable to refresh profile.');
+    } finally {
+      setProfileRefreshing(false);
+    }
+  };
+
   useEffect(() => {
     const loadDetails = async () => {
       if (!selected?.customerId) {
@@ -141,35 +196,7 @@ export default function CustomerManagementPage() {
       });
       setProfileEditing(false);
       setProfileSaving(false);
-      setTxLoading(true);
-      setReservationsLoading(true);
-      try {
-        const [tx, pending, walletInfo] = (await Promise.all([
-          adminApi.getCustomerTransactions(selected.customerId),
-          adminApi.getCustomerPendingTransactions(selected.customerId, { limit: 25, offset: 0 }),
-          adminApi.getCustomerWallet(selected.customerId),
-        ])) as [any, any, any];
-        setTransactions(mapDashboardTransactions((tx as any[]) ?? []));
-        setReservations(mapDashboardTransactions((pending as any[]) ?? []));
-        if (walletInfo) {
-          setWallet({
-            balance: walletInfo.balance,
-            availableBalance: walletInfo.availableBalance ?? walletInfo.balance,
-            currentBalance: walletInfo.currentBalance ?? walletInfo.balance,
-            currency: walletInfo.currency,
-          });
-        } else {
-          setWallet(null);
-        }
-      } catch (err: any) {
-        setError(err?.message ?? 'Unable to load customer details.');
-        setTransactions([]);
-        setReservations([]);
-        setWallet(null);
-      } finally {
-        setTxLoading(false);
-        setReservationsLoading(false);
-      }
+      await refreshFinancials();
     };
     void loadDetails();
   }, [
@@ -179,6 +206,7 @@ export default function CustomerManagementPage() {
     selected?.email,
     selected?.phoneNumber,
     selected?.address,
+    refreshFinancials,
   ]);
 
   const pendingReservationsTotal = reservations.reduce((sum, row) => {
@@ -284,6 +312,8 @@ export default function CustomerManagementPage() {
             collapsed={profileCollapsed}
             onToggle={() => setProfileCollapsed((v) => !v)}
             fields={selectedProfileFields}
+            onRefresh={refreshSelected}
+            refreshing={profileRefreshing}
             editing={profileEditing}
             onFieldChange={(fieldId, value) =>
               setProfileForm((prev) => ({
@@ -370,10 +400,22 @@ export default function CustomerManagementPage() {
             }
             transactions={transactions}
             loading={txLoading}
-            actions={
-              <span className="text-xs text-slate-500">
-                Wallet: {selected.eclipseWalletId ?? '—'}
-              </span>
+            rightActions={
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={refreshFinancials}
+                  disabled={txLoading || reservationsLoading}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  aria-label="Refresh transactions"
+                  title="Refresh transactions"
+                >
+                  {txLoading ? '⟳' : '⟲'}
+                </button>
+                <span className="text-xs text-slate-500">
+                  Wallet: {selected.eclipseWalletId ?? '—'}
+                </span>
+              </div>
             }
           />
 
@@ -390,10 +432,22 @@ export default function CustomerManagementPage() {
             transactions={reservations}
             loading={reservationsLoading}
             emptyLabel="No reservations."
-            actions={
-              <span className="text-xs text-slate-500">
-                Wallet: {selected.eclipseWalletId ?? '—'}
-              </span>
+            rightActions={
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={refreshFinancials}
+                  disabled={txLoading || reservationsLoading}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                  aria-label="Refresh reservations"
+                  title="Refresh reservations"
+                >
+                  {reservationsLoading ? '⟳' : '⟲'}
+                </button>
+                <span className="text-xs text-slate-500">
+                  Wallet: {selected.eclipseWalletId ?? '—'}
+                </span>
+              </div>
             }
             showBalanceColumn={false}
             showExpiresColumn

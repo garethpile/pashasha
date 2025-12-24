@@ -50,6 +50,7 @@ export const adminApi = {
     const suffix = query.toString() ? `?${query.toString()}` : '';
     return request(`/civil-servants${suffix}`);
   },
+  getCivilServant: (id: string) => request(`/civil-servants/${id}`),
   createCivilServant: (payload: {
     firstName: string;
     familyName: string;
@@ -120,6 +121,7 @@ export const adminApi = {
     const suffix = query.toString() ? `?${query.toString()}` : '';
     return request(`/customers${suffix}`);
   },
+  getCustomer: (id: string) => request(`/customers/${id}`),
   createCustomer: (payload: {
     firstName: string;
     familyName: string;

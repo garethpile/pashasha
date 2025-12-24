@@ -69,6 +69,7 @@ export default function CivilServantManagementPage() {
   const [reservationsCollapsed, setReservationsCollapsed] = useState(true);
   const [profileEditing, setProfileEditing] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
+  const [profileRefreshing, setProfileRefreshing] = useState(false);
   const [profileForm, setProfileForm] = useState({
     firstName: '',
     familyName: '',
@@ -377,6 +378,33 @@ export default function CivilServantManagementPage() {
     }
   };
 
+  const refreshSelected = async () => {
+    if (!selected?.civilServantId) return;
+    setProfileRefreshing(true);
+    setError(null);
+    try {
+      const refreshed = (await adminApi.getCivilServant(selected.civilServantId)) as CivilServant;
+      setSelected(refreshed);
+      setResults((prev) =>
+        prev.map((item) => (item.civilServantId === refreshed.civilServantId ? refreshed : item))
+      );
+      setProfileForm({
+        firstName: refreshed.firstName ?? '',
+        familyName: refreshed.familyName ?? '',
+        email: refreshed.email ?? '',
+        phoneNumber: refreshed.phoneNumber ?? '',
+        occupation: refreshed.occupation ?? '',
+        primarySite: refreshed.primarySite ?? refreshed.address ?? '',
+        address: refreshed.address ?? '',
+        homeAddress: refreshed.homeAddress ?? refreshed.address ?? '',
+      });
+    } catch (err: any) {
+      setError(err?.message ?? 'Unable to refresh profile.');
+    } finally {
+      setProfileRefreshing(false);
+    }
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-end">
@@ -513,6 +541,8 @@ export default function CivilServantManagementPage() {
             feedback={message}
             showWorkFields
             showEclipseAccount
+            onRefresh={refreshSelected}
+            refreshing={profileRefreshing}
             onViewQr={() => selected?.civilServantId && fetchQrUrl(selected.civilServantId, true)}
             onGenerateQr={() => selected?.civilServantId && regenerateQr(selected.civilServantId)}
             qrLoading={qrLoading}

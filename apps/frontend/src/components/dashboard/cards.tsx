@@ -79,6 +79,8 @@ export function DashboardProfileCard({
   fields,
   children,
   actions,
+  onRefresh,
+  refreshing,
   editing,
   onFieldChange,
   footer,
@@ -89,6 +91,8 @@ export function DashboardProfileCard({
   fields: DashboardProfileField[];
   children?: ReactNode;
   actions?: ReactNode;
+  onRefresh?: () => void | Promise<void>;
+  refreshing?: boolean;
   editing?: boolean;
   onFieldChange?: (fieldId: string, value: string) => void;
   footer?: ReactNode;
@@ -99,6 +103,18 @@ export function DashboardProfileCard({
       <header className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <p className="text-xs uppercase tracking-[0.35em] text-slate-400">{title}</p>
         <div className="flex items-center gap-2">
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={refreshing}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              aria-label="Refresh profile"
+              title="Refresh profile"
+            >
+              {refreshing ? '⟳' : '⟲'}
+            </button>
+          )}
           {actions}
           <button
             type="button"
