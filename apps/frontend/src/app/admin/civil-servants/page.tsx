@@ -26,7 +26,10 @@ type CivilServant = {
   familyName: string;
   email: string;
   phoneNumber?: string;
+  occupation?: string;
+  primarySite?: string;
   address?: string;
+  homeAddress?: string;
   guardToken?: string;
   qrCodeKey?: string;
   status?: string;
@@ -40,6 +43,7 @@ export default function CivilServantManagementPage() {
     familyName: '',
     email: '',
     phoneNumber: '',
+    occupation: '',
     address: '',
   });
   const [searchCriteria, setSearchCriteria] = useState({
@@ -70,7 +74,10 @@ export default function CivilServantManagementPage() {
     familyName: '',
     email: '',
     phoneNumber: '',
+    occupation: '',
+    primarySite: '',
     address: '',
+    homeAddress: '',
   });
 
   const handleCreate = async (event: FormEvent) => {
@@ -92,10 +99,18 @@ export default function CivilServantManagementPage() {
       await adminApi.createCivilServant({
         ...creation,
         phoneNumber: creation.phoneNumber || undefined,
+        occupation: creation.occupation || undefined,
         address: creation.address || undefined,
       });
       setMessage('Civil servant provisioning started. You will receive credentials once ready.');
-      setCreation({ firstName: '', familyName: '', email: '', phoneNumber: '', address: '' });
+      setCreation({
+        firstName: '',
+        familyName: '',
+        email: '',
+        phoneNumber: '',
+        occupation: '',
+        address: '',
+      });
       setSelected(null);
       setResults((prev) => prev);
       setQrPreview(null);
@@ -187,7 +202,10 @@ export default function CivilServantManagementPage() {
         familyName: selected.familyName ?? '',
         email: selected.email ?? '',
         phoneNumber: selected.phoneNumber ?? '',
+        occupation: selected.occupation ?? '',
+        primarySite: selected.primarySite ?? selected.address ?? '',
         address: selected.address ?? '',
+        homeAddress: selected.homeAddress ?? selected.address ?? '',
       });
       setProfileEditing(false);
       setProfileSaving(false);
@@ -267,6 +285,15 @@ export default function CivilServantManagementPage() {
           className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
         />
       </label>
+      <label className="text-sm font-semibold text-slate-600">
+        Occupation
+        <input
+          value={creation.occupation}
+          onChange={(e) => setCreation((prev) => ({ ...prev, occupation: e.target.value }))}
+          className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3"
+          placeholder="e.g. Security Guard"
+        />
+      </label>
       <div className="grid gap-4 md:grid-cols-2">
         <label className="text-sm font-semibold text-slate-600">
           Phone
@@ -305,15 +332,15 @@ export default function CivilServantManagementPage() {
       familyName: selected.familyName ?? '',
       email: selected.email ?? '',
       phoneNumber: selected.phoneNumber ?? '',
+      occupation: selected.occupation ?? '',
+      primarySite: selected.primarySite ?? selected.address ?? '',
       address: selected.address ?? '',
+      homeAddress: selected.homeAddress ?? selected.address ?? '',
     });
   };
 
   const handleProfileFieldChange = (field: string, value: string) => {
     setProfileForm((prev) => {
-      if (field === 'homeAddress' || field === 'primarySite') {
-        return { ...prev, address: value };
-      }
       if (field in prev) {
         return { ...prev, [field]: value } as typeof prev;
       }
@@ -332,7 +359,10 @@ export default function CivilServantManagementPage() {
         familyName: profileForm.familyName,
         email: profileForm.email,
         phoneNumber: profileForm.phoneNumber || undefined,
+        occupation: profileForm.occupation || undefined,
+        primarySite: profileForm.primarySite || undefined,
         address: profileForm.address || undefined,
+        homeAddress: profileForm.homeAddress || undefined,
       })) as CivilServant;
       setSelected(updated);
       setResults((prev) =>
@@ -457,11 +487,11 @@ export default function CivilServantManagementPage() {
             data={{
               firstName: profileForm.firstName,
               familyName: profileForm.familyName,
-              occupation: undefined,
-              primarySite: profileForm.address,
+              occupation: profileForm.occupation,
+              primarySite: profileForm.primarySite,
               email: profileForm.email,
               phoneNumber: profileForm.phoneNumber,
-              homeAddress: profileForm.address,
+              homeAddress: profileForm.homeAddress,
               accountNumber: selected.accountNumber ?? null,
               walletId: selected.eclipseWalletId ?? null,
               guardToken: selected.guardToken ?? null,
@@ -481,7 +511,7 @@ export default function CivilServantManagementPage() {
             onSave={saveProfile}
             saving={profileSaving}
             feedback={message}
-            showWorkFields={false}
+            showWorkFields
             showEclipseAccount
             onViewQr={() => selected?.civilServantId && fetchQrUrl(selected.civilServantId, true)}
             onGenerateQr={() => selected?.civilServantId && regenerateQr(selected.civilServantId)}

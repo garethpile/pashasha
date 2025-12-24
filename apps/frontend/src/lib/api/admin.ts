@@ -55,7 +55,10 @@ export const adminApi = {
     familyName: string;
     email: string;
     phoneNumber?: string;
+    occupation?: string;
     address?: string;
+    primarySite?: string;
+    homeAddress?: string;
   }) =>
     request<{ status: string; profileId: string }>('/admin/users/civil-servants', {
       method: 'POST',

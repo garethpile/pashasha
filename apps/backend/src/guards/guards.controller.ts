@@ -8,6 +8,7 @@ import {
   Post,
   Res,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CreateTipIntentDto } from './dto/create-tip-intent.dto';
 import { GuardsService } from './guards.service';
 import type { Response } from 'express';
@@ -19,12 +20,14 @@ export class GuardsController {
   constructor(private readonly guardsService: GuardsService) {}
 
   @Public()
+  @Throttle(30, 60)
   @Get(':token')
   getGuardByToken(@Param('token') token: string) {
     return this.guardsService.findGuardByToken(token);
   }
 
   @Public()
+  @Throttle(20, 60)
   @Post(':token/tips')
   @HttpCode(HttpStatus.CREATED)
   createTipIntent(
@@ -38,6 +41,7 @@ export class GuardsController {
   }
 
   @Public()
+  @Throttle(10, 60)
   @Post(':token/topup-sandbox')
   @HttpCode(HttpStatus.CREATED)
   createSandboxTopup(
@@ -61,6 +65,7 @@ export class GuardsController {
   }
 
   @Public()
+  @Throttle(10, 60)
   @Get(':token/qr')
   async getGuardQrCode(@Param('token') token: string, @Res() res: Response) {
     const { buffer, landingUrl } =
@@ -74,5 +79,10 @@ export class GuardsController {
       'Cross-Origin-Resource-Policy': 'cross-origin',
     });
     res.send(buffer);
+  }
+
+  @Post(':token/rotate')
+  async rotateGuardToken(@Param('token') token: string) {
+    return this.guardsService.rotateGuardToken(token);
   }
 }

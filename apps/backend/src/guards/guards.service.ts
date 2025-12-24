@@ -91,6 +91,33 @@ export class GuardsService {
     return this.mapEntityToProfile(entity, token);
   }
 
+  async rotateGuardToken(oldToken: string) {
+    const entity = await this.repository.findByGuardToken(oldToken);
+    if (!entity) {
+      throw new NotFoundException({
+        message: 'Guard not found',
+        guardToken: oldToken,
+      });
+    }
+
+    const newToken = randomUUID().replace(/-/g, '');
+    await this.repository.update(entity.civilServantId, {
+      guardToken: newToken,
+    });
+
+    this.logger.log(
+      `Guard token rotated for civilServantId=${entity.civilServantId} oldToken=${oldToken}`,
+    );
+
+    const landingUrl = guardPortalBase + encodeURIComponent(newToken);
+
+    return {
+      civilServantId: entity.civilServantId,
+      guardToken: newToken,
+      landingUrl,
+    };
+  }
+
   async generateGuardQrCode(
     token: string,
     skipValidation = false,
