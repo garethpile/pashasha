@@ -28,6 +28,26 @@ import { validateEnv } from './config/env.schema';
         ttl: 60,
         limit: 10,
       },
+      {
+        name: 'login',
+        ttl: 60,
+        limit: 5,
+      },
+      {
+        name: 'qr',
+        ttl: 300,
+        limit: 10,
+      },
+      {
+        name: 'payout',
+        ttl: 300,
+        limit: 5,
+      },
+      {
+        name: 'upload',
+        ttl: 300,
+        limit: 5,
+      },
     ]),
     DynamoConfigModule,
     AuthModule,

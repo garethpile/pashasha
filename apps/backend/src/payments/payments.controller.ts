@@ -9,17 +9,19 @@ import {
   Post,
   Req,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { Public } from '../auth/public.decorator';
 import { EclipseService } from './eclipse.service';
-import type {
-  EclipsePaymentRequest,
-  EclipseWithdrawalRequest,
-  EclipseWalletRequest,
-} from './eclipse.types';
 import { PaymentsService } from './payments.service';
+import {
+  EclipsePaymentDto,
+  EclipseWithdrawalDto,
+  EclipseWalletDto,
+  ReconcilePaymentsDto,
+} from './dto/eclipse-payment.dto';
 
 type JsonRequest = Request<ParamsDictionary, unknown, Record<string, unknown>>;
 type RawJsonRequest = RawBodyRequest<JsonRequest>;
@@ -34,7 +36,8 @@ export class PaymentsController {
   ) {}
 
   @Post('payments/eclipse')
-  async createPayment(@Body() dto: EclipsePaymentRequest) {
+  @Throttle({ payout: { limit: 8, ttl: 60 } })
+  async createPayment(@Body() dto: EclipsePaymentDto) {
     // In production, validate amounts, guard wallet lookup, and persist payment records.
     return this.eclipse.createPayment(dto);
   }
@@ -46,13 +49,15 @@ export class PaymentsController {
   }
 
   @Post('payments/eclipse/withdrawals')
-  async createWithdrawal(@Body() dto: EclipseWithdrawalRequest) {
+  @Throttle({ payout: { limit: 5, ttl: 120 } })
+  async createWithdrawal(@Body() dto: EclipseWithdrawalDto) {
     // In production, validate wallet ownership, limit checks, and persist withdrawal records.
     return this.eclipse.createWithdrawal(dto);
   }
 
   @Post('payments/eclipse/wallets')
-  async createWallet(@Body() dto: EclipseWalletRequest) {
+  @Throttle({ payout: { limit: 10, ttl: 300 } })
+  async createWallet(@Body() dto: EclipseWalletDto) {
     // In production, link to guard/customer record and persist the walletId.
     return this.eclipse.createWallet(dto);
   }
@@ -101,8 +106,8 @@ export class PaymentsController {
   }
 
   @Post('payments/reconcile')
-  async reconcile(@Body('days') days?: number) {
-    return this.payments.reconcileRecent(days ?? 7);
+  async reconcile(@Body() dto: ReconcilePaymentsDto) {
+    return this.payments.reconcileRecent(dto.days ?? 7);
   }
 
   /**

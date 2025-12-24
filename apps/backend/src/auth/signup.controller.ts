@@ -1,17 +1,11 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { Public } from './public.decorator';
 import { SignupDto } from './dto/signup.dto';
 import { SignupService } from './signup.service';
 import { CivilServantRepository } from '../profiles/civil-servant.repository';
 import { CustomerRepository } from '../profiles/customer.repository';
+import { EmailQueryDto } from '../common/dto/email-query.dto';
 
 @Controller('auth')
 export class SignupController {
@@ -22,7 +16,7 @@ export class SignupController {
   ) {}
 
   @Public()
-  @Throttle({ short: { limit: 5, ttl: 60 } })
+  @Throttle({ login: { limit: 5, ttl: 60 } })
   @Post('signup')
   async handleSignup(@Body() dto: SignupDto) {
     return this.signup.signup(dto);
@@ -31,12 +25,8 @@ export class SignupController {
   @Public()
   @Throttle({ short: { limit: 10, ttl: 60 } })
   @Get('check-email')
-  async checkEmail(@Query('email') email: string) {
-    const value = email?.trim();
-    if (!value) {
-      throw new BadRequestException('email query parameter is required');
-    }
-    const normalized = value.toLowerCase();
+  async checkEmail(@Query() query: EmailQueryDto) {
+    const normalized = query.email.toLowerCase();
     const [civil, customer] = await Promise.all([
       this.civilServants.findByEmail(normalized),
       this.customers.findByEmail(normalized),

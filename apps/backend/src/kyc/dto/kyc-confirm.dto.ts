@@ -1,4 +1,13 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
+
+export const MAX_KYC_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
 
 export class KycConfirmDto {
   @IsString()
@@ -17,7 +26,8 @@ export class KycConfirmDto {
   @IsOptional()
   fileName?: string;
 
-  @IsNumber()
-  @IsOptional()
-  size?: number;
+  @IsInt()
+  @Min(1)
+  @Max(MAX_KYC_FILE_SIZE_BYTES)
+  size!: number;
 }

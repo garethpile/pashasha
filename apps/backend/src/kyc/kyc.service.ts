@@ -16,6 +16,7 @@ import {
   KycStatus,
 } from './kyc.types';
 import { EclipseService } from '../payments/eclipse.service';
+import { MAX_KYC_FILE_SIZE_BYTES } from './dto/kyc-confirm.dto';
 
 const ALLOWED_CONTENT_TYPES = new Set([
   'application/pdf',
@@ -91,12 +92,17 @@ export class KycService {
     documentType: KycDocumentType,
     contentType: string,
     fileName?: string,
+    size?: number,
   ) {
     const normalized = contentType.toLowerCase().split(';')[0].trim();
     if (!ALLOWED_CONTENT_TYPES.has(normalized)) {
       throw new BadRequestException(
         `Unsupported content type. Allowed: ${Array.from(ALLOWED_CONTENT_TYPES).join(', ')}`,
       );
+    }
+
+    if (size && size > MAX_KYC_FILE_SIZE_BYTES) {
+      throw new BadRequestException('Requested file exceeds permitted size');
     }
 
     await this.loadProfile(profileType, profileId);
@@ -125,6 +131,41 @@ export class KycService {
       );
     }
 
+    if (!ALLOWED_CONTENT_TYPES.has(record.contentType)) {
+      throw new BadRequestException(
+        `Unsupported content type. Allowed: ${Array.from(ALLOWED_CONTENT_TYPES).join(', ')}`,
+      );
+    }
+
+    if (!record.size || record.size > MAX_KYC_FILE_SIZE_BYTES) {
+      throw new BadRequestException('Uploaded file exceeds permitted size');
+    }
+
+    const resolvedBucket = this.storage.resolveBucketForKey(
+      record.key,
+      record.bucket,
+    );
+    if (record.bucket && record.bucket !== resolvedBucket) {
+      throw new BadRequestException('Bucket does not match document key');
+    }
+
+    let sanitized = record;
+    if (record.contentType.startsWith('image/')) {
+      const result = await this.storage.sanitizeImageObject(
+        record.key,
+        record.contentType,
+        resolvedBucket,
+      );
+      if (result) {
+        sanitized = {
+          ...sanitized,
+          bucket: result.bucket,
+          contentType: result.contentType,
+          size: result.size,
+        };
+      }
+    }
+
     const now = new Date().toISOString();
     const existing = entity.kyc;
 
@@ -141,7 +182,11 @@ export class KycService {
       documents: { ...(existing?.documents ?? {}) },
       updatedAt: now,
     };
-    kyc.documents[documentType] = { ...record, uploadedAt: now };
+    kyc.documents[documentType] = {
+      ...sanitized,
+      bucket: resolvedBucket,
+      uploadedAt: now,
+    };
 
     await this.saveKyc(profileType, profileId, kyc);
 
@@ -187,7 +232,7 @@ export class KycService {
     if (!doc?.key) {
       throw new NotFoundException('KYC document not found');
     }
-    return this.storage.createDownloadUrl(doc.key, 5 * 60);
+    return this.storage.createDownloadUrl(doc.key, 5 * 60, doc.bucket);
   }
 
   async getDocument(
@@ -200,7 +245,7 @@ export class KycService {
     if (!doc?.key) {
       throw new NotFoundException('KYC document not found');
     }
-    const object = await this.storage.getObject(doc.key);
+    const object = await this.storage.getObject(doc.key, doc.bucket);
     return {
       stream: object.body,
       contentType:
@@ -224,7 +269,7 @@ export class KycService {
 
     // Best-effort S3 cleanup; do not fail the request if deletion errors.
     try {
-      await this.storage.deleteObject(doc.key);
+      await this.storage.deleteObject(doc.key, doc.bucket);
     } catch (error) {
       this.logger.warn(
         `Failed to delete KYC object ${doc.key}: ${(error as Error).message}`,

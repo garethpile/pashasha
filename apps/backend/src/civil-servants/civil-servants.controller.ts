@@ -15,6 +15,9 @@ import { CivilServantsService } from './civil-servants.service';
 import { Roles } from '../auth/roles.decorator';
 import { CreateCivilServantDto } from './dto/create-civil-servant.dto';
 import { UpdateCivilServantDto } from './dto/update-civil-servant.dto';
+import { CivilServantSearchQueryDto } from './dto/civil-servant-search-query.dto';
+import { CivilServantLookupQueryDto } from './dto/civil-servant-lookup-query.dto';
+import { CivilServantTransactionsQueryDto } from './dto/civil-servant-transactions-query.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { PaymentsService } from '../payments/payments.service';
 import { KycService } from '../kyc/kyc.service';
@@ -39,26 +42,18 @@ export class CivilServantsController {
 
   @Roles('Administrators')
   @Get()
-  search(
-    @Query('accountNumber') accountNumber?: string,
-    @Query('familyName') familyName?: string,
-  ) {
-    return this.service.search(accountNumber, familyName);
+  search(@Query() query: CivilServantSearchQueryDto) {
+    return this.service.search(query.accountNumber, query.familyName);
   }
 
   @Roles('Customers', 'Administrators')
   @Get('lookup')
-  lookup(
-    @Query('firstName') firstName?: string,
-    @Query('familyName') familyName?: string,
-    @Query('occupation') occupation?: string,
-    @Query('site') site?: string,
-  ) {
+  lookup(@Query() query: CivilServantLookupQueryDto) {
     return this.service.searchForCustomers({
-      firstName,
-      familyName,
-      occupation,
-      site,
+      firstName: query.firstName,
+      familyName: query.familyName,
+      occupation: query.occupation,
+      site: query.site,
     });
   }
 
@@ -70,15 +65,14 @@ export class CivilServantsController {
   @Get('me/transactions')
   async getMyTransactions(
     @CurrentUser() user: { sub: string },
-    @Query('offset') offset?: string,
-    @Query('limit') limit?: string,
+    @Query() query: CivilServantTransactionsQueryDto,
   ) {
     const civilServant = await this.service.findByUser(user.sub);
     if (!civilServant.eclipseWalletId) {
       return [];
     }
-    const parsedLimit = Number(limit ?? 20);
-    const parsedOffset = Number(offset ?? 0);
+    const parsedLimit = query.limit ?? 20;
+    const parsedOffset = query.offset ?? 0;
     return this.payments.listByWalletId(
       civilServant.eclipseWalletId,
       Number.isNaN(parsedLimit) ? 20 : parsedLimit,
@@ -90,15 +84,14 @@ export class CivilServantsController {
   @Get('me/transactions/pending')
   async getMyPendingTransactions(
     @CurrentUser() user: { sub: string },
-    @Query('offset') offset?: string,
-    @Query('limit') limit?: string,
+    @Query() query: CivilServantTransactionsQueryDto,
   ) {
     const civilServant = await this.service.findByUser(user.sub);
     if (!civilServant.eclipseWalletId) {
       return [];
     }
-    const parsedLimit = Number(limit ?? 20);
-    const parsedOffset = Number(offset ?? 0);
+    const parsedLimit = query.limit ?? 20;
+    const parsedOffset = query.offset ?? 0;
     return this.payments.listByWalletId(
       civilServant.eclipseWalletId,
       Number.isNaN(parsedLimit) ? 20 : parsedLimit,
@@ -129,15 +122,14 @@ export class CivilServantsController {
   @Get(':civilServantId/transactions/pending')
   async getPendingTransactions(
     @Param('civilServantId') civilServantId: string,
-    @Query('offset') offset?: string,
-    @Query('limit') limit?: string,
+    @Query() query: CivilServantTransactionsQueryDto,
   ) {
     const civilServant = await this.service.findOne(civilServantId);
     if (!civilServant.eclipseWalletId) {
       return [];
     }
-    const parsedLimit = Number(limit ?? 10);
-    const parsedOffset = Number(offset ?? 0);
+    const parsedLimit = query.limit ?? 10;
+    const parsedOffset = query.offset ?? 0;
     return this.payments.listByWalletId(
       civilServant.eclipseWalletId,
       Number.isNaN(parsedLimit) ? 10 : parsedLimit,
@@ -187,6 +179,7 @@ export class CivilServantsController {
       parsed,
       dto.contentType,
       dto.fileName,
+      dto.size,
     );
   }
 

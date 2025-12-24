@@ -23,6 +23,8 @@ export const envSchema = z.object({
     .min(1, 'ADMINISTRATORS_TABLE_NAME is required'),
   PAYMENTS_TABLE_NAME: z.string().min(1, 'PAYMENTS_TABLE_NAME is required'),
   USER_ASSETS_BUCKET: z.string().min(1, 'USER_ASSETS_BUCKET is required'),
+  KYC_ASSETS_BUCKET: z.string().optional(),
+  QR_ASSETS_BUCKET: z.string().optional(),
   COUNTER_TABLE_NAME: z.string().min(1, 'COUNTER_TABLE_NAME is required'),
 
   PAYMENTS_SNS_TOPIC_ARN: z

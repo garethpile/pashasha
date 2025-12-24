@@ -20,7 +20,7 @@ export class GuardsController {
   constructor(private readonly guardsService: GuardsService) {}
 
   @Public()
-  @Throttle({ short: { limit: 30, ttl: 60 } })
+  @Throttle({ short: { limit: 30, ttl: 60 }, qr: { limit: 20, ttl: 60 } })
   @Get(':token')
   getGuardByToken(@Param('token') token: string) {
     return this.guardsService.findGuardByToken(token);
@@ -81,6 +81,7 @@ export class GuardsController {
     res.send(buffer);
   }
 
+  @Throttle({ qr: { limit: 3, ttl: 300 } })
   @Post(':token/rotate')
   async rotateGuardToken(@Param('token') token: string) {
     return this.guardsService.rotateGuardToken(token);

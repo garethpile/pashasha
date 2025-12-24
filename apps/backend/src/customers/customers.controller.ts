@@ -15,6 +15,8 @@ import { CustomersService } from './customers.service';
 import { Roles } from '../auth/roles.decorator';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { CustomerSearchQueryDto } from './dto/customer-search-query.dto';
+import { CustomerTransactionsQueryDto } from './dto/customer-transactions-query.dto';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { KycService } from '../kyc/kyc.service';
 import { KycPresignDto } from '../kyc/dto/kyc-presign.dto';
@@ -37,11 +39,8 @@ export class CustomersController {
 
   @Roles('Administrators')
   @Get()
-  search(
-    @Query('accountNumber') accountNumber?: string,
-    @Query('familyName') familyName?: string,
-  ) {
-    return this.customersService.search(accountNumber, familyName);
+  search(@Query() query: CustomerSearchQueryDto) {
+    return this.customersService.search(query.accountNumber, query.familyName);
   }
 
   @Roles('Customers')
@@ -54,11 +53,10 @@ export class CustomersController {
   @Get('me/transactions')
   getMyTransactions(
     @CurrentUser() user: { sub: string },
-    @Query('offset') offset?: string,
-    @Query('limit') limit?: string,
+    @Query() query: CustomerTransactionsQueryDto,
   ) {
-    const parsedLimit = Number(limit ?? 20);
-    const parsedOffset = Number(offset ?? 0);
+    const parsedLimit = query.limit ?? 20;
+    const parsedOffset = query.offset ?? 0;
     return this.customersService.listTransactions(
       user.sub,
       Number.isNaN(parsedLimit) ? 10 : parsedLimit,
@@ -70,11 +68,10 @@ export class CustomersController {
   @Get('me/transactions/sent')
   async getMySentTransactions(
     @CurrentUser() user: { sub: string },
-    @Query('offset') offset?: string,
-    @Query('limit') limit?: string,
+    @Query() query: CustomerTransactionsQueryDto,
   ) {
-    const parsedLimit = Number(limit ?? 20);
-    const parsedOffset = Number(offset ?? 0);
+    const parsedLimit = query.limit ?? 20;
+    const parsedOffset = query.offset ?? 0;
     return this.customersService.listSentTransactions(
       user.sub,
       Number.isNaN(parsedLimit) ? 10 : parsedLimit,
@@ -122,6 +119,7 @@ export class CustomersController {
       parsed,
       dto.contentType,
       dto.fileName,
+      dto.size,
     );
   }
 
@@ -202,11 +200,10 @@ export class CustomersController {
   @Get(':customerId/transactions')
   getTransactions(
     @Param('customerId') customerId: string,
-    @Query('offset') offset?: string,
-    @Query('limit') limit?: string,
+    @Query() query: CustomerTransactionsQueryDto,
   ) {
-    const parsedLimit = Number(limit ?? 10);
-    const parsedOffset = Number(offset ?? 0);
+    const parsedLimit = query.limit ?? 10;
+    const parsedOffset = query.offset ?? 0;
     return this.customersService.listTransactions(
       customerId,
       Number.isNaN(parsedLimit) ? 10 : parsedLimit,
@@ -218,11 +215,10 @@ export class CustomersController {
   @Get(':customerId/transactions/pending')
   getPendingTransactions(
     @Param('customerId') customerId: string,
-    @Query('offset') offset?: string,
-    @Query('limit') limit?: string,
+    @Query() query: CustomerTransactionsQueryDto,
   ) {
-    const parsedLimit = Number(limit ?? 10);
-    const parsedOffset = Number(offset ?? 0);
+    const parsedLimit = query.limit ?? 10;
+    const parsedOffset = query.offset ?? 0;
     return this.customersService.listTransactions(
       customerId,
       Number.isNaN(parsedLimit) ? 10 : parsedLimit,

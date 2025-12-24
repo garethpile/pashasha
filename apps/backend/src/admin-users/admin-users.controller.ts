@@ -14,6 +14,7 @@ import { AccountWorkflowService } from '../workflows/account-workflow.service';
 import { CivilServantRepository } from '../profiles/civil-servant.repository';
 import { CustomerRepository } from '../profiles/customer.repository';
 import { AdministratorRepository } from '../profiles/administrator.repository';
+import { EmailQueryDto } from '../common/dto/email-query.dto';
 
 @Controller('admin/users')
 export class AdminUsersController {
@@ -116,12 +117,8 @@ export class AdminUsersController {
 
   @Roles('Administrators')
   @Get('check-email')
-  async checkEmail(@Query('email') email: string) {
-    const value = email?.trim();
-    if (!value) {
-      throw new BadRequestException('email query parameter is required');
-    }
-    const normalized = value.toLowerCase();
+  async checkEmail(@Query() query: EmailQueryDto) {
+    const normalized = query.email.toLowerCase();
     const [civil, customer, admin] = await Promise.all([
       this.civilServants.findByEmail(normalized),
       this.customers.findByEmail(normalized),

@@ -19,6 +19,7 @@ import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
 import * as sfnTasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 import * as lambdaNode from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
+import * as wafv2 from 'aws-cdk-lib/aws-wafv2';
 
 export interface PashashaPayBackendStackProps extends cdk.StackProps {
   /**
@@ -235,6 +236,36 @@ export class PashashaPayBackendStack extends cdk.Stack {
       cors: [
         {
           allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT],
+          allowedOrigins: ['*'],
+          allowedHeaders: ['*'],
+        },
+      ],
+    });
+
+    const kycAssetsBucket = new s3.Bucket(this, 'KycAssetsBucket', {
+      bucketName: 'pashashapay-kyc-assets',
+      autoDeleteObjects: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      cors: [
+        {
+          allowedMethods: [s3.HttpMethods.GET, s3.HttpMethods.PUT],
+          allowedOrigins: ['*'],
+          allowedHeaders: ['*'],
+        },
+      ],
+    });
+
+    const qrAssetsBucket = new s3.Bucket(this, 'QrAssetsBucket', {
+      bucketName: 'pashashapay-qr-assets',
+      autoDeleteObjects: true,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      encryption: s3.BucketEncryption.S3_MANAGED,
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      cors: [
+        {
+          allowedMethods: [s3.HttpMethods.GET],
           allowedOrigins: ['*'],
           allowedHeaders: ['*'],
         },
@@ -755,6 +786,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
             ADMINISTRATORS_TABLE_NAME: administratorsTable.tableName,
             PAYMENTS_TABLE_NAME: paymentsTable.tableName,
             USER_ASSETS_BUCKET: userAssetsBucket.bucketName,
+            KYC_ASSETS_BUCKET: kycAssetsBucket.bucketName,
+            QR_ASSETS_BUCKET: qrAssetsBucket.bucketName,
             COUNTER_TABLE_NAME: accountCounterTable.tableName,
             GUARD_PORTAL_BASE_URL: guardPortalBaseUrl,
             TENANT_WALLET_ID: process.env.TENANT_WALLET_ID ?? '',
@@ -798,6 +831,40 @@ export class PashashaPayBackendStack extends cdk.Stack {
       }
     );
 
+    const webAcl = new wafv2.CfnWebACL(this, 'BackendWebAcl', {
+      name: 'PashashaPay-Backend-RateLimit',
+      scope: 'REGIONAL',
+      defaultAction: { allow: {} },
+      visibilityConfig: {
+        cloudWatchMetricsEnabled: true,
+        metricName: 'backend-waf',
+        sampledRequestsEnabled: true,
+      },
+      rules: [
+        {
+          name: 'RateLimitIP',
+          priority: 1,
+          action: { block: {} },
+          statement: {
+            rateBasedStatement: {
+              limit: 2000,
+              aggregateKeyType: 'IP',
+            },
+          },
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: 'backend-waf-rate-limit',
+            sampledRequestsEnabled: true,
+          },
+        },
+      ],
+    });
+
+    new wafv2.CfnWebACLAssociation(this, 'BackendWebAclAssociation', {
+      resourceArn: service.loadBalancer.loadBalancerArn,
+      webAclArn: webAcl.attrArn,
+    });
+
     service.targetGroup.configureHealthCheck({
       path: '/health',
       healthyHttpCodes: '200',
@@ -820,6 +887,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
     civilServantsTable.grantReadWriteData(service.taskDefinition.taskRole);
     paymentsTable.grantReadWriteData(service.taskDefinition.taskRole);
     userAssetsBucket.grantReadWrite(service.taskDefinition.taskRole);
+    kycAssetsBucket.grantReadWrite(service.taskDefinition.taskRole);
+    qrAssetsBucket.grantReadWrite(service.taskDefinition.taskRole);
     accountCounterTable.grantReadWriteData(service.taskDefinition.taskRole);
     administratorsTable.grantReadWriteData(service.taskDefinition.taskRole);
     supportTicketsTable.grantReadWriteData(service.taskDefinition.taskRole);

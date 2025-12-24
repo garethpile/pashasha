@@ -3,6 +3,10 @@ import { Roles } from '../auth/roles.decorator';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { SupportService } from './support.service';
 import type { SupportUser } from './support.service';
+import { CreateSupportTicketDto } from './dto/create-support-ticket.dto';
+import { SupportTicketsQueryDto } from './dto/support-tickets-query.dto';
+import { SupportCommentDto } from './dto/support-comment.dto';
+import { SupportStatusDto } from './dto/support-status.dto';
 
 @Controller('support')
 export class SupportController {
@@ -18,16 +22,7 @@ export class SupportController {
   @Post('tickets')
   async createTicket(
     @CurrentUser() user: SupportUser,
-    @Body()
-    body: {
-      message?: string;
-      summary?: string;
-      details?: string;
-      issueType?: string;
-      status?: string;
-      supportCode?: string;
-      metadata?: Record<string, any>;
-    },
+    @Body() body: CreateSupportTicketDto,
   ) {
     return this.support.createTicket(user, body);
   }
@@ -36,9 +31,9 @@ export class SupportController {
   @Get('tickets')
   async listTickets(
     @CurrentUser() user: SupportUser,
-    @Query('status') status?: string,
+    @Query() query: SupportTicketsQueryDto,
   ) {
-    const items = await this.support.listTickets(user, status);
+    const items = await this.support.listTickets(user, query.status);
     return { items };
   }
 
@@ -56,7 +51,7 @@ export class SupportController {
   async addComment(
     @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
-    @Body() body: { message?: string },
+    @Body() body: SupportCommentDto,
   ) {
     return this.support.addComment(user, supportCode, body?.message);
   }
@@ -66,7 +61,7 @@ export class SupportController {
   async updateStatusUser(
     @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
-    @Body() body: { status?: string },
+    @Body() body: SupportStatusDto,
   ) {
     return this.support.updateStatus(user, supportCode, body?.status ?? '');
   }
@@ -74,12 +69,12 @@ export class SupportController {
   // Admin endpoints
   @Roles('Administrators')
   @Get('admin/tickets')
-  async adminList(
-    @Query('status') status?: string,
-    @Query('supportCode') supportCode?: string,
-    @Query('familyName') familyName?: string,
-  ) {
-    return this.support.listTicketsAdmin({ status, supportCode, familyName });
+  async adminList(@Query() query: SupportTicketsQueryDto) {
+    return this.support.listTicketsAdmin({
+      status: query.status,
+      supportCode: query.supportCode,
+      familyName: query.familyName,
+    });
   }
 
   @Roles('Administrators')
@@ -93,7 +88,7 @@ export class SupportController {
   async adminComment(
     @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
-    @Body() body: { message?: string },
+    @Body() body: SupportCommentDto,
   ) {
     return this.support.addComment(user, supportCode, body?.message);
   }
@@ -103,7 +98,7 @@ export class SupportController {
   async adminStatus(
     @CurrentUser() user: SupportUser,
     @Param('supportCode') supportCode: string,
-    @Body() body: { status?: string },
+    @Body() body: SupportStatusDto,
   ) {
     return this.support.updateStatus(user, supportCode, body?.status ?? '');
   }
