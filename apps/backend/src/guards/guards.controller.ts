@@ -20,14 +20,14 @@ export class GuardsController {
   constructor(private readonly guardsService: GuardsService) {}
 
   @Public()
-  @Throttle(30, 60)
+  @Throttle({ short: { limit: 30, ttl: 60 } })
   @Get(':token')
   getGuardByToken(@Param('token') token: string) {
     return this.guardsService.findGuardByToken(token);
   }
 
   @Public()
-  @Throttle(20, 60)
+  @Throttle({ short: { limit: 20, ttl: 60 } })
   @Post(':token/tips')
   @HttpCode(HttpStatus.CREATED)
   createTipIntent(
@@ -41,7 +41,7 @@ export class GuardsController {
   }
 
   @Public()
-  @Throttle(10, 60)
+  @Throttle({ short: { limit: 10, ttl: 60 } })
   @Post(':token/topup-sandbox')
   @HttpCode(HttpStatus.CREATED)
   createSandboxTopup(
@@ -65,7 +65,7 @@ export class GuardsController {
   }
 
   @Public()
-  @Throttle(10, 60)
+  @Throttle({ short: { limit: 10, ttl: 60 } })
   @Get(':token/qr')
   async getGuardQrCode(@Param('token') token: string, @Res() res: Response) {
     const { buffer, landingUrl } =
