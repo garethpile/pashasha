@@ -29,6 +29,7 @@ export function CivilServantProfileCard({
   saving,
   feedback,
   showWorkFields = true,
+  showPrimarySite = true,
   occupationOptions,
   showEclipseAccount = false,
   onViewQr,
@@ -48,6 +49,7 @@ export function CivilServantProfileCard({
   saving?: boolean;
   feedback?: string | null;
   showWorkFields?: boolean;
+  showPrimarySite?: boolean;
   occupationOptions?: { value: string; label: string }[];
   showEclipseAccount?: boolean;
   onViewQr?: () => void;
@@ -121,36 +123,40 @@ export function CivilServantProfileCard({
             </label>
           </div>
 
-          {showWorkFields && (
+          {(showWorkFields || showPrimarySite) && (
             <div className="grid gap-4 md:grid-cols-2">
-              <label className="text-xs font-semibold text-slate-600">
-                Occupation
-                <select
-                  value={data.occupation ?? ''}
-                  onChange={(e) => onFieldChange('occupation', e.target.value)}
-                  disabled={!editing}
-                  className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                    editing ? 'bg-white' : 'bg-slate-50'
-                  }`}
-                >
-                  {occupationChoices.map((option) => (
-                    <option key={option.value || option.label} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="text-xs font-semibold text-slate-600">
-                Primary Site
-                <input
-                  value={data.primarySite ?? ''}
-                  onChange={(e) => onFieldChange('primarySite', e.target.value)}
-                  disabled={!editing}
-                  className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
-                    editing ? 'bg-white' : 'bg-slate-50'
-                  }`}
-                />
-              </label>
+              {showWorkFields && (
+                <label className="text-xs font-semibold text-slate-600">
+                  Occupation
+                  <select
+                    value={data.occupation ?? ''}
+                    onChange={(e) => onFieldChange('occupation', e.target.value)}
+                    disabled={!editing}
+                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
+                      editing ? 'bg-white' : 'bg-slate-50'
+                    }`}
+                  >
+                    {occupationChoices.map((option) => (
+                      <option key={option.value || option.label} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {showPrimarySite && (
+                <label className="text-xs font-semibold text-slate-600">
+                  Primary Site
+                  <input
+                    value={data.primarySite ?? ''}
+                    onChange={(e) => onFieldChange('primarySite', e.target.value)}
+                    disabled={!editing}
+                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
+                      editing ? 'bg-white' : 'bg-slate-50'
+                    }`}
+                  />
+                </label>
+              )}
             </div>
           )}
 
