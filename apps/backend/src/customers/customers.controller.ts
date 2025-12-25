@@ -11,6 +11,7 @@ import {
   Res,
   StreamableFile,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CustomersService } from './customers.service';
 import { Roles } from '../auth/roles.decorator';
 import { CreateCustomerDto } from './dto/create-customer.dto';
@@ -102,6 +103,7 @@ export class CustomersController {
 
   @Roles('Customers')
   @Post('me/kyc/documents/:documentType/presign')
+  @Throttle({ upload: { limit: 5, ttl: 300 } })
   presignMyKyc(
     @CurrentUser() user: { sub: string },
     @Param('documentType') documentType: string,
@@ -125,6 +127,7 @@ export class CustomersController {
 
   @Roles('Customers')
   @Post('me/kyc/documents/:documentType/confirm')
+  @Throttle({ upload: { limit: 5, ttl: 300 } })
   confirmMyKyc(
     @CurrentUser() user: { sub: string },
     @Param('documentType') documentType: string,
@@ -241,6 +244,7 @@ export class CustomersController {
 
   @Roles('Administrators')
   @Post(':customerId/kyc/documents/:documentType/presign')
+  @Throttle({ upload: { limit: 10, ttl: 300 } })
   presignKyc(
     @Param('customerId') customerId: string,
     @Param('documentType') documentType: string,
@@ -263,6 +267,7 @@ export class CustomersController {
 
   @Roles('Administrators')
   @Post(':customerId/kyc/documents/:documentType/confirm')
+  @Throttle({ upload: { limit: 10, ttl: 300 } })
   confirmKyc(
     @Param('customerId') customerId: string,
     @Param('documentType') documentType: string,

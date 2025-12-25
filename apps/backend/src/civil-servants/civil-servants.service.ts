@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CivilServantRepository } from '../profiles/civil-servant.repository';
 import { AccountNumberService } from '../profiles/account-number.service';
 import { CreateCivilServantDto } from './dto/create-civil-servant.dto';
@@ -19,7 +20,14 @@ export class CivilServantsService {
     private readonly storage: StorageService,
     private readonly eclipse: EclipseService,
     private readonly payments: PaymentsService,
+    private readonly config: ConfigService,
   ) {}
+
+  private guardTokenTtlMs(): number {
+    const ttlSeconds =
+      this.config.get<number>('GUARD_TOKEN_TTL_SECONDS') ?? 24 * 60 * 60;
+    return ttlSeconds * 1000;
+  }
 
   private getMetadata(value: unknown): Record<string, unknown> | undefined {
     if (!value || typeof value !== 'object') return undefined;
@@ -196,6 +204,9 @@ export class CivilServantsService {
     await this.storage.uploadBuffer(key, buffer, 'image/png');
     await this.repository.update(civilServantId, {
       guardToken: newToken,
+      guardTokenExpiresAt: new Date(
+        Date.now() + this.guardTokenTtlMs(),
+      ).toISOString(),
       qrCodeKey: key,
     });
     return this.findOne(civilServantId);

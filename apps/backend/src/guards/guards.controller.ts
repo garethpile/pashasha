@@ -12,8 +12,9 @@ import { Throttle } from '@nestjs/throttler';
 import { CreateTipIntentDto } from './dto/create-tip-intent.dto';
 import { GuardsService } from './guards.service';
 import type { Response } from 'express';
-import { Public } from '../auth/public.decorator';
 import { CreateSandboxTopupDto } from './dto/create-sandbox-topup.dto';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { Public } from '../auth/public.decorator';
 
 @Controller('guards')
 export class GuardsController {
@@ -64,12 +65,23 @@ export class GuardsController {
     };
   }
 
-  @Public()
   @Throttle({ short: { limit: 10, ttl: 60 } })
   @Get(':token/qr')
-  async getGuardQrCode(@Param('token') token: string, @Res() res: Response) {
-    const { buffer, landingUrl } =
-      await this.guardsService.generateGuardQrCode(token);
+  async getGuardQrCode(
+    @Param('token') token: string,
+    @CurrentUser()
+    user: {
+      sub?: string;
+      username?: string;
+      ['cognito:groups']?: string[];
+    } = {},
+    @Res() res: Response,
+  ) {
+    const { buffer, landingUrl } = await this.guardsService.generateGuardQrCode(
+      token,
+      false,
+      user,
+    );
     res.set({
       'Content-Type': 'image/png',
       'Cache-Control': 'public, max-age=300',
@@ -83,7 +95,29 @@ export class GuardsController {
 
   @Throttle({ qr: { limit: 3, ttl: 300 } })
   @Post(':token/rotate')
-  async rotateGuardToken(@Param('token') token: string) {
-    return this.guardsService.rotateGuardToken(token);
+  async rotateGuardToken(
+    @Param('token') token: string,
+    @CurrentUser()
+    user: {
+      sub?: string;
+      username?: string;
+      ['cognito:groups']?: string[];
+    } = {},
+  ) {
+    return this.guardsService.rotateGuardToken(token, user);
+  }
+
+  @Throttle({ qr: { limit: 3, ttl: 300 } })
+  @Post(':token/revoke')
+  async revokeGuardToken(
+    @Param('token') token: string,
+    @CurrentUser()
+    user: {
+      sub?: string;
+      username?: string;
+      ['cognito:groups']?: string[];
+    } = {},
+  ) {
+    return this.guardsService.revokeGuardToken(token, user);
   }
 }

@@ -1,9 +1,13 @@
 import {
   BadRequestException,
+  ForbiddenException,
+  Inject,
   Injectable,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import { toBuffer as qrcodeToBuffer } from 'qrcode';
 import { CreateTipIntentDto } from './dto/create-tip-intent.dto';
@@ -14,6 +18,8 @@ import { CivilServantEntity } from '../profiles/entities/civil-servant.entity';
 import { EclipseService } from '../payments/eclipse.service';
 import { PaymentsService } from '../payments/payments.service';
 import { PaymentWorkflowService } from '../payments/payment-workflow.service';
+import { runtimeConfig } from '../config/runtime.config';
+import { AuditService } from '../audit/audit.service';
 
 type PaymentResponse = {
   paymentId?: string;
@@ -28,17 +34,12 @@ type PaymentResponse = {
 const MIN_TIP = 5;
 const MAX_TIP = 2000;
 
-const guardPortalBaseFromEnv =
-  process.env.GUARD_PORTAL_BASE_URL ?? process.env.FRONTEND_BASE_URL;
-
-const guardPortalBase =
-  (guardPortalBaseFromEnv
-    ? guardPortalBaseFromEnv.replace(/\/$/, '')
-    : 'https://main.d2vxflzymkt19g.amplifyapp.com') + '/g?token=';
-
 @Injectable()
 export class GuardsService {
   private readonly logger = new Logger(GuardsService.name);
+
+  private readonly guardTokenTtlMs: number;
+  private readonly guardLandingBase: string;
 
   private readonly qrToBuffer: (
     text: string,
@@ -53,12 +54,54 @@ export class GuardsService {
     private readonly eclipse: EclipseService,
     private readonly payments: PaymentsService,
     private readonly paymentWorkflow: PaymentWorkflowService,
-  ) {}
+    private readonly config: ConfigService,
+    @Inject(runtimeConfig.KEY)
+    private readonly runtime: ConfigType<typeof runtimeConfig>,
+    private readonly audit: AuditService,
+  ) {
+    const ttlSeconds =
+      this.config.get<number>('GUARD_TOKEN_TTL_SECONDS') ?? 24 * 60 * 60;
+    this.guardTokenTtlMs = ttlSeconds * 1000;
+    this.guardLandingBase = this.runtime.guardLandingBase;
+  }
 
   private toStringValue(value: unknown): string | undefined {
     if (typeof value === 'string') return value;
     if (typeof value === 'number') return value.toString();
     return undefined;
+  }
+
+  private isAdmin(groups: string[] = []): boolean {
+    const normalized = groups.map((g) =>
+      g
+        .toString()
+        .toLowerCase()
+        .replace(/[\s_-]/g, ''),
+    );
+    return (
+      normalized.includes('administrators') || normalized.includes('admin')
+    );
+  }
+
+  private ensureOwnership(
+    user: { sub?: string; username?: string; ['cognito:groups']?: string[] },
+    entity: CivilServantEntity,
+  ) {
+    const groups = user?.['cognito:groups'] ?? [];
+    if (this.isAdmin(groups)) return;
+
+    const subject = user?.sub ?? user?.username;
+    if (
+      subject &&
+      entity.cognitoUsername &&
+      subject === entity.cognitoUsername
+    ) {
+      return;
+    }
+
+    throw new ForbiddenException(
+      'Forbidden: not the owner of this guard profile',
+    );
   }
 
   private mapEntityToProfile(
@@ -88,10 +131,24 @@ export class GuardsService {
         guardToken: token,
       });
     }
+
+    if (entity.guardTokenExpiresAt) {
+      const expiresAt = Date.parse(entity.guardTokenExpiresAt);
+      if (Number.isFinite(expiresAt) && expiresAt < Date.now()) {
+        throw new NotFoundException({
+          message: 'Guard token expired',
+          guardToken: token,
+        });
+      }
+    }
+
     return this.mapEntityToProfile(entity, token);
   }
 
-  async rotateGuardToken(oldToken: string) {
+  async rotateGuardToken(
+    oldToken: string,
+    actor?: { sub?: string; ['cognito:groups']?: string[] },
+  ) {
     const entity = await this.repository.findByGuardToken(oldToken);
     if (!entity) {
       throw new NotFoundException({
@@ -100,32 +157,111 @@ export class GuardsService {
       });
     }
 
+    this.ensureOwnership(actor ?? {}, entity);
+
     const newToken = randomUUID().replace(/-/g, '');
+    const guardTokenExpiresAt = new Date(
+      Date.now() + this.guardTokenTtlMs,
+    ).toISOString();
     await this.repository.update(entity.civilServantId, {
       guardToken: newToken,
+      guardTokenExpiresAt,
+    });
+
+    await this.audit.record({
+      userId: entity.cognitoUsername ?? entity.civilServantId,
+      actorId: actor?.sub,
+      actorType: this.isAdmin(actor?.['cognito:groups']) ? 'admin' : 'user',
+      eventType: 'guard.token.rotate',
+      description: `Guard token rotated for ${entity.civilServantId}`,
+      metadata: {
+        civilServantId: entity.civilServantId,
+      },
     });
 
     this.logger.log(
-      `Guard token rotated for civilServantId=${entity.civilServantId} oldToken=${oldToken}`,
+      `Guard token rotated for civilServantId=${entity.civilServantId} oldToken=${oldToken} actor=${actor?.sub ?? 'unknown'}`,
     );
 
-    const landingUrl = guardPortalBase + encodeURIComponent(newToken);
+    const landingUrl = this.guardLandingBase + encodeURIComponent(newToken);
 
     return {
       civilServantId: entity.civilServantId,
       guardToken: newToken,
+      guardTokenExpiresAt,
       landingUrl,
+    };
+  }
+
+  async revokeGuardToken(
+    token: string,
+    actor?: { sub?: string; ['cognito:groups']?: string[] },
+  ) {
+    const entity = await this.repository.findByGuardToken(token);
+    if (!entity) {
+      throw new NotFoundException({
+        message: 'Guard not found',
+        guardToken: token,
+      });
+    }
+
+    this.ensureOwnership(actor ?? {}, entity);
+
+    await this.repository.update(entity.civilServantId, {
+      guardToken: null,
+      guardTokenExpiresAt: null,
+    });
+
+    await this.audit.record({
+      userId: entity.cognitoUsername ?? entity.civilServantId,
+      actorId: actor?.sub,
+      actorType: this.isAdmin(actor?.['cognito:groups']) ? 'admin' : 'user',
+      eventType: 'guard.token.revoke',
+      description: `Guard token revoked for ${entity.civilServantId}`,
+      metadata: {
+        civilServantId: entity.civilServantId,
+      },
+    });
+
+    this.logger.log(
+      `Guard token revoked for civilServantId=${entity.civilServantId} actor=${actor?.sub ?? 'unknown'}`,
+    );
+
+    return {
+      civilServantId: entity.civilServantId,
+      revoked: true,
     };
   }
 
   async generateGuardQrCode(
     token: string,
     skipValidation = false,
+    actor?: { sub?: string; ['cognito:groups']?: string[] },
   ): Promise<{ buffer: Buffer; landingUrl: string }> {
+    const entity = skipValidation
+      ? null
+      : await this.repository.findByGuardToken(token);
     if (!skipValidation) {
-      await this.findGuardByToken(token);
+      if (!entity) {
+        throw new NotFoundException({
+          message: 'Guard not found',
+          guardToken: token,
+        });
+      }
+      if (entity.guardTokenExpiresAt) {
+        const expiresAt = Date.parse(entity.guardTokenExpiresAt);
+        if (Number.isFinite(expiresAt) && expiresAt < Date.now()) {
+          throw new NotFoundException({
+            message: 'Guard token expired',
+            guardToken: token,
+          });
+        }
+      }
+      if (actor) {
+        this.ensureOwnership(actor, entity);
+      }
     }
-    const landingUrl = guardPortalBase + encodeURIComponent(token);
+    const landingUrl = this.guardLandingBase + encodeURIComponent(token);
     const rawBuffer: unknown = await this.qrToBuffer(landingUrl, {
       width: 512,
       margin: 1,
@@ -135,6 +271,13 @@ export class GuardsService {
     const buffer = Buffer.isBuffer(rawBuffer)
       ? rawBuffer
       : Buffer.from(rawBuffer as Uint8Array);
+
+    if (entity) {
+      this.logger.log(
+        `Guard QR generated for civilServantId=${entity.civilServantId} actor=${actor?.sub ?? 'unknown'}`,
+      );
+    }
+
     return { buffer, landingUrl };
   }
 
@@ -190,7 +333,7 @@ export class GuardsService {
         workflowResult?.authorizationUrl ||
           workflowResult?.redirectUrl ||
           workflowResult?.completionUrl,
-      ) || guardPortalBase + encodeURIComponent(dto.guardToken);
+      ) || this.guardLandingBase + encodeURIComponent(dto.guardToken);
 
     const intent: TipIntent = {
       intentId: paymentId,

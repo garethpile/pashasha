@@ -227,6 +227,26 @@ export class PashashaPayBackendStack extends cdk.Stack {
       projectionType: dynamodb.ProjectionType.ALL,
     });
 
+    const auditLogsTable = new dynamodb.Table(this, 'AuditLogsTable', {
+      partitionKey: { name: 'auditId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+      billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      tableName: 'PashashaPay-AuditLogs',
+    });
+    auditLogsTable.addGlobalSecondaryIndex({
+      indexName: 'userId-index',
+      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+    auditLogsTable.addGlobalSecondaryIndex({
+      indexName: 'eventType-index',
+      partitionKey: { name: 'eventType', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL,
+    });
+
     const userAssetsBucket = new s3.Bucket(this, 'UserAssetsBucket', {
       bucketName: 'pashashapay-user-assets',
       autoDeleteObjects: true,
@@ -302,12 +322,16 @@ export class PashashaPayBackendStack extends cdk.Stack {
               ECLIPSE_API_BASE: cdk.SecretValue.unsafePlainText(
                 'https://eclipse-java-sandbox.ukheshe.rocks'
               ),
-              ECLIPSE_TENANT_ID: cdk.SecretValue.unsafePlainText(''),
-              ECLIPSE_CLIENT_ID: cdk.SecretValue.unsafePlainText(''),
-              ECLIPSE_CLIENT_SECRET: cdk.SecretValue.unsafePlainText(''),
-              ECLIPSE_TENANT_IDENTITY: cdk.SecretValue.unsafePlainText(''),
-              ECLIPSE_TENANT_PASSWORD: cdk.SecretValue.unsafePlainText(''),
-              ECLIPSE_CALLBACK_BASE: cdk.SecretValue.unsafePlainText(''),
+              ECLIPSE_TENANT_ID: cdk.SecretValue.unsafePlainText('placeholder-tenant-id'),
+              ECLIPSE_CLIENT_ID: cdk.SecretValue.unsafePlainText('placeholder-client-id'),
+              ECLIPSE_CLIENT_SECRET: cdk.SecretValue.unsafePlainText('placeholder-client-secret'),
+              ECLIPSE_TENANT_IDENTITY: cdk.SecretValue.unsafePlainText(
+                'placeholder-tenant-identity'
+              ),
+              ECLIPSE_TENANT_PASSWORD: cdk.SecretValue.unsafePlainText(
+                'placeholder-tenant-password'
+              ),
+              ECLIPSE_CALLBACK_BASE: cdk.SecretValue.unsafePlainText('https://example.com'),
               ECLIPSE_WEBHOOK_SECRET: cdk.SecretValue.unsafePlainText('placeholder'),
             },
             removalPolicy: cdk.RemovalPolicy.DESTROY,
@@ -792,6 +816,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
             GUARD_PORTAL_BASE_URL: guardPortalBaseUrl,
             TENANT_WALLET_ID: process.env.TENANT_WALLET_ID ?? '',
             SUPPORT_TABLE_NAME: supportTicketsTable.tableName,
+            AUDIT_TABLE_NAME: auditLogsTable.tableName,
           },
           secrets: {
             SIGNUP_SNS_TOPIC_ARN: ecs.Secret.fromSsmParameter(signupTopicArnParam),
@@ -809,6 +834,11 @@ export class PashashaPayBackendStack extends cdk.Stack {
               customerPaymentStateMachineArnParam
             ),
             ECLIPSE_API_BASE: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_API_BASE'),
+            ECLIPSE_CLIENT_ID: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_CLIENT_ID'),
+            ECLIPSE_CLIENT_SECRET: ecs.Secret.fromSecretsManager(
+              eclipseSecret,
+              'ECLIPSE_CLIENT_SECRET'
+            ),
             ECLIPSE_TENANT_ID: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_TENANT_ID'),
             ECLIPSE_TENANT_IDENTITY: ecs.Secret.fromSecretsManager(
               eclipseSecret,
@@ -842,8 +872,118 @@ export class PashashaPayBackendStack extends cdk.Stack {
       },
       rules: [
         {
-          name: 'RateLimitIP',
+          name: 'RateLimitLogin',
           priority: 1,
+          action: { block: {} },
+          statement: {
+            rateBasedStatement: {
+              limit: 500,
+              aggregateKeyType: 'IP',
+              scopeDownStatement: {
+                byteMatchStatement: {
+                  fieldToMatch: { uriPath: {} },
+                  positionalConstraint: 'STARTS_WITH',
+                  searchString: '/auth',
+                  textTransformations: [{ priority: 0, type: 'NONE' }],
+                },
+              },
+            },
+          },
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: 'backend-waf-login',
+            sampledRequestsEnabled: true,
+          },
+        },
+        {
+          name: 'RateLimitQr',
+          priority: 2,
+          action: { block: {} },
+          statement: {
+            rateBasedStatement: {
+              limit: 800,
+              aggregateKeyType: 'IP',
+              scopeDownStatement: {
+                byteMatchStatement: {
+                  fieldToMatch: { uriPath: {} },
+                  positionalConstraint: 'STARTS_WITH',
+                  searchString: '/guards',
+                  textTransformations: [{ priority: 0, type: 'NONE' }],
+                },
+              },
+            },
+          },
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: 'backend-waf-qr',
+            sampledRequestsEnabled: true,
+          },
+        },
+        {
+          name: 'RateLimitUploads',
+          priority: 3,
+          action: { block: {} },
+          statement: {
+            rateBasedStatement: {
+              limit: 400,
+              aggregateKeyType: 'IP',
+              scopeDownStatement: {
+                orStatement: {
+                  statements: [
+                    {
+                      byteMatchStatement: {
+                        fieldToMatch: { uriPath: {} },
+                        positionalConstraint: 'CONTAINS',
+                        searchString: '/kyc/documents',
+                        textTransformations: [{ priority: 0, type: 'NONE' }],
+                      },
+                    },
+                    {
+                      byteMatchStatement: {
+                        fieldToMatch: { uriPath: {} },
+                        positionalConstraint: 'CONTAINS',
+                        searchString: '/presign',
+                        textTransformations: [{ priority: 0, type: 'NONE' }],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          },
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: 'backend-waf-upload',
+            sampledRequestsEnabled: true,
+          },
+        },
+        {
+          name: 'RateLimitPayout',
+          priority: 4,
+          action: { block: {} },
+          statement: {
+            rateBasedStatement: {
+              limit: 400,
+              aggregateKeyType: 'IP',
+              scopeDownStatement: {
+                byteMatchStatement: {
+                  fieldToMatch: { uriPath: {} },
+                  positionalConstraint: 'STARTS_WITH',
+                  searchString: '/payments',
+                  textTransformations: [{ priority: 0, type: 'NONE' }],
+                },
+              },
+            },
+          },
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: 'backend-waf-payout',
+            sampledRequestsEnabled: true,
+          },
+        },
+        {
+          name: 'RateLimitIpFallback',
+          priority: 50,
           action: { block: {} },
           statement: {
             rateBasedStatement: {
@@ -895,6 +1035,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
     customerPaymentStateMachine.grantStartExecution(service.taskDefinition.taskRole);
     supportTopic.grantPublish(service.taskDefinition.taskRole);
     signupTopic.grantPublish(service.taskDefinition.taskRole);
+    auditLogsTable.grantReadWriteData(service.taskDefinition.taskRole);
     accountWorkflowCivil.grantStartExecution(service.taskDefinition.taskRole);
     accountWorkflowCustomer.grantStartExecution(service.taskDefinition.taskRole);
     accountWorkflowAdmin.grantStartExecution(service.taskDefinition.taskRole);

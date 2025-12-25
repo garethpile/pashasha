@@ -11,6 +11,7 @@ import {
   Res,
   StreamableFile,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { CivilServantsService } from './civil-servants.service';
 import { Roles } from '../auth/roles.decorator';
 import { CreateCivilServantDto } from './dto/create-civil-servant.dto';
@@ -162,6 +163,7 @@ export class CivilServantsController {
   }
 
   @Post('me/kyc/documents/:documentType/presign')
+  @Throttle({ upload: { limit: 5, ttl: 300 } })
   presignMyKyc(
     @CurrentUser() user: { sub: string },
     @Param('documentType') documentType: string,
@@ -184,6 +186,7 @@ export class CivilServantsController {
   }
 
   @Post('me/kyc/documents/:documentType/confirm')
+  @Throttle({ upload: { limit: 5, ttl: 300 } })
   confirmMyKyc(
     @CurrentUser() user: { sub: string },
     @Param('documentType') documentType: string,
@@ -263,6 +266,7 @@ export class CivilServantsController {
 
   @Roles('Administrators')
   @Post(':civilServantId/kyc/documents/:documentType/presign')
+  @Throttle({ upload: { limit: 10, ttl: 300 } })
   presignKyc(
     @Param('civilServantId') civilServantId: string,
     @Param('documentType') documentType: string,
@@ -285,6 +289,7 @@ export class CivilServantsController {
 
   @Roles('Administrators')
   @Post(':civilServantId/kyc/documents/:documentType/confirm')
+  @Throttle({ upload: { limit: 10, ttl: 300 } })
   confirmKyc(
     @Param('civilServantId') civilServantId: string,
     @Param('documentType') documentType: string,

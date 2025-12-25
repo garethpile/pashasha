@@ -14,13 +14,15 @@ import { AdminUsersModule } from './admin-users/admin-users.module';
 import { PaymentsModule } from './payments/payments.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { SupportModule } from './support/support.module';
-import { validateEnv } from './config/env.schema';
+import { AuditModule } from './audit/audit.module';
+import { loadValidatedEnv, runtimeConfig } from './config/runtime.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      validate: validateEnv,
+      validate: loadValidatedEnv,
+      load: [runtimeConfig],
     }),
     ThrottlerModule.forRoot([
       {
@@ -60,6 +62,7 @@ import { validateEnv } from './config/env.schema';
     PaymentsModule,
     WorkflowsModule,
     SupportModule,
+    AuditModule,
     HealthModule,
   ],
   providers: [

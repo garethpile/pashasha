@@ -27,6 +27,7 @@ export const Header = () => {
     normalizedGroups.some((g) => targets.some((t) => g === t.toLowerCase().replace(/[\s_-]/g, '')));
   const isCivilServant = hasGroup('civilservants', 'civilservant');
   const isCustomer = hasGroup('customers', 'customer');
+  const isAdmin = hasGroup('administrators', 'admin');
   const dashboardLabel = session
     ? isCivilServant
       ? 'Civil Servant Dashboard'
@@ -34,6 +35,7 @@ export const Header = () => {
         ? 'Customer Dashboard'
         : null
     : null;
+  const auditPath = isAdmin ? '/admin/audit' : '/audit';
 
   useEffect(() => {
     setSession(getSession());
@@ -103,6 +105,16 @@ export const Header = () => {
             }}
           >
             Support
+          </button>
+          <button
+            type="button"
+            className="block w-full px-4 py-3 text-left text-sm font-semibold hover:bg-white/10"
+            onClick={() => {
+              setProfileMenuOpen(false);
+              router.push(auditPath);
+            }}
+          >
+            Audit Log
           </button>
           <button
             type="button"
