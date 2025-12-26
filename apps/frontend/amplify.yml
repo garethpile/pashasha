@@ -8,13 +8,12 @@ applications:
             - npm ci --workspaces --prefer-offline=false --no-audit --progress=false
             - npm run build --workspace @pashashapay/contracts
             # Fetch Cognito config from Secrets Manager and export as env vars
-            - |
-              export SECRET_ARN=$(aws secretsmanager list-secrets --query "SecretList[?Name=='pashashapay-frontend-config'].ARN | [0]" --output text)
-              export COGNITO_JSON=$(aws secretsmanager get-secret-value --secret-id "$SECRET_ARN" --query SecretString --output text)
-              export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_USER_POOL_ID)
-              export NEXT_PUBLIC_COGNITO_CLIENT_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_CLIENT_ID)
-              echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID" >> $CODEBUILD_SRC_DIR/.env.production
-              echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID" >> $CODEBUILD_SRC_DIR/.env.production
+            - yum install -y jq
+            - export COGNITO_JSON=$(aws secretsmanager get-secret-value --secret-id "pashashapay-frontend-config" --query SecretString --output text)
+            - export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_USER_POOL_ID)
+            - export NEXT_PUBLIC_COGNITO_CLIENT_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_CLIENT_ID)
+            - echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID" >> $CODEBUILD_SRC_DIR/.env.production
+            - echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID" >> $CODEBUILD_SRC_DIR/.env.production
         build:
           commands:
             - npm run build --workspace frontend
