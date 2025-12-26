@@ -21,6 +21,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build contracts package
+        run: npm run build --workspace @pashashapay/contracts
+
       - name: Lint (all workspaces)
         run: npm run lint --workspaces --if-present
 
