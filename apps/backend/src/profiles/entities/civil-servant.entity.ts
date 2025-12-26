@@ -15,8 +15,8 @@ export interface CivilServantEntity {
   occupation?: string;
   cognitoUsername?: string;
   status?: 'active' | 'inactive';
-  guardToken?: string;
-  guardTokenExpiresAt?: string;
+  guardToken?: string | null;
+  guardTokenExpiresAt?: string | null;
   qrCodeKey?: string;
   photoKey?: string;
   idDocumentKey?: string;

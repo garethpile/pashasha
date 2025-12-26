@@ -2,12 +2,7 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { AuditRepository } from './audit.repository';
 import { AuditLogEntry } from './audit.entity';
-
-export type AuditSearchParams = {
-  userId?: string;
-  eventType?: string;
-  limit?: number;
-};
+import { AuditQueryDto } from './dto/audit-query.dto';
 
 @Injectable()
 export class AuditService {
@@ -31,7 +26,7 @@ export class AuditService {
   }
 
   async search(
-    params: AuditSearchParams,
+    params: AuditQueryDto,
     actor: { sub?: string; groups?: string[] },
   ): Promise<AuditLogEntry[]> {
     const limit = Math.max(1, Math.min(params.limit ?? 50, 200));

@@ -29,13 +29,14 @@ const hasAdminGroup = (groups: string[]) =>
 const buildSecurityHeaders = () => {
   const csp = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https://d219w61biha52r.cloudfront.net https://*.amazonaws.com",
     `connect-src 'self' ${API_ORIGIN} https://*.amazonaws.com http://localhost:4000`,
     "font-src 'self' data:",
     "object-src 'none'",
     "frame-ancestors 'none'",
+    "frame-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
     'upgrade-insecure-requests',
@@ -48,6 +49,11 @@ const buildSecurityHeaders = () => {
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    'Cross-Origin-Opener-Policy': 'same-origin',
+    'Cross-Origin-Resource-Policy': 'same-origin',
+    'X-DNS-Prefetch-Control': 'off',
+    'X-Permitted-Cross-Domain-Policies': 'none',
+    'Origin-Agent-Cluster': '?1',
   };
 };
 
@@ -67,17 +73,16 @@ export function middleware(req: NextRequest) {
   }
 
   const token = req.cookies.get('pp-id-token')?.value;
+  const payload = token ? decodeJwtPayload(token) : null;
+  const tokenGroups: string[] = Array.isArray(payload?.['cognito:groups'])
+    ? payload['cognito:groups']
+    : [];
   const groupsCookie = req.cookies.get('pp-groups')?.value ?? '';
   const cookieGroups = groupsCookie
     .split(',')
     .map((g) => g.trim())
     .filter(Boolean);
-
-  const payload = token ? decodeJwtPayload(token) : null;
-  const tokenGroups: string[] = Array.isArray(payload?.['cognito:groups'])
-    ? payload['cognito:groups']
-    : [];
-  const mergedGroups = [...cookieGroups, ...tokenGroups];
+  const mergedGroups = tokenGroups.length > 0 ? tokenGroups : cookieGroups;
   const isExpired = payload?.exp ? payload.exp * 1000 < Date.now() : false;
 
   const allowed = token && !isExpired && hasAdminGroup(mergedGroups);

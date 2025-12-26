@@ -106,10 +106,10 @@ export const validateEnv = (env: Record<string, unknown>): AppEnv => {
     const messages = Object.entries(formatted)
       .filter(([key]) => key !== '_errors')
       .map(([key, val]) => {
-        const entryErrors = Array.isArray(
+        const entryErrors: string[] = Array.isArray(
           (val as { _errors?: string[] })._errors,
         )
-          ? (val as { _errors?: string[] })._errors
+          ? ((val as { _errors?: string[] })._errors as string[])
           : [];
         const message =
           entryErrors.length > 0 ? entryErrors.join(', ') : 'invalid';

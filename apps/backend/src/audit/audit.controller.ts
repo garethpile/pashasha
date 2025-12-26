@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { AuditService } from './audit.service';
 import { CurrentUser } from '../auth/current-user.decorator';
+import { AuditQueryDto } from './dto/audit-query.dto';
 
 @Controller('audit')
 export class AuditController {
@@ -8,16 +9,13 @@ export class AuditController {
 
   @Get()
   list(
-    @Query('userId') userId: string | undefined,
-    @Query('eventType') eventType: string | undefined,
-    @Query('limit') limitRaw: string | undefined,
+    @Query() query: AuditQueryDto,
     @CurrentUser()
     user: { sub?: string; ['cognito:groups']?: string[] } = {},
   ) {
-    const limit = limitRaw ? Number(limitRaw) : undefined;
-    return this.audit.search(
-      { userId: userId || undefined, eventType: eventType || undefined, limit },
-      { sub: user?.sub, groups: user?.['cognito:groups'] },
-    );
+    return this.audit.search(query, {
+      sub: user?.sub,
+      groups: user?.['cognito:groups'],
+    });
   }
 }
