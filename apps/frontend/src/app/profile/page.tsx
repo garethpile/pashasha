@@ -14,7 +14,7 @@ export default function ProfilePage() {
           href="/"
           className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700"
         >
-          Go home
+          Go home 1
         </a>
         <a
           href="/admin/civil-servants"
