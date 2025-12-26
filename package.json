@@ -21,7 +21,7 @@
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md,css,scss}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md,css,scss}\"",
     "check": "npm-run-all lint typecheck format:check",
-    "prepare": "if [ \"$CI\" != \"true\" ]; then husky install; fi"
+    "prepare": "if [ \"$CI\" != \"true\" ]; then husky install; fi || true"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json,css,md}": [
