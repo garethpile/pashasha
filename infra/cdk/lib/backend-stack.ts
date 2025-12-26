@@ -1,3 +1,4 @@
+// ...existing code...
 import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -1073,6 +1074,34 @@ export class PashashaPayBackendStack extends cdk.Stack {
     this.userPoolId = userPool.userPoolId;
     this.userPoolClientId = userPoolClient.userPoolClientId;
 
+    // --- Frontend Cognito config in Secrets Manager ---
+    const frontendSecrets = new secretsmanager.Secret(this, 'FrontendSecrets', {
+      secretName: 'pashashapay-frontend-config',
+      description: 'Frontend config for Cognito integration',
+      secretObjectValue: {
+        NEXT_PUBLIC_COGNITO_USER_POOL_ID: cdk.SecretValue.unsafePlainText(userPool.userPoolId),
+        NEXT_PUBLIC_COGNITO_CLIENT_ID: cdk.SecretValue.unsafePlainText(
+          userPoolClient.userPoolClientId
+        ),
+      },
+    });
+
+    // Amplify build role for frontend to fetch secrets
+    const amplifyBuildRole = new iam.Role(this, 'AmplifyFrontendBuildRole', {
+      assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com'),
+      description: 'Role for Amplify frontend build to fetch Cognito config from Secrets Manager',
+    });
+    frontendSecrets.grantRead(amplifyBuildRole);
+
+    new cdk.CfnOutput(this, 'FrontendSecretsArn', {
+      value: frontendSecrets.secretArn,
+    });
+    new cdk.CfnOutput(this, 'AmplifyFrontendBuildRoleArn', {
+      value: amplifyBuildRole.roleArn,
+    });
+    // ...existing code...
+
+    // --- Standard outputs ---
     new cdk.CfnOutput(this, 'BackendLoadBalancerDns', {
       value: this.loadBalancerDnsName,
       exportName: 'PashashaPayBackendAlbDns',
@@ -1080,11 +1109,9 @@ export class PashashaPayBackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'BackendServiceSecurityGroup', {
       value: service.service.connections.securityGroups[0].securityGroupId,
     });
-
     new cdk.CfnOutput(this, 'BackendListenerArn', {
       value: this.backendListener.listenerArn,
     });
-
     new cdk.CfnOutput(this, 'BackendApiEndpoint', {
       value: this.apiEndpoint,
     });
@@ -1094,7 +1121,6 @@ export class PashashaPayBackendStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'BackendCloudFrontDomain', {
       value: distribution.domainName,
     });
-
     new cdk.CfnOutput(this, 'UserPoolId', {
       value: userPool.userPoolId,
     });
