@@ -70,6 +70,7 @@ export function CivilServantProfileCard({
       { value: 'Security Guard', label: 'Security Guard' },
       { value: 'Parking Attendant', label: 'Parking Attendant' },
       { value: 'Golf Caddy', label: 'Golf Caddy' },
+      { value: 'Traffic Controller', label: 'Traffic Controller' },
       { value: 'Unemployed', label: 'Unemployed' },
       { value: 'Other', label: 'Other' },
     ] as const);
