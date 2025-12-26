@@ -6,6 +6,7 @@ applications:
         preBuild:
           commands:
             - npm ci --workspaces --prefer-offline=false --no-audit --progress=false
+            - npm run build --workspace @pashashapay/contracts
         build:
           commands:
             - npm run build --workspace frontend
