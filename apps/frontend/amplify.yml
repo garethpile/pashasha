@@ -2,13 +2,22 @@ version: 1
 applications:
   - appRoot: apps/frontend
     frontend:
+      buildImage: aws/codebuild/standard:7.0
       phases:
         preBuild:
           commands:
+            - nvm install 20 && nvm use 20
+            - node -v && npm -v
             - npm ci --workspaces --prefer-offline=false --no-audit --progress=false
             - npm run build --workspace @pashashapay/contracts
+            # Set AWS_REGION for CLI
+            - export AWS_REGION=$AWS_DEFAULT_REGION
+            # Use the Amplify build role (already assumed in Amplify builds)
+            # Ensure AWS CLI and jq are installed
+            - which aws || (curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && sudo ./aws/install)
+            - which jq || (yum install -y jq || apt-get update && apt-get install -y jq)
             # Fetch Cognito config from Secrets Manager and export as env vars
-            - export COGNITO_JSON=$(aws secretsmanager get-secret-value --secret-id "pashashapay-frontend-config" --query SecretString --output text)
+            - export COGNITO_JSON=$(aws secretsmanager get-secret-value --region $AWS_REGION --secret-id "pashashapay-frontend-config" --query SecretString --output text)
             - export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_USER_POOL_ID)
             - export NEXT_PUBLIC_COGNITO_CLIENT_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_CLIENT_ID)
             - echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID" >> $CODEBUILD_SRC_DIR/.env.production
