@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { Construct } from 'constructs';
 import * as amplify from '@aws-cdk/aws-amplify-alpha';
+import { AmplifySSRLoggingRolePatch } from './ssr-logging-role-patch';
 
 export interface PashashaPayFrontendStackProps extends cdk.StackProps {
   /**
@@ -169,5 +170,10 @@ export class PashashaPayFrontendStack extends cdk.Stack {
 
     this.amplifyApp = app;
     this.primaryBranch = branch;
+
+    // Patch SSR Logging Role for Amplify with secret access (if role exists)
+    new AmplifySSRLoggingRolePatch(this, 'SSRLoggingRolePatch', {
+      secretArn: props.frontendSecretsArn,
+    });
   }
 }
