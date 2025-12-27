@@ -2,7 +2,7 @@ version: 1
 applications:
   - appRoot: apps/frontend
     frontend:
-      buildImage: aws/codebuild/standard:7.0
+      buildImage: aws/codebuild/standard:8.0 # Node.js 24.x included
       phases:
         preBuild:
           commands:
