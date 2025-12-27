@@ -28,4 +28,5 @@ new PashashaPayFrontendStack(app, 'PashashaPayFrontendStack', {
   repositoryName: context.repositoryName,
   githubTokenSecretArn: context.githubTokenSecretArn,
   branchName: context.branchName,
+  frontendSecretsArn: backendStack.frontendSecretsArn,
 });

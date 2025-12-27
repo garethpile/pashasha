@@ -1,4 +1,3 @@
-// ...existing code...
 import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -44,6 +43,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
   public readonly secureApiEndpoint: string;
   public readonly userPoolId: string;
   public readonly userPoolClientId: string;
+  public readonly frontendSecretsArn: string;
 
   constructor(scope: Construct, id: string, props: PashashaPayBackendStackProps = {}) {
     super(scope, id, props);
@@ -1086,20 +1086,10 @@ export class PashashaPayBackendStack extends cdk.Stack {
       },
     });
 
-    // Amplify build role for frontend to fetch secrets
-    const amplifyBuildRole = new iam.Role(this, 'AmplifyFrontendBuildRole', {
-      assumedBy: new iam.ServicePrincipal('codebuild.amazonaws.com'),
-      description: 'Role for Amplify frontend build to fetch Cognito config from Secrets Manager',
-    });
-    frontendSecrets.grantRead(amplifyBuildRole);
-
     new cdk.CfnOutput(this, 'FrontendSecretsArn', {
       value: frontendSecrets.secretArn,
     });
-    new cdk.CfnOutput(this, 'AmplifyFrontendBuildRoleArn', {
-      value: amplifyBuildRole.roleArn,
-    });
-    // ...existing code...
+    this.frontendSecretsArn = frontendSecrets.secretArn;
 
     // --- Standard outputs ---
     new cdk.CfnOutput(this, 'BackendLoadBalancerDns', {

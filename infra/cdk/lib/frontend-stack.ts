@@ -45,6 +45,11 @@ export interface PashashaPayFrontendStackProps extends cdk.StackProps {
    * Branch to deploy (defaults to main).
    */
   readonly branchName?: string;
+
+  /**
+   * ARN of the frontend config secret in Secrets Manager.
+   */
+  readonly frontendSecretsArn: string;
 }
 
 export class PashashaPayFrontendStack extends cdk.Stack {
@@ -133,6 +138,25 @@ export class PashashaPayFrontendStack extends cdk.Stack {
       stage: 'PRODUCTION',
       autoBuild: false,
       pullRequestPreview: false,
+    });
+
+    // IAM role for Amplify build to access frontend secret
+    const amplifyBuildRole = new cdk.aws_iam.Role(this, 'AmplifyBuildRole', {
+      assumedBy: new cdk.aws_iam.ServicePrincipal('amplify.amazonaws.com'),
+      description: 'IAM role for Amplify build to access frontend config secret',
+    });
+
+    // Grant read access to the frontend secret
+    amplifyBuildRole.addToPolicy(
+      new cdk.aws_iam.PolicyStatement({
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: [props.frontendSecretsArn],
+      })
+    );
+
+    // Output the build role ARN for reference
+    new cdk.CfnOutput(this, 'AmplifyBuildRoleArn', {
+      value: amplifyBuildRole.roleArn,
     });
 
     new cdk.CfnOutput(this, 'AmplifyAppId', {
