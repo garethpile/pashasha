@@ -1,18 +1,22 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthenticationDetails, CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js';
 import { persistSession } from '../../lib/auth/session';
 
 type Stage = 'login' | 'forceChange' | 'forgotRequest' | 'forgotConfirm';
 
-const pool = new CognitoUserPool({
-  UserPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || '',
-  ClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || '',
-});
-
 export default function LoginPage() {
+  const userPoolId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || '';
+  const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || '';
+
+  // Memoize pool creation to avoid repeated instantiation.
+  const pool = useMemo(() => {
+    if (!userPoolId || !clientId) return null;
+    return new CognitoUserPool({ UserPoolId: userPoolId, ClientId: clientId });
+  }, [userPoolId, clientId]);
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [stage, setStage] = useState<Stage>('login');
@@ -25,6 +29,21 @@ export default function LoginPage() {
   const [resetCode, setResetCode] = useState('');
   const [resetPassword, setResetPassword] = useState('');
   const router = useRouter();
+
+  // If config is missing at build or runtime, render a graceful message to avoid build failure.
+  if (!pool) {
+    return (
+      <main className="mx-auto flex min-h-screen max-w-lg flex-col gap-6 px-4 pb-16 pt-24 sm:px-6 lg:px-8">
+        <header className="space-y-2 text-center">
+          <h1 className="text-3xl font-semibold text-slate-900">Configuration missing</h1>
+          <p className="text-sm text-slate-600">
+            Cognito settings are not available. Please set NEXT_PUBLIC_COGNITO_USER_POOL_ID and
+            NEXT_PUBLIC_COGNITO_CLIENT_ID.
+          </p>
+        </header>
+      </main>
+    );
+  }
 
   const handleAuthSuccess = (result: any) => {
     const idToken = result.getIdToken().getJwtToken();
