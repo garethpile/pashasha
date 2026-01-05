@@ -1086,6 +1086,23 @@ export class PashashaPayBackendStack extends cdk.Stack {
       },
     });
 
+    // Allow Amplify SSR logging/build roles (with generated suffixes) to read the frontend secret.
+    frontendSecrets.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ['secretsmanager:GetSecretValue'],
+        principals: [new iam.StarPrincipal()],
+        conditions: {
+          StringLike: {
+            'aws:PrincipalArn': [
+              `arn:aws:iam::${cdk.Aws.ACCOUNT_ID}:role/AmplifySSRLoggingRole-*`,
+              `arn:aws:iam::${cdk.Aws.ACCOUNT_ID}:role/AmplifyBuildRole-*`,
+            ],
+          },
+        },
+        resources: [frontendSecrets.secretArn],
+      })
+    );
+
     new cdk.CfnOutput(this, 'FrontendSecretsArn', {
       value: frontendSecrets.secretArn,
     });
