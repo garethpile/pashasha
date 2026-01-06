@@ -6,28 +6,28 @@ applications:
       phases:
         preBuild:
           commands:
-            - set -euo pipefail
+            - 'set -euo pipefail'
             - node -v && npm -v
             - npm ci --workspaces --prefer-offline=false --no-audit --progress=false
             - npm run build --workspace @pashashapay/contracts
             # Set AWS_REGION for CLI
-            - export AWS_REGION=${AWS_DEFAULT_REGION:-$AWS_REGION}
+            - 'export AWS_REGION=${AWS_DEFAULT_REGION:-$AWS_REGION}'
             # Ensure AWS CLI and jq are installed
             - which aws || (curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" && unzip awscliv2.zip && sudo ./aws/install)
             - which jq || sudo yum -y install jq
             # Debug identity
             - aws sts get-caller-identity
             # Fetch Cognito config from Secrets Manager; if missing, fail fast
-            - export COGNITO_JSON=$(aws secretsmanager get-secret-value --region $AWS_REGION --secret-id "pashashapay-frontend-config" --query SecretString --output text)
-            - echo "Fetched secret length: ${#COGNITO_JSON}"
-            - export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(echo "$COGNITO_JSON" | jq -r .NEXT_PUBLIC_COGNITO_USER_POOL_ID)
-            - export NEXT_PUBLIC_COGNITO_CLIENT_ID=$(echo "$COGNITO_JSON" | jq -r .NEXT_PUBLIC_COGNITO_CLIENT_ID)
-            - export NEXT_PUBLIC_AWS_REGION=$AWS_REGION
+            - 'export COGNITO_JSON=$(aws secretsmanager get-secret-value --region $AWS_REGION --secret-id "pashashapay-frontend-config" --query SecretString --output text)'
+            - 'echo "Fetched secret length: ${#COGNITO_JSON}"'
+            - 'export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(echo "$COGNITO_JSON" | jq -r .NEXT_PUBLIC_COGNITO_USER_POOL_ID)'
+            - 'export NEXT_PUBLIC_COGNITO_CLIENT_ID=$(echo "$COGNITO_JSON" | jq -r .NEXT_PUBLIC_COGNITO_CLIENT_ID)'
+            - 'export NEXT_PUBLIC_AWS_REGION=$AWS_REGION'
             - '[[ -n "$NEXT_PUBLIC_COGNITO_USER_POOL_ID" && -n "$NEXT_PUBLIC_COGNITO_CLIENT_ID" ]] || { echo "Cognito env missing"; exit 1; }'
-            - echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID" >> .env.production
-            - echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID" >> .env.production
-            - echo "NEXT_PUBLIC_AWS_REGION=$NEXT_PUBLIC_AWS_REGION" >> .env.production
-            - echo "--- .env.production ---" && cat .env.production
+            - 'echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID" >> .env.production'
+            - 'echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID" >> .env.production'
+            - 'echo "NEXT_PUBLIC_AWS_REGION=$NEXT_PUBLIC_AWS_REGION" >> .env.production'
+            - 'echo "--- .env.production ---" && cat .env.production'
         build:
           commands:
             - NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID NEXT_PUBLIC_AWS_REGION=$NEXT_PUBLIC_AWS_REGION npm run build --workspace frontend
