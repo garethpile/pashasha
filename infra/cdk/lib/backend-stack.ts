@@ -1134,6 +1134,22 @@ export class PashashaPayBackendStack extends cdk.Stack {
       })
     );
 
+    // Identity-based policy for the observed Amplify SSR Logging role (name with suffix from logs).
+    new iam.CfnPolicy(this, 'AmplifySsrLoggingRoleSecretAccess', {
+      policyName: 'AmplifySSRLoggingRoleSecretAccess',
+      roles: ['AmplifySSRLoggingRole-2dea8e80-0f5b-4edc-93fa-e1dd23f58ea0'],
+      policyDocument: {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Effect: 'Allow',
+            Action: ['secretsmanager:GetSecretValue'],
+            Resource: [frontendSecrets.secretArn, `${frontendSecrets.secretArn}*`],
+          },
+        ],
+      },
+    });
+
     new cdk.CfnOutput(this, 'FrontendSecretsArn', {
       value: frontendSecrets.secretArn,
     });
