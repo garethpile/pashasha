@@ -1117,6 +1117,23 @@ export class PashashaPayBackendStack extends cdk.Stack {
       })
     );
 
+    // Allow STS assumed-role ARNs for Amplify SSR/build roles (the caller in logs is sts::...:assumed-role/AmplifySSRLoggingRole-*/BuildSession).
+    frontendSecrets.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ['secretsmanager:GetSecretValue'],
+        principals: [new iam.StarPrincipal()],
+        conditions: {
+          ArnLike: {
+            'aws:PrincipalArn': [
+              `arn:aws:sts::${cdk.Aws.ACCOUNT_ID}:assumed-role/AmplifySSRLoggingRole-*/*`,
+              `arn:aws:sts::${cdk.Aws.ACCOUNT_ID}:assumed-role/AmplifyBuildRole-*/*`,
+            ],
+          },
+        },
+        resources: [frontendSecrets.secretArn],
+      })
+    );
+
     new cdk.CfnOutput(this, 'FrontendSecretsArn', {
       value: frontendSecrets.secretArn,
     });
