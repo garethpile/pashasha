@@ -1103,6 +1103,20 @@ export class PashashaPayBackendStack extends cdk.Stack {
       })
     );
 
+    // Fallback: allow any Amplify-associated role in this account to read the secret.
+    frontendSecrets.addToResourcePolicy(
+      new iam.PolicyStatement({
+        actions: ['secretsmanager:GetSecretValue'],
+        principals: [new iam.AccountPrincipal(cdk.Aws.ACCOUNT_ID)],
+        conditions: {
+          ArnLike: {
+            'aws:PrincipalArn': `arn:aws:iam::${cdk.Aws.ACCOUNT_ID}:role/*Amplify*`,
+          },
+        },
+        resources: [frontendSecrets.secretArn],
+      })
+    );
+
     new cdk.CfnOutput(this, 'FrontendSecretsArn', {
       value: frontendSecrets.secretArn,
     });
