@@ -377,6 +377,14 @@ export class PashashaPayBackendStack extends cdk.Stack {
     const defaultGuardPortal = 'https://dev.pashasha.com';
     const guardPortalBaseUrl = process.env.GUARD_PORTAL_BASE_URL ?? defaultGuardPortal;
 
+    const defaultAllowedOrigins = [
+      'http://localhost:3000',
+      'https://master.d28mxe1buxl9n7.amplifyapp.com',
+      guardPortalBaseUrl,
+    ]
+      .filter(Boolean)
+      .join(',');
+
     const workflowFunction = new lambdaNode.NodejsFunction(this, 'AccountWorkflowLambda', {
       entry: path.join(__dirname, '../../lambda/account-workflow/handler.ts'),
       handler: 'handler',
@@ -815,6 +823,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
             QR_ASSETS_BUCKET: qrAssetsBucket.bucketName,
             COUNTER_TABLE_NAME: accountCounterTable.tableName,
             GUARD_PORTAL_BASE_URL: guardPortalBaseUrl,
+            ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS ?? defaultAllowedOrigins,
             TENANT_WALLET_ID: process.env.TENANT_WALLET_ID ?? '',
             SUPPORT_TABLE_NAME: supportTicketsTable.tableName,
             AUDIT_TABLE_NAME: auditLogsTable.tableName,

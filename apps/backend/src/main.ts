@@ -25,18 +25,19 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (requestOrigin: string | undefined, callback: CorsCallback) => {
-      if (!requestOrigin && origins.length === 0) {
+      // Allow server-to-server calls (no Origin header) to avoid failing health checks.
+      if (!requestOrigin) {
         callback(null, false);
         return;
       }
-      if (
-        origins.length === 0 ||
-        (requestOrigin && origins.includes(requestOrigin))
-      ) {
-        callback(null, requestOrigin ?? false);
+
+      if (origins.length === 0 || origins.includes(requestOrigin)) {
+        callback(null, requestOrigin);
         return;
       }
-      callback(new Error('CORS origin denied'));
+
+      // Deny by omitting CORS headers instead of throwing, to avoid 500s.
+      callback(null, false);
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
