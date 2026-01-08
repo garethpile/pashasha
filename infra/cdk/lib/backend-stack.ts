@@ -379,6 +379,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
 
     const defaultAllowedOrigins = [
       'http://localhost:3000',
+      // Keep both historical Amplify URLs to avoid CORS mismatches if the branch URL changes.
+      'https://master.d28mxe1bux19h7.amplifyapp.com',
       'https://master.d28mxe1buxl9n7.amplifyapp.com',
       guardPortalBaseUrl,
     ]
@@ -1091,6 +1093,10 @@ export class PashashaPayBackendStack extends cdk.Stack {
         NEXT_PUBLIC_COGNITO_USER_POOL_ID: cdk.SecretValue.unsafePlainText(userPool.userPoolId),
         NEXT_PUBLIC_COGNITO_CLIENT_ID: cdk.SecretValue.unsafePlainText(
           userPoolClient.userPoolClientId
+        ),
+        NEXT_PUBLIC_API_BASE_URL: cdk.SecretValue.unsafePlainText(`${this.secureApiEndpoint}/api`),
+        NEXT_PUBLIC_BACKEND_API_ROOT: cdk.SecretValue.unsafePlainText(
+          `${this.secureApiEndpoint}/api`
         ),
       },
     });

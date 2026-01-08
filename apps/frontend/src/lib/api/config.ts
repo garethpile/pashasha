@@ -3,7 +3,7 @@
 const ENV_API_ROOT =
   process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_BACKEND_API_ROOT;
 // Backend API is fronted by CloudFront and exposes the base /api path.
-const PROD_API_ROOT = ENV_API_ROOT || 'https://d219w61biha52r.cloudfront.net/api';
+const PROD_API_ROOT = ENV_API_ROOT || 'https://d3513l2t9aq2xv.cloudfront.net/api';
 const LOCAL_API_ROOT = 'http://localhost:4000/api';
 
 export const resolveApiRoot = () => {
