@@ -6,7 +6,7 @@ const ADMIN_GROUPS = ['administrators', 'admin'];
 const API_ORIGIN =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_BACKEND_API_ROOT ||
-  'https://d219w61biha52r.cloudfront.net';
+  'https://d3513l2t9aq2xv.cloudfront.net';
 
 const normalizeGroup = (value: string) => value.toLowerCase().replace(/[\s_-]/g, '');
 
@@ -31,8 +31,8 @@ const buildSecurityHeaders = () => {
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https://d219w61biha52r.cloudfront.net https://*.amazonaws.com",
-    `connect-src 'self' ${API_ORIGIN} https://*.amazonaws.com http://localhost:4000`,
+    "img-src 'self' data: https://d3513l2t9aq2xv.cloudfront.net https://d219w61biha52r.cloudfront.net https://*.amazonaws.com",
+    `connect-src 'self' ${API_ORIGIN} https://d219w61biha52r.cloudfront.net https://d3513l2t9aq2xv.cloudfront.net https://*.amazonaws.com http://localhost:4000`,
     "font-src 'self' data:",
     "object-src 'none'",
     "frame-ancestors 'none'",
