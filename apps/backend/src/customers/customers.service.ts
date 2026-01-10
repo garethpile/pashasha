@@ -169,7 +169,16 @@ export class CustomersService {
     if (!customer.eclipseWalletId) {
       throw new NotFoundException('Wallet not linked for this customer');
     }
-    const walletRaw = await this.eclipse.getWallet(customer.eclipseWalletId);
+    let walletRaw: unknown;
+    try {
+      walletRaw = await this.eclipse.getWallet(customer.eclipseWalletId);
+    } catch (err) {
+      const message = (err as Error)?.message ?? '';
+      if (/Eclipse getWallet failed:\s*404\b/i.test(message)) {
+        throw new NotFoundException('Wallet not found for this customer');
+      }
+      throw err;
+    }
     const wallet = this.ensureRecord(walletRaw);
     const parseAmount = (value: unknown): number | undefined => {
       if (typeof value === 'number') return value;

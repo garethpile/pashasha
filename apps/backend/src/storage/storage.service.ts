@@ -5,6 +5,7 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
   GetObjectCommand,
+  HeadObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
@@ -38,6 +39,25 @@ export class StorageService {
     if (key.startsWith('qr/')) return this.qrBucketName;
     if (key.startsWith('kyc/')) return this.kycBucketName;
     return this.bucketName;
+  }
+
+  private async objectExists(bucket: string, key: string): Promise<boolean> {
+    try {
+      await this.s3.send(
+        new HeadObjectCommand({
+          Bucket: bucket,
+          Key: key,
+        }),
+      );
+      return true;
+    } catch (err) {
+      const meta = (err as { $metadata?: { httpStatusCode?: number } })
+        ?.$metadata;
+      if (meta?.httpStatusCode === 404) return false;
+      const name = (err as { name?: string })?.name;
+      if (name === 'NotFound' || name === 'NoSuchKey') return false;
+      throw err;
+    }
   }
 
   private encryptionHeaders():
@@ -100,7 +120,23 @@ export class StorageService {
   }
 
   async createDownloadUrl(key: string, expires = 300, bucketOverride?: string) {
-    const bucket = this.resolveBucketForKey(key, bucketOverride);
+    let bucket = this.resolveBucketForKey(key, bucketOverride);
+
+    // Backward-compat: some older QR uploads exist in USER_ASSETS_BUCKET.
+    // If the QR bucket doesn't have the key but the user bucket does, sign from the user bucket.
+    if (
+      !bucketOverride &&
+      key.startsWith('qr/') &&
+      this.qrBucketName &&
+      this.bucketName &&
+      this.qrBucketName !== this.bucketName
+    ) {
+      const inQr = await this.objectExists(this.qrBucketName, key);
+      if (!inQr) {
+        const inUser = await this.objectExists(this.bucketName, key);
+        if (inUser) bucket = this.bucketName;
+      }
+    }
     const command = new GetObjectCommand({
       Bucket: bucket,
       Key: key,

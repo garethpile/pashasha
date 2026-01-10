@@ -243,7 +243,16 @@ export class CivilServantsService {
       throw new NotFoundException('Wallet not linked for this civil servant');
     }
 
-    const wallet = await this.eclipse.getWallet(servant.eclipseWalletId);
+    let wallet: any;
+    try {
+      wallet = await this.eclipse.getWallet(servant.eclipseWalletId);
+    } catch (err) {
+      const message = (err as Error)?.message ?? '';
+      if (/Eclipse getWallet failed:\s*404\b/i.test(message)) {
+        throw new NotFoundException('Wallet not found for this civil servant');
+      }
+      throw err;
+    }
     if (!wallet || typeof wallet !== 'object') {
       throw new NotFoundException('Unable to read wallet details');
     }
@@ -340,7 +349,16 @@ export class CivilServantsService {
     if (!servant.eclipseWalletId) {
       throw new NotFoundException('Wallet not linked for this civil servant');
     }
-    const wallet = await this.eclipse.getWallet(servant.eclipseWalletId);
+    let wallet: any;
+    try {
+      wallet = await this.eclipse.getWallet(servant.eclipseWalletId);
+    } catch (err) {
+      const message = (err as Error)?.message ?? '';
+      if (/Eclipse getWallet failed:\s*404\b/i.test(message)) {
+        throw new NotFoundException('Wallet not found for this civil servant');
+      }
+      throw err;
+    }
     const parseAmount = (value: unknown): number | undefined => {
       if (typeof value === 'number') return value;
       if (typeof value === 'string') {

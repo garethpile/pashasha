@@ -51,6 +51,10 @@ export const envSchema = z
     SUPPORT_TOPIC_ARN: z.string().min(1, 'SUPPORT_TOPIC_ARN is required'),
     SUPPORT_TABLE_NAME: z.string().min(1, 'SUPPORT_TABLE_NAME is required'),
 
+    // If provided, this should contain the entire Secrets Manager JSON payload for Eclipse.
+    // We merge recognized keys into the env before validation.
+    ECLIPSE_SECRET_JSON: z.string().min(1).optional(),
+
     // Eclipse payments API
     ECLIPSE_API_BASE: z
       .string()
@@ -99,8 +103,90 @@ export const envSchema = z
 
 export type AppEnv = z.infer<typeof envSchema>;
 
+const asNonEmptyString = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const pickFirst = (
+  obj: Record<string, unknown>,
+  keys: string[],
+): string | undefined => {
+  for (const key of keys) {
+    const value = asNonEmptyString(obj[key]);
+    if (value) return value;
+  }
+  return undefined;
+};
+
+const mergeEclipseSecretIntoEnv = (
+  env: Record<string, unknown>,
+): Record<string, unknown> => {
+  const raw = asNonEmptyString(env.ECLIPSE_SECRET_JSON);
+  if (!raw) return env;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(
+      'Invalid environment configuration: ECLIPSE_SECRET_JSON: invalid JSON',
+    );
+  }
+
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    throw new Error(
+      'Invalid environment configuration: ECLIPSE_SECRET_JSON: must be a JSON object',
+    );
+  }
+
+  const secret = parsed as Record<string, unknown>;
+
+  const candidates = {
+    ECLIPSE_API_BASE: [
+      'ECLIPSE_API_BASE',
+      'NEXT_ECLIPSE_API_BASE',
+      'NEXT_ECLIPSE_BASE_URL',
+      'NEXT_ECLIPSE_BASE',
+    ],
+    ECLIPSE_TENANT_ID: ['ECLIPSE_TENANT_ID', 'NEXT_ECLIPSE_TENANT_ID'],
+    ECLIPSE_CLIENT_ID: ['ECLIPSE_CLIENT_ID', 'NEXT_ECLIPSE_CLIENT_ID'],
+    ECLIPSE_CLIENT_SECRET: [
+      'ECLIPSE_CLIENT_SECRET',
+      'NEXT_ECLIPSE_CLIENT_SECRET',
+    ],
+    ECLIPSE_TENANT_IDENTITY: [
+      'ECLIPSE_TENANT_IDENTITY',
+      'NEXT_ECLIPSE_TENANT_IDENTITY',
+    ],
+    ECLIPSE_TENANT_PASSWORD: [
+      'ECLIPSE_TENANT_PASSWORD',
+      'NEXT_ECLIPSE_TENANT_PASSWORD',
+    ],
+    ECLIPSE_CALLBACK_BASE: [
+      'ECLIPSE_CALLBACK_BASE',
+      'NEXT_ECLIPSE_CALLBACK_BASE',
+    ],
+    ECLIPSE_WEBHOOK_SECRET: [
+      'ECLIPSE_WEBHOOK_SECRET',
+      'NEXT_ECLIPSE_WEBHOOK_SECRET',
+    ],
+  };
+
+  const merged: Record<string, unknown> = { ...env };
+  for (const [targetKey, keys] of Object.entries(candidates)) {
+    if (asNonEmptyString(merged[targetKey])) continue;
+    const candidate = pickFirst(secret, keys);
+    if (candidate) merged[targetKey] = candidate;
+  }
+
+  return merged;
+};
+
 export const validateEnv = (env: Record<string, unknown>): AppEnv => {
-  const parsed = envSchema.safeParse(env);
+  const mergedEnv = mergeEclipseSecretIntoEnv(env);
+  const parsed = envSchema.safeParse(mergedEnv);
   if (!parsed.success) {
     const formatted = parsed.error.format();
     const messages = Object.entries(formatted)

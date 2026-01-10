@@ -35,6 +35,55 @@ type EclipseSecret = {
   ECLIPSE_TENANT_PASSWORD?: string;
 };
 
+const asNonEmptyString = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+};
+
+const pickFirst = (obj: Record<string, unknown>, keys: string[]): string | undefined => {
+  for (const key of keys) {
+    const value = asNonEmptyString(obj[key]);
+    if (value) return value;
+  }
+  return undefined;
+};
+
+const normalizeEclipseApiBase = (apiBase: string): string => {
+  const trimmed = apiBase.replace(/\/$/, '');
+  if (trimmed.includes('/eclipse-conductor/rest/v1')) return trimmed;
+  if (trimmed.includes('ukheshe.rocks')) return `${trimmed}/eclipse-conductor/rest/v1`;
+  return trimmed;
+};
+
+function normalizeEclipseSecret(raw: Record<string, unknown>): EclipseSecret {
+  const apiBase = pickFirst(raw, [
+    'ECLIPSE_API_BASE',
+    'NEXT_ECLIPSE_API_BASE',
+    'NEXT_ECLIPSE_BASE_URL',
+    'NEXT_ECLIPSE_BASE',
+  ]);
+  const tenantId = pickFirst(raw, ['ECLIPSE_TENANT_ID', 'NEXT_ECLIPSE_TENANT_ID']);
+
+  if (!apiBase) throw new Error('Eclipse secret missing api base');
+  if (!tenantId) throw new Error('Eclipse secret missing tenant id');
+
+  return {
+    ECLIPSE_API_BASE: normalizeEclipseApiBase(apiBase),
+    ECLIPSE_TENANT_ID: tenantId,
+    ECLIPSE_CLIENT_ID: pickFirst(raw, ['ECLIPSE_CLIENT_ID', 'NEXT_ECLIPSE_CLIENT_ID']),
+    ECLIPSE_CLIENT_SECRET: pickFirst(raw, ['ECLIPSE_CLIENT_SECRET', 'NEXT_ECLIPSE_CLIENT_SECRET']),
+    ECLIPSE_TENANT_IDENTITY: pickFirst(raw, [
+      'ECLIPSE_TENANT_IDENTITY',
+      'NEXT_ECLIPSE_TENANT_IDENTITY',
+    ]),
+    ECLIPSE_TENANT_PASSWORD: pickFirst(raw, [
+      'ECLIPSE_TENANT_PASSWORD',
+      'NEXT_ECLIPSE_TENANT_PASSWORD',
+    ]),
+  };
+}
+
 async function loadSecret(): Promise<EclipseSecret> {
   const res = await secrets.send(
     new GetSecretValueCommand({
@@ -42,7 +91,8 @@ async function loadSecret(): Promise<EclipseSecret> {
     })
   );
   const raw = res.SecretString ?? '{}';
-  return JSON.parse(raw) as EclipseSecret;
+  const parsed = JSON.parse(raw) as Record<string, unknown>;
+  return normalizeEclipseSecret(parsed);
 }
 
 async function getAccessToken(cfg: EclipseSecret): Promise<string> {

@@ -22,18 +22,79 @@ export class EclipseService {
   private readonly cfg: EclipseConfig;
 
   constructor(private readonly config: ConfigService) {
+    const normalize = (value: string) => {
+      const v = (value ?? '').trim();
+      if (!v) return '';
+      // Prevent placeholder secrets from enabling an auth flow that will never work.
+      if (/^placeholder[-_]/i.test(v)) return '';
+      return v;
+    };
+
     this.cfg = {
       apiBase:
         this.config.get<string>('ECLIPSE_API_BASE') ??
         'https://sandbox.api.eftcorp.co.za',
-      tenantId: this.config.get<string>('ECLIPSE_TENANT_ID') ?? '',
-      clientId: this.config.get<string>('ECLIPSE_CLIENT_ID') ?? '',
-      clientSecret: this.config.get<string>('ECLIPSE_CLIENT_SECRET') ?? '',
-      tenantIdentity: this.config.get<string>('ECLIPSE_TENANT_IDENTITY') ?? '',
-      tenantPassword: this.config.get<string>('ECLIPSE_TENANT_PASSWORD') ?? '',
+      tenantId: normalize(this.config.get<string>('ECLIPSE_TENANT_ID') ?? ''),
+      clientId: normalize(this.config.get<string>('ECLIPSE_CLIENT_ID') ?? ''),
+      clientSecret: normalize(
+        this.config.get<string>('ECLIPSE_CLIENT_SECRET') ?? '',
+      ),
+      tenantIdentity: normalize(
+        this.config.get<string>('ECLIPSE_TENANT_IDENTITY') ?? '',
+      ),
+      tenantPassword: normalize(
+        this.config.get<string>('ECLIPSE_TENANT_PASSWORD') ?? '',
+      ),
       webhookSecret: this.config.get<string>('ECLIPSE_WEBHOOK_SECRET') ?? '',
       callbackBase: this.config.get<string>('ECLIPSE_CALLBACK_BASE') ?? '',
     };
+  }
+
+  private rootBase(): string {
+    const raw = (this.cfg.apiBase ?? '').trim().replace(/\/$/, '');
+    // If a full conductor base is provided, strip it to the root host.
+    return raw.replace(/\/eclipse-conductor\/rest\/v1\/?$/, '');
+  }
+
+  private conductorBases(): string[] {
+    const raw = (this.cfg.apiBase ?? '').trim().replace(/\/$/, '');
+    const hasConductorSuffix = /\/eclipse-conductor\/rest\/v1\/?$/.test(raw);
+    if (hasConductorSuffix) return [raw];
+
+    const root = this.rootBase();
+    const conductor = `${root}/eclipse-conductor/rest/v1`;
+
+    // Heuristic: ukheshe sandbox uses the conductor prefix for all REST endpoints.
+    if (root.includes('ukheshe.rocks')) return [conductor, root];
+    return [root, conductor];
+  }
+
+  private conductorUrl(path: string): string {
+    const base = this.conductorBases()[0];
+    return `${base}/${path.replace(/^\//, '')}`;
+  }
+
+  private rootUrl(path: string): string {
+    const base = this.rootBase().replace(/\/$/, '');
+    return `${base}/${path.replace(/^\//, '')}`;
+  }
+
+  private async fetchFirstOk(
+    candidates: string[],
+    init: RequestInit,
+  ): Promise<{ url: string; response: Response; bodyText: string }> {
+    let last: { url: string; response: Response; bodyText: string } | null =
+      null;
+
+    for (const url of candidates) {
+      const response = await fetch(url, init);
+      const bodyText = await response.text();
+      last = { url, response, bodyText };
+      if (response.ok) return last;
+    }
+
+    if (last) return last;
+    throw new Error('No Eclipse URL candidates provided');
   }
 
   /**
@@ -46,44 +107,66 @@ export class EclipseService {
       return this.token.accessToken;
     }
 
+    if (
+      !this.cfg.clientId &&
+      !this.cfg.clientSecret &&
+      (!this.cfg.tenantIdentity || !this.cfg.tenantPassword)
+    ) {
+      throw new Error(
+        'Eclipse credentials not configured (set ECLIPSE_TENANT_IDENTITY/ECLIPSE_TENANT_PASSWORD or ECLIPSE_CLIENT_ID/ECLIPSE_CLIENT_SECRET)',
+      );
+    }
+
     // Prefer OAuth client credentials when available.
     if (this.cfg.clientId && this.cfg.clientSecret) {
-      const url = `${this.cfg.apiBase.replace(/\/$/, '')}/oauth/token`;
+      const urlCandidates = [
+        this.rootUrl('/oauth/token'),
+        this.conductorUrl('/oauth/token'),
+      ];
       const body = new URLSearchParams({
         grant_type: 'client_credentials',
         client_id: this.cfg.clientId,
         client_secret: this.cfg.clientSecret,
       });
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
-      });
-      const data = this.ensureRecord(await response.json());
+      try {
+        const { response, bodyText } = await this.fetchFirstOk(urlCandidates, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString(),
+        });
+        const data = bodyText ? this.tryParseObject(bodyText) : {};
 
-      const accessToken =
-        typeof data.access_token === 'string' ? data.access_token : '';
-      const expiresRaw =
-        typeof data.expires_in === 'number'
-          ? data.expires_in
-          : Number(data.expires_in ?? 300);
-      const expiresMs = Number.isFinite(expiresRaw)
-        ? expiresRaw * 1000
-        : 300 * 1000;
+        const accessToken =
+          typeof data.access_token === 'string' ? data.access_token : '';
+        const expiresRaw =
+          typeof data.expires_in === 'number'
+            ? data.expires_in
+            : Number(data.expires_in ?? 300);
+        const expiresMs = Number.isFinite(expiresRaw)
+          ? expiresRaw * 1000
+          : 300 * 1000;
 
-      this.token = {
-        accessToken,
-        expiresAt: now + expiresMs,
-      };
-      return this.token.accessToken;
+        if (accessToken) {
+          this.token = {
+            accessToken,
+            expiresAt: now + expiresMs,
+          };
+          return this.token.accessToken;
+        }
+
+        this.logger.warn(
+          `OAuth token endpoint returned empty token (status ${response.status}); falling back to login if available`,
+        );
+      } catch (err) {
+        this.logger.warn(
+          `OAuth token flow failed; falling back to login if available: ${(err as Error).message}`,
+        );
+      }
     }
 
     // Fallback: tenant identity/password login (sandbox-only convenience).
-    const loginUrl = `${this.cfg.apiBase.replace(
-      /\/$/,
-      '',
-    )}/authentication/login`;
+    const loginUrl = this.conductorUrl('/authentication/login');
     const payload = {
       identity: this.cfg.tenantIdentity,
       password: this.cfg.tenantPassword,
@@ -94,7 +177,17 @@ export class EclipseService {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    const data = this.ensureRecord(await response.json());
+    const bodyText = await response.text();
+    const data = bodyText ? this.tryParseObject(bodyText) : {};
+
+    if (!response.ok) {
+      this.logger.error(
+        `Eclipse login failed: status=${response.status} ${response.statusText || ''} body=${bodyText || '<empty>'}`,
+      );
+      throw new Error(
+        `Eclipse login failed with status ${response.status}: ${bodyText || response.statusText}`,
+      );
+    }
 
     // The login endpoint returns { headerName, headerValue, expiresEpochSecs, ... }
     const bearer = typeof data.headerValue === 'string' ? data.headerValue : '';
@@ -127,7 +220,7 @@ export class EclipseService {
    * Initiate a payment (e.g., ZA_QRCODE or ZA_OZOW).
    */
   async createPayment(request: EclipsePaymentRequest) {
-    const url = `${this.cfg.apiBase.replace(/\/$/, '')}/tenants/${this.cfg.tenantId}/payments`;
+    const url = this.conductorUrl(`/tenants/${this.cfg.tenantId}/payments`);
     const headers = await this.authedHeaders();
     const payload = {
       ...request,
@@ -189,7 +282,9 @@ export class EclipseService {
       query.push(`offset=${params.offset}`);
     }
     const qs = query.length ? `?${query.join('&')}` : '';
-    const url = `${this.cfg.apiBase.replace(/\/$/, '')}/tenants/${this.cfg.tenantId}/payments${qs}`;
+    const url = this.conductorUrl(
+      `/tenants/${this.cfg.tenantId}/payments${qs}`,
+    );
     const headers = await this.authedHeaders();
     this.logger.log(`Eclipse listPayments -> ${url}`);
     const response = await fetch(url, { headers });
@@ -221,12 +316,16 @@ export class EclipseService {
     const headers = await this.authedHeaders();
 
     const candidates = [
-      `${this.cfg.apiBase.replace(/\/$/, '')}/tenants/${this.cfg.tenantId}/wallets/${encodeURIComponent(
-        walletId,
-      )}/reservations?limit=${limit}&offset=${offset}`,
-      `${this.cfg.apiBase.replace(/\/$/, '')}/tenants/${this.cfg.tenantId}/reservations?walletId=${encodeURIComponent(
-        walletId,
-      )}&limit=${limit}&offset=${offset}`,
+      this.conductorUrl(
+        `/tenants/${this.cfg.tenantId}/wallets/${encodeURIComponent(
+          walletId,
+        )}/reservations?limit=${limit}&offset=${offset}`,
+      ),
+      this.conductorUrl(
+        `/tenants/${this.cfg.tenantId}/reservations?walletId=${encodeURIComponent(
+          walletId,
+        )}&limit=${limit}&offset=${offset}`,
+      ),
     ];
 
     let lastError: string | null = null;
@@ -460,10 +559,9 @@ export class EclipseService {
   }
 
   async getWallet(walletId: string | number) {
-    const url = `${this.cfg.apiBase.replace(
-      /\/$/,
-      '',
-    )}/tenants/${this.cfg.tenantId}/wallets/${walletId}`;
+    const url = this.conductorUrl(
+      `/tenants/${this.cfg.tenantId}/wallets/${walletId}`,
+    );
     const headers = await this.authedHeaders();
     const response = await fetch(url, { headers });
     if (!response.ok) {

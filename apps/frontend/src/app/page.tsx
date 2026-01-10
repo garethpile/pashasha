@@ -13,7 +13,6 @@ import {
 import { mapDashboardTransactions } from '../components/dashboard/transactions';
 import { guardApi } from '../lib/api/guard';
 import { customerApi } from '../lib/api/customer';
-import { resolveApiRoot } from '../lib/api/config';
 import { getSession, sessionEventName } from '../lib/auth/session';
 import { guardsClient } from '../lib/guards-client';
 import {
@@ -292,9 +291,13 @@ function CivilServantDashboard() {
         });
         setProfileEditing(false);
         setProfileFeedback(null);
-        const apiRoot = resolveApiRoot();
-        if (data.guardToken) {
-          setQrUrl(`${apiRoot}/guards/${encodeURIComponent(data.guardToken)}/qr`);
+        if (data.qrCodeKey) {
+          try {
+            const qrResponse = await guardApi.getQrCode();
+            setQrUrl(qrResponse.url);
+          } catch {
+            setQrUrl(null);
+          }
         } else {
           setQrUrl(null);
         }
@@ -317,13 +320,15 @@ function CivilServantDashboard() {
   }, [loadProfile]);
 
   useEffect(() => {
-    if (!profile?.guardToken) {
+    if (!profile?.qrCodeKey) {
       setQrUrl(null);
       return;
     }
-    const apiRoot = resolveApiRoot();
-    setQrUrl(`${apiRoot}/guards/${encodeURIComponent(profile.guardToken)}/qr`);
-  }, [profile?.guardToken]);
+    guardApi
+      .getQrCode()
+      .then((response) => setQrUrl(response.url))
+      .catch(() => setQrUrl(null));
+  }, [profile?.qrCodeKey]);
 
   useEffect(() => {
     if (!profile?.eclipseWalletId) return;

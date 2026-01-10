@@ -477,12 +477,47 @@ async function loadEclipseSecrets() {
       SecretId: ECLIPSE_SECRET_ARN,
     })
   );
-  const parsed = JSON.parse(secret.SecretString ?? '{}');
+  const parsed = JSON.parse(secret.SecretString ?? '{}') as Record<string, unknown>;
+
+  const asNonEmptyString = (value: unknown): string | undefined => {
+    if (typeof value !== 'string') return undefined;
+    const trimmed = value.trim();
+    return trimmed.length > 0 ? trimmed : undefined;
+  };
+
+  const pickFirst = (obj: Record<string, unknown>, keys: string[]): string | undefined => {
+    for (const key of keys) {
+      const value = asNonEmptyString(obj[key]);
+      if (value) return value;
+    }
+    return undefined;
+  };
+
+  const normalizeEclipseApiBase = (apiBase: string): string => {
+    const trimmed = apiBase.replace(/\/$/, '');
+    if (trimmed.includes('/eclipse-conductor/rest/v1')) return trimmed;
+    if (trimmed.includes('ukheshe.rocks')) return `${trimmed}/eclipse-conductor/rest/v1`;
+    return trimmed;
+  };
+
+  const apiBaseRaw = pickFirst(parsed, [
+    'ECLIPSE_API_BASE',
+    'NEXT_ECLIPSE_API_BASE',
+    'NEXT_ECLIPSE_BASE_URL',
+    'NEXT_ECLIPSE_BASE',
+  ]);
+  const tenantId = pickFirst(parsed, ['ECLIPSE_TENANT_ID', 'NEXT_ECLIPSE_TENANT_ID']);
+  const identity = pickFirst(parsed, ['ECLIPSE_TENANT_IDENTITY', 'NEXT_ECLIPSE_TENANT_IDENTITY']);
+  const password = pickFirst(parsed, ['ECLIPSE_TENANT_PASSWORD', 'NEXT_ECLIPSE_TENANT_PASSWORD']);
+
+  if (!apiBaseRaw) throw new Error('Eclipse secret missing api base');
+  if (!tenantId) throw new Error('Eclipse secret missing tenant id');
+
   return {
-    apiBase: parsed.ECLIPSE_API_BASE,
-    tenantId: parsed.ECLIPSE_TENANT_ID,
-    identity: parsed.ECLIPSE_TENANT_IDENTITY,
-    password: parsed.ECLIPSE_TENANT_PASSWORD,
+    apiBase: normalizeEclipseApiBase(apiBaseRaw),
+    tenantId,
+    identity,
+    password,
   };
 }
 

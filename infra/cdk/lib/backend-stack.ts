@@ -306,6 +306,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
     });
 
     // Eclipse sandbox secret (contains ECLIPSE_API_BASE, ECLIPSE_TENANT_ID, etc.)
+    // IMPORTANT: do not let CloudFormation overwrite the secret value on future deployments.
+    // The secret must be managed out-of-band (console/CLI) once created.
     const eclipseSecretArn =
       process.env.ECLIPSE_SECRET_ARN ?? this.node.tryGetContext('ECLIPSE_SECRET_ARN');
 
@@ -316,27 +318,11 @@ export class PashashaPayBackendStack extends cdk.Stack {
             'EclipseSandboxSecret',
             eclipseSecretArn
           )
-        : new secretsmanager.Secret(this, 'EclipseSandboxSecret', {
-            secretName: 'pashashapay/eclipse',
-            description: 'Eclipse sandbox credentials for PashashaPay',
-            secretObjectValue: {
-              ECLIPSE_API_BASE: cdk.SecretValue.unsafePlainText(
-                'https://eclipse-java-sandbox.ukheshe.rocks'
-              ),
-              ECLIPSE_TENANT_ID: cdk.SecretValue.unsafePlainText('placeholder-tenant-id'),
-              ECLIPSE_CLIENT_ID: cdk.SecretValue.unsafePlainText('placeholder-client-id'),
-              ECLIPSE_CLIENT_SECRET: cdk.SecretValue.unsafePlainText('placeholder-client-secret'),
-              ECLIPSE_TENANT_IDENTITY: cdk.SecretValue.unsafePlainText(
-                'placeholder-tenant-identity'
-              ),
-              ECLIPSE_TENANT_PASSWORD: cdk.SecretValue.unsafePlainText(
-                'placeholder-tenant-password'
-              ),
-              ECLIPSE_CALLBACK_BASE: cdk.SecretValue.unsafePlainText('https://example.com'),
-              ECLIPSE_WEBHOOK_SECRET: cdk.SecretValue.unsafePlainText('placeholder'),
-            },
-            removalPolicy: cdk.RemovalPolicy.DESTROY,
-          });
+        : secretsmanager.Secret.fromSecretNameV2(
+            this,
+            'EclipseSandboxSecret',
+            'pashashapay/eclipse'
+          );
 
     const signupTopic = new sns.Topic(this, 'SignupNotificationsTopic', {
       topicName: 'PashashaPay-AccountProvisioning',
@@ -845,29 +831,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
             CUSTOMER_PAYMENT_SFN_ARN: ecs.Secret.fromSsmParameter(
               customerPaymentStateMachineArnParam
             ),
-            ECLIPSE_API_BASE: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_API_BASE'),
-            ECLIPSE_CLIENT_ID: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_CLIENT_ID'),
-            ECLIPSE_CLIENT_SECRET: ecs.Secret.fromSecretsManager(
-              eclipseSecret,
-              'ECLIPSE_CLIENT_SECRET'
-            ),
-            ECLIPSE_TENANT_ID: ecs.Secret.fromSecretsManager(eclipseSecret, 'ECLIPSE_TENANT_ID'),
-            ECLIPSE_TENANT_IDENTITY: ecs.Secret.fromSecretsManager(
-              eclipseSecret,
-              'ECLIPSE_TENANT_IDENTITY'
-            ),
-            ECLIPSE_TENANT_PASSWORD: ecs.Secret.fromSecretsManager(
-              eclipseSecret,
-              'ECLIPSE_TENANT_PASSWORD'
-            ),
-            ECLIPSE_CALLBACK_BASE: ecs.Secret.fromSecretsManager(
-              eclipseSecret,
-              'ECLIPSE_CALLBACK_BASE'
-            ),
-            ECLIPSE_WEBHOOK_SECRET: ecs.Secret.fromSecretsManager(
-              eclipseSecret,
-              'ECLIPSE_WEBHOOK_SECRET'
-            ),
+            // Inject the full JSON payload so the app can support both ECLIPSE_* and NEXT_ECLIPSE_* keys.
+            ECLIPSE_SECRET_JSON: ecs.Secret.fromSecretsManager(eclipseSecret),
           },
         },
       }
