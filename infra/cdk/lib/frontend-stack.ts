@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as codebuild from 'aws-cdk-lib/aws-codebuild';
 import { Construct } from 'constructs';
 import * as amplify from '@aws-cdk/aws-amplify-alpha';
+import * as route53 from 'aws-cdk-lib/aws-route53';
 import { AmplifySSRLoggingRolePatch } from './ssr-logging-role-patch';
 
 export interface PashashaPayFrontendStackProps extends cdk.StackProps {
@@ -139,6 +140,20 @@ export class PashashaPayFrontendStack extends cdk.Stack {
       stage: 'PRODUCTION',
       autoBuild: false,
       pullRequestPreview: false,
+    });
+
+    // Route53 record to point www.dev.pashasha.com to the Amplify branch domain
+    const hostedZone = route53.HostedZone.fromLookup(this, 'PashashaHostedZone', {
+      domainName: 'pashasha.com',
+    });
+
+    const amplifyBranchDomain = `${branch.branchName}.${app.defaultDomain}`;
+
+    new route53.CnameRecord(this, 'WwwDevCname', {
+      zone: hostedZone,
+      recordName: 'www.dev.pashasha.com',
+      domainName: amplifyBranchDomain,
+      ttl: cdk.Duration.minutes(5),
     });
 
     // IAM role for Amplify build to access frontend secret
