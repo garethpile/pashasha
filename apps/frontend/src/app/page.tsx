@@ -36,6 +36,7 @@ type GuardProfile = {
   homeAddress?: string;
   eclipseCustomerId?: string;
   eclipseWalletId?: string;
+  qrCodeKey?: string;
 };
 
 type CustomerProfile = {
