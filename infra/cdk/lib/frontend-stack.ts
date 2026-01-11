@@ -149,6 +149,13 @@ export class PashashaPayFrontendStack extends cdk.Stack {
 
     const amplifyBranchDomain = `${branch.branchName}.${app.defaultDomain}`;
 
+    new route53.CnameRecord(this, 'DevRootCname', {
+      zone: hostedZone,
+      recordName: 'dev.pashasha.com',
+      domainName: amplifyBranchDomain,
+      ttl: cdk.Duration.minutes(5),
+    });
+
     new route53.CnameRecord(this, 'WwwDevCname', {
       zone: hostedZone,
       recordName: 'www.dev.pashasha.com',
