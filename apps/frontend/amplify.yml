@@ -1,6 +1,6 @@
 version: 1
 applications:
-  - appRoot: .
+  - appRoot: apps/frontend
     frontend:
       buildImage: aws/codebuild/standard:8.0
       phases:
@@ -15,14 +15,14 @@ applications:
             - export COGNITO_JSON=$(aws secretsmanager get-secret-value --region $AWS_REGION --secret-id "pashashapay-frontend-config" --query SecretString --output text)
             - export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_USER_POOL_ID)
             - export NEXT_PUBLIC_COGNITO_CLIENT_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_CLIENT_ID)
-            - echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID" >> apps/frontend/.env.production
-            - echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID" >> apps/frontend/.env.production
-            - echo "NEXT_PUBLIC_AWS_REGION=$AWS_REGION" >> apps/frontend/.env.production
+            - echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID" >> .env.production
+            - echo "NEXT_PUBLIC_COGNITO_CLIENT_ID=$NEXT_PUBLIC_COGNITO_CLIENT_ID" >> .env.production
+            - echo "NEXT_PUBLIC_AWS_REGION=$AWS_REGION" >> .env.production
         build:
           commands:
             - npm run build --workspace frontend
       artifacts:
-        baseDirectory: apps/frontend/.next
+        baseDirectory: .next
         files:
           - '**/*'
       cache:
