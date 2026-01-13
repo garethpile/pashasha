@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getSession } from '../../lib/auth/session';
 import { ChatAssistant } from '../../components/support/chat-assistant';
 
@@ -15,22 +15,19 @@ const tabs = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [ready, setReady] = useState(false);
+  const session = getSession();
 
   useEffect(() => {
-    const session = getSession();
     if (!session) {
       router.replace('/login');
       return;
     }
     if (!session.groups.includes('Administrators')) {
       router.replace('/');
-      return;
     }
-    setReady(true);
-  }, [router]);
+  }, [router, session]);
 
-  if (!ready) {
+  if (!session || !session.groups.includes('Administrators')) {
     return null;
   }
 

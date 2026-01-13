@@ -29,11 +29,10 @@ export function ChatAssistant() {
     }
   };
 
-  useEffect(() => {
-    if (open) {
-      void loadContext();
-    }
-  }, [open]);
+  const openAssistant = () => {
+    setOpen(true);
+    void loadContext();
+  };
 
   const handleSubmit = async () => {
     if (!summary.trim()) {
@@ -74,7 +73,7 @@ export function ChatAssistant() {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={openAssistant}
         className="fixed bottom-4 right-4 z-40 rounded-full bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-orange-600"
       >
         Need help?

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Headers,
   HttpCode,
@@ -14,6 +15,8 @@ import { RawBodyRequest } from '@nestjs/common';
 import type { Request } from 'express';
 import { ParamsDictionary } from 'express-serve-static-core';
 import { Public } from '../auth/public.decorator';
+import { Roles } from '../auth/roles.decorator';
+import { CurrentUser } from '../auth/current-user.decorator';
 import { EclipseService } from './eclipse.service';
 import { PaymentsService } from './payments.service';
 import {
@@ -22,6 +25,7 @@ import {
   EclipseWalletDto,
   ReconcilePaymentsDto,
 } from './dto/eclipse-payment.dto';
+import { CustomersService } from '../customers/customers.service';
 
 type JsonRequest = Request<ParamsDictionary, unknown, Record<string, unknown>>;
 type RawJsonRequest = RawBodyRequest<JsonRequest>;
@@ -33,32 +37,95 @@ export class PaymentsController {
   constructor(
     private readonly eclipse: EclipseService,
     private readonly payments: PaymentsService,
+    private readonly customers: CustomersService,
   ) {}
 
+  private isAdmin(user?: { ['cognito:groups']?: string[] }) {
+    const groups = user?.['cognito:groups'] ?? [];
+    return groups
+      .map((g) => g.toLowerCase().replace(/[\s_-]/g, ''))
+      .some((g) => g === 'administrators' || g === 'admin');
+  }
+
+  @Roles('Customers', 'Administrators')
   @Post('payments/eclipse')
   @Throttle({ payout: { limit: 8, ttl: 60 } })
-  async createPayment(@Body() dto: EclipsePaymentDto) {
-    // In production, validate amounts, guard wallet lookup, and persist payment records.
+  async createPayment(
+    @Body() dto: EclipsePaymentDto,
+    @CurrentUser()
+    user: {
+      sub?: string;
+      username?: string;
+      ['cognito:groups']?: string[];
+    } = {},
+  ) {
+    const isAdmin = this.isAdmin(user);
+
+    // Non-admin callers must use their own wallet/customer IDs.
+    if (!isAdmin) {
+      const customerId = user.sub ?? user.username;
+      if (!customerId) {
+        throw new ForbiddenException('Missing customer identity');
+      }
+      const customer = await this.customers.findByUser(customerId);
+      if (!customer.eclipseWalletId || !customer.eclipseCustomerId) {
+        throw new ForbiddenException('Wallet not linked for this customer');
+      }
+      dto.walletId = customer.eclipseWalletId;
+      dto.destinationWalletId = customer.eclipseWalletId;
+      dto.customerId = customer.eclipseCustomerId;
+    }
+
+    // Minimal amount sanity to avoid zero/negative attempts.
+    if (dto.amount <= 0) {
+      throw new ForbiddenException('Amount must be positive');
+    }
+
     return this.eclipse.createPayment(dto);
   }
 
+  @Roles('Administrators')
   @Get('payments/eclipse/:paymentId')
   async getPayment(@Req() req: Request<{ paymentId: string }>) {
-    const paymentId = req.params.paymentId;
-    return this.eclipse.getPayment(paymentId);
+    return this.eclipse.getPayment(req.params.paymentId);
   }
 
+  @Roles('Customers', 'Administrators')
   @Post('payments/eclipse/withdrawals')
   @Throttle({ payout: { limit: 5, ttl: 120 } })
-  async createWithdrawal(@Body() dto: EclipseWithdrawalDto) {
-    // In production, validate wallet ownership, limit checks, and persist withdrawal records.
+  async createWithdrawal(
+    @Body() dto: EclipseWithdrawalDto,
+    @CurrentUser()
+    user: {
+      sub?: string;
+      username?: string;
+      ['cognito:groups']?: string[];
+    } = {},
+  ) {
+    const isAdmin = this.isAdmin(user);
+    if (!isAdmin) {
+      const customerId = user.sub ?? user.username;
+      if (!customerId) {
+        throw new ForbiddenException('Missing customer identity');
+      }
+      const customer = await this.customers.findByUser(customerId);
+      if (!customer.eclipseWalletId) {
+        throw new ForbiddenException('Wallet not linked for this customer');
+      }
+      dto.walletId = customer.eclipseWalletId;
+    }
+
+    if (dto.amount?.value <= 0) {
+      throw new ForbiddenException('Withdrawal amount must be positive');
+    }
+
     return this.eclipse.createWithdrawal(dto);
   }
 
   @Post('payments/eclipse/wallets')
   @Throttle({ payout: { limit: 10, ttl: 300 } })
   async createWallet(@Body() dto: EclipseWalletDto) {
-    // In production, link to guard/customer record and persist the walletId.
+    // Restrict wallet creation to admins to avoid orphaned wallets.
     return this.eclipse.createWallet(dto);
   }
 
@@ -84,10 +151,13 @@ export class PaymentsController {
     this.logger.log(
       `Eclipse webhook received: ${JSON.stringify(meta)} rawSnippet=${snippet}`,
     );
-    // Temporarily accept unsigned/failed signatures to debug payload arrival.
+    if (!ok) {
+      this.logger.warn('Rejecting payment webhook with invalid signature');
+      return { accepted: false, signatureVerified: false };
+    }
     const payload = req.body ?? {};
     await this.payments.recordFromWebhook(payload);
-    return { accepted: ok, signatureVerified: ok };
+    return { accepted: true, signatureVerified: true };
   }
 
   @Public()

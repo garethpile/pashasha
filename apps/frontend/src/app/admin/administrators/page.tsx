@@ -35,7 +35,23 @@ export default function AdministratorManagementPage() {
   };
 
   useEffect(() => {
-    loadAdmins();
+    let cancelled = false;
+    const fetchAdmins = async () => {
+      try {
+        const data = await adminApi.listAdministrators();
+        if (!cancelled) {
+          setAdmins((data as AdministratorProfile[]) ?? []);
+        }
+      } catch (err: any) {
+        if (!cancelled) {
+          setError(err?.message ?? 'Failed to load administrators.');
+        }
+      }
+    };
+    void fetchAdmins();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleCreate = async (event: FormEvent) => {

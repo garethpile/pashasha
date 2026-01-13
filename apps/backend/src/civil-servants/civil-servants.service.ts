@@ -243,7 +243,7 @@ export class CivilServantsService {
       throw new NotFoundException('Wallet not linked for this civil servant');
     }
 
-    let wallet: any;
+    let wallet: unknown;
     try {
       wallet = await this.eclipse.getWallet(servant.eclipseWalletId);
     } catch (err) {
@@ -256,7 +256,7 @@ export class CivilServantsService {
     if (!wallet || typeof wallet !== 'object') {
       throw new NotFoundException('Unable to read wallet details');
     }
-    const walletData = wallet;
+    const walletData = wallet as Record<string, unknown>;
     const parseAmount = (value: unknown): number | undefined => {
       if (typeof value === 'number') return value;
       if (typeof value === 'string') {
@@ -349,7 +349,7 @@ export class CivilServantsService {
     if (!servant.eclipseWalletId) {
       throw new NotFoundException('Wallet not linked for this civil servant');
     }
-    let wallet: any;
+    let wallet: unknown;
     try {
       wallet = await this.eclipse.getWallet(servant.eclipseWalletId);
     } catch (err) {
@@ -369,7 +369,10 @@ export class CivilServantsService {
       }
       return undefined;
     };
-    const walletData = wallet && typeof wallet === 'object' ? wallet : {};
+    const walletData: Record<string, unknown> =
+      wallet && typeof wallet === 'object'
+        ? (wallet as Record<string, unknown>)
+        : {};
     const walletCurrency =
       typeof walletData.currency === 'string' ? walletData.currency : 'ZAR';
     const candidates: unknown[] = [

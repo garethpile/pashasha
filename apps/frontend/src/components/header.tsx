@@ -14,7 +14,7 @@ import {
 
 export const Header = () => {
   const router = useRouter();
-  const [session, setSession] = useState<AuthSession | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(() => getSession());
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
@@ -38,8 +38,6 @@ export const Header = () => {
   const auditPath = isAdmin ? '/admin/audit' : '/audit';
 
   useEffect(() => {
-    setSession(getSession());
-
     const handleStorage = (event: StorageEvent) => {
       if (event.key === SESSION_STORAGE_KEY || event.key === null) {
         setSession(getSession());

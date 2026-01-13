@@ -1410,7 +1410,6 @@ function CustomerDashboard() {
 
 export default function DashboardPage() {
   const [session, setSession] = useState(() => getSession());
-  const [sessionReady, setSessionReady] = useState(false);
   const router = useRouter();
 
   const normalizedGroups = (session?.groups ?? []).map((g) =>
@@ -1424,11 +1423,6 @@ export default function DashboardPage() {
   const isAdmin = hasGroup('administrators', 'administrator');
 
   useEffect(() => {
-    setSession(getSession());
-    setSessionReady(true);
-  }, []);
-
-  useEffect(() => {
     const handleSessionChange = () => setSession(getSession());
     window.addEventListener(sessionEventName, handleSessionChange);
     return () => {
@@ -1437,14 +1431,10 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if (sessionReady && session && isAdmin) {
+    if (session && isAdmin) {
       router.replace('/admin');
     }
-  }, [isAdmin, router, session, sessionReady]);
-
-  if (!sessionReady) {
-    return <LoadingPanel text="Loading…" />;
-  }
+  }, [isAdmin, router, session]);
 
   if (!session) {
     return <MarketingScreen />;

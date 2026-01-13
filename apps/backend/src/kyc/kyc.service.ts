@@ -37,7 +37,16 @@ function sanitizeFileName(value?: string) {
   const trimmed = (value ?? '').trim();
   if (!trimmed) return undefined;
   const withoutPath = trimmed.split(/[/\\]/).pop() ?? trimmed;
-  return withoutPath.replace(/[^\w.\-() ]+/g, '_').slice(0, 120);
+  const stripped = withoutPath.replace(/[\r\n]+/g, ' ');
+  return stripped.replace(/[^\w.\-() ]+/g, '_').slice(0, 120);
+}
+
+function contentDisposition(
+  fileName?: string,
+  type: 'inline' | 'attachment' = 'inline',
+) {
+  const safe = sanitizeFileName(fileName) ?? 'document';
+  return `${type}; filename="${safe}"`;
 }
 
 @Injectable()
@@ -232,7 +241,12 @@ export class KycService {
     if (!doc?.key) {
       throw new NotFoundException('KYC document not found');
     }
-    return this.storage.createDownloadUrl(doc.key, 5 * 60, doc.bucket);
+    return this.storage.createDownloadUrl(
+      doc.key,
+      5 * 60,
+      doc.bucket,
+      contentDisposition(doc.fileName, 'inline'),
+    );
   }
 
   async getDocument(

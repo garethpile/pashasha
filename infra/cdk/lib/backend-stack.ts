@@ -365,10 +365,12 @@ export class PashashaPayBackendStack extends cdk.Stack {
 
     const defaultAllowedOrigins = [
       'http://localhost:3000',
-      // Keep both historical Amplify URLs to avoid CORS mismatches if the branch URL changes.
+      // Amplify branch (retain historical URLs to avoid CORS mismatches on branch rename).
       'https://master.d28mxe1bux19h7.amplifyapp.com',
       'https://master.d28mxe1buxl9n7.amplifyapp.com',
-      guardPortalBaseUrl,
+      // Primary dev domains
+      'https://dev.pashasha.com',
+      'https://www.dev.pashasha.com',
     ]
       .filter(Boolean)
       .join(',');

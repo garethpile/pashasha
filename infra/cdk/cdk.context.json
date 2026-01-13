@@ -21,5 +21,9 @@
     "eu-west-1a",
     "eu-west-1b",
     "eu-west-1c"
-  ]
+  ],
+  "hosted-zone:account=701158128147:domainName=pashasha.com:region=eu-west-1": {
+    "Id": "/hostedzone/Z07482111XTU7482PPQXE",
+    "Name": "pashasha.com."
+  }
 }

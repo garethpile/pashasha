@@ -119,7 +119,12 @@ export class StorageService {
     return { uploadUrl, key, bucket };
   }
 
-  async createDownloadUrl(key: string, expires = 300, bucketOverride?: string) {
+  async createDownloadUrl(
+    key: string,
+    expires = 300,
+    bucketOverride?: string,
+    contentDisposition?: string,
+  ) {
     let bucket = this.resolveBucketForKey(key, bucketOverride);
 
     // Backward-compat: some older QR uploads exist in USER_ASSETS_BUCKET.
@@ -140,6 +145,7 @@ export class StorageService {
     const command = new GetObjectCommand({
       Bucket: bucket,
       Key: key,
+      ResponseContentDisposition: contentDisposition,
     });
     const url = await getSignedUrl(this.s3, command, {
       expiresIn: expires,
