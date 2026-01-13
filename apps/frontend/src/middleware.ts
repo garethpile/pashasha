@@ -27,12 +27,16 @@ const hasAdminGroup = (groups: string[]) =>
   groups.map(normalizeGroup).some((g) => ADMIN_GROUPS.includes(g));
 
 const buildSecurityHeaders = () => {
+  const cloudfrontWildcard = 'https://*.cloudfront.net';
+  const pashashaWildcard = 'https://*.pashasha.com';
+  const amazonAwsWildcard = 'https://*.amazonaws.com';
+
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: https://d3513l2t9aq2xv.cloudfront.net https://d219w61biha52r.cloudfront.net https://*.amazonaws.com",
-    `connect-src 'self' ${API_ORIGIN} https://d219w61biha52r.cloudfront.net https://d3513l2t9aq2xv.cloudfront.net https://*.amazonaws.com http://localhost:4000`,
+    `img-src 'self' data: ${cloudfrontWildcard} ${pashashaWildcard} ${amazonAwsWildcard}`,
+    `connect-src 'self' ${API_ORIGIN} ${cloudfrontWildcard} ${pashashaWildcard} ${amazonAwsWildcard} http://localhost:4000`,
     "font-src 'self' data:",
     "object-src 'none'",
     "frame-ancestors 'none'",
