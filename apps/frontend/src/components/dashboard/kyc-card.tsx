@@ -5,7 +5,6 @@ import { adminApi } from '../../lib/api/admin';
 import { customerApi } from '../../lib/api/customer';
 import { guardApi } from '../../lib/api/guard';
 import { getSession } from '../../lib/auth/session';
-import { resolveApiRoot } from '../../lib/api/config';
 
 type KycStatus = 'not_started' | 'pending' | 'approved' | 'rejected';
 type KycDocumentType = 'country-id' | 'passport' | 'proof-of-address';
@@ -81,24 +80,15 @@ function statusLabel(status: KycStatus) {
   }
 }
 
-async function openAuthenticatedDocument(path: string) {
+function openAuthenticatedDocument(path: string) {
+  if (typeof window === 'undefined') return;
   const session = getSession();
   if (!session) {
     throw new Error('Not authenticated');
   }
-  const apiRoot = resolveApiRoot();
-  const resp = await fetch(`${apiRoot}${path}`, {
-    headers: { Authorization: `Bearer ${session.accessToken}` },
-    credentials: 'include',
-  });
-  if (!resp.ok) {
-    const text = await resp.text();
-    throw new Error(text || `Request failed (${resp.status})`);
-  }
-  const blob = await resp.blob();
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank', 'noopener,noreferrer');
-  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  const url = new URL('/kyc/document', window.location.origin);
+  url.searchParams.set('path', path);
+  window.open(url.toString(), '_blank', 'noopener,noreferrer');
 }
 
 function KycCardShell({
