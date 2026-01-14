@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { KycService } from './kyc.service';
 import { ProfilesModule } from '../profiles/profiles.module';
 import { StorageModule } from '../storage/storage.module';
 import { PaymentsModule } from '../payments/payments.module';
 
 @Module({
-  imports: [ProfilesModule, StorageModule, PaymentsModule],
+  imports: [ProfilesModule, StorageModule, forwardRef(() => PaymentsModule)],
   providers: [KycService],
   exports: [KycService],
 })

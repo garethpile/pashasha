@@ -9,7 +9,7 @@ COPY apps/backend ./apps/backend
 
 # Ensure a clean npm cache to avoid ENOENT issues during CI
 RUN rm -rf /root/.npm \
-  && npm ci --workspaces --prefer-offline=false --no-audit --progress=false \
+  && npm ci --workspaces --prefer-offline=false --no-audit --progress=false --legacy-peer-deps \
   && npm cache clean --force
 RUN npm run build --workspace backend
 
