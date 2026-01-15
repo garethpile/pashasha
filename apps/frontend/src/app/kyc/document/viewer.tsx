@@ -21,13 +21,15 @@ export default function KycDocumentViewer() {
   const [loading, setLoading] = useState<boolean>(true);
   const [path, setPath] = useState<string | null>(null);
   const timeoutRef = useRef<number | null>(null);
+  const objectUrlRef = useRef<string | null>(null);
 
   const revokeObjectUrl = useCallback(() => {
-    if (objectUrl) {
-      URL.revokeObjectURL(objectUrl);
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
       setObjectUrl(null);
     }
-  }, [objectUrl]);
+  }, []);
 
   useEffect(() => {
     const handleSessionInvalidated = () => {
@@ -97,10 +99,15 @@ export default function KycDocumentViewer() {
 
       const blob = await resp.blob();
       const url = URL.createObjectURL(blob);
+      objectUrlRef.current = url;
       setObjectUrl(url);
       setContentType(resp.headers.get('content-type'));
       setFileName(parseFileName(resp.headers.get('content-disposition')));
       setLoading(false);
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
     };
 
     load().catch((err: unknown) => {
