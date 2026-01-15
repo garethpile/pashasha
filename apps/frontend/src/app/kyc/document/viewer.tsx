@@ -157,18 +157,14 @@ export default function KycDocumentViewer() {
           </div>
         )}
         {!loading && !error && objectUrl && (
-          <div className="flex-1 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex-1 overflow-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
             {isImage ? (
-              <img
-                src={objectUrl}
-                alt={fileName ?? 'KYC document'}
-                className="h-full w-full object-contain"
-              />
+              <img src={objectUrl} alt={fileName ?? 'KYC document'} className="h-auto w-full" />
             ) : (
               <embed
                 src={objectUrl}
                 type={contentType ?? 'application/octet-stream'}
-                className="h-full w-full"
+                className="h-[80vh] w-full"
               />
             )}
             {!isImage && !isPdf && (
