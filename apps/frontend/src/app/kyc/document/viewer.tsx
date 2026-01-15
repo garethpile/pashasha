@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
 import { SESSION_STORAGE_KEY, getSession, sessionEventName } from '../../../lib/auth/session';
 import { resolveApiRoot } from '../../../lib/api/config';
 
@@ -15,18 +14,24 @@ const parseFileName = (disposition: string | null) => {
 };
 
 export default function KycDocumentViewer() {
-  const searchParams = useSearchParams();
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
   const [contentType, setContentType] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [path, setPath] = useState<string | null>(null);
 
-  const path = useMemo(() => {
-    const raw = searchParams.get('path')?.trim() ?? '';
-    if (!raw || !ALLOWED_PATH.test(raw)) return null;
-    return raw;
-  }, [searchParams]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const raw = new URLSearchParams(window.location.search).get('path')?.trim() ?? '';
+    if (!raw || !ALLOWED_PATH.test(raw)) {
+      setPath(null);
+      setError('Invalid document link.');
+      setLoading(false);
+      return;
+    }
+    setPath(raw);
+  }, []);
 
   const revokeObjectUrl = useCallback(() => {
     if (objectUrl) {
@@ -68,11 +73,7 @@ export default function KycDocumentViewer() {
         return;
       }
 
-      if (!path) {
-        setError('Invalid document link.');
-        setLoading(false);
-        return;
-      }
+      if (!path) return;
 
       setLoading(true);
       setError(null);
