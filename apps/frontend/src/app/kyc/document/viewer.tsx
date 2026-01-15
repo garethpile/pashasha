@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { SESSION_STORAGE_KEY, getSession, sessionEventName } from '../../../lib/auth/session';
 import { resolveApiRoot } from '../../../lib/api/config';
 
@@ -20,18 +20,7 @@ export default function KycDocumentViewer() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [path, setPath] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const raw = new URLSearchParams(window.location.search).get('path')?.trim() ?? '';
-    if (!raw || !ALLOWED_PATH.test(raw)) {
-      setPath(null);
-      setError('Invalid document link.');
-      setLoading(false);
-      return;
-    }
-    setPath(raw);
-  }, []);
+  const timeoutRef = useRef<number | null>(null);
 
   const revokeObjectUrl = useCallback(() => {
     if (objectUrl) {
@@ -66,6 +55,16 @@ export default function KycDocumentViewer() {
     const apiRoot = resolveApiRoot();
 
     const load = async () => {
+      if (typeof window === 'undefined') return;
+      const raw = new URLSearchParams(window.location.search).get('path')?.trim() ?? '';
+      if (!raw || !ALLOWED_PATH.test(raw)) {
+        setPath(null);
+        setError('Invalid document link.');
+        setLoading(false);
+        return;
+      }
+      setPath(raw);
+
       const session = getSession();
       if (!session) {
         setError('Not authenticated.');
@@ -73,13 +72,19 @@ export default function KycDocumentViewer() {
         return;
       }
 
-      if (!path) return;
-
       setLoading(true);
       setError(null);
       revokeObjectUrl();
 
-      const resp = await fetch(`${apiRoot}${path}`, {
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = window.setTimeout(() => {
+        setError('Document request timed out. Please retry.');
+        setLoading(false);
+      }, 15000);
+
+      const resp = await fetch(`${apiRoot}${raw}`, {
         headers: { Authorization: `Bearer ${session.accessToken}` },
         credentials: 'include',
         signal: controller.signal,
@@ -105,10 +110,14 @@ export default function KycDocumentViewer() {
     });
 
     return () => {
+      if (timeoutRef.current) {
+        window.clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
       controller.abort();
       revokeObjectUrl();
     };
-  }, [path, revokeObjectUrl]);
+  }, [revokeObjectUrl]);
 
   useEffect(() => {
     if (fileName) {
