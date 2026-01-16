@@ -163,6 +163,15 @@ export class PashashaPayFrontendStack extends cdk.Stack {
       ttl: cdk.Duration.minutes(5),
     });
 
+    // Role required by Amplify custom domain activation.
+    new cdk.aws_iam.Role(this, 'AmplifyDomainRole', {
+      roleName: 'AWSAmplifyDomainRole-Z07482111XTU7482PPQXE',
+      assumedBy: new cdk.aws_iam.ServicePrincipal('amplify.amazonaws.com'),
+      managedPolicies: [
+        cdk.aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AdministratorAccess-Amplify'),
+      ],
+    });
+
     // IAM role for Amplify build to access frontend secret
     const amplifyBuildRole = new cdk.aws_iam.Role(this, 'AmplifyBuildRole', {
       assumedBy: new cdk.aws_iam.ServicePrincipal('amplify.amazonaws.com'),
