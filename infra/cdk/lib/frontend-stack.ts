@@ -100,7 +100,7 @@ export class PashashaPayFrontendStack extends cdk.Stack {
               },
             },
             artifacts: {
-              baseDirectory: '.next',
+              baseDirectory: 'out',
               files: ['**/*'],
             },
             cache: {
@@ -128,7 +128,7 @@ export class PashashaPayFrontendStack extends cdk.Stack {
       environmentVariables: envVars,
       autoBranchDeletion: true,
       sourceCodeProvider,
-      platform: amplify.Platform.WEB_COMPUTE,
+      platform: amplify.Platform.WEB,
     };
 
     const app = new amplify.App(this, 'AmplifyApp', appProps);

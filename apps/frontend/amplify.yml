@@ -27,7 +27,7 @@ applications:
           commands:
             - npm run build --workspace frontend
       artifacts:
-        baseDirectory: .next
+        baseDirectory: out
         files:
           - '**/*'
       cache:
