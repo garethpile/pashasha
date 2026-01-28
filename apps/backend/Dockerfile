@@ -4,13 +4,15 @@ WORKDIR /repo
 # Skip lifecycle scripts (husky) during Docker install
 ENV npm_config_ignore_scripts=true
 COPY package.json package-lock.json ./
+COPY tsconfig.base.json ./tsconfig.base.json
 COPY packages ./packages
 COPY apps/backend ./apps/backend
 
 # Ensure a clean npm cache to avoid ENOENT issues during CI
 RUN rm -rf /root/.npm \
-  && npm ci --workspaces --prefer-offline=false --no-audit --progress=false --legacy-peer-deps \
+  && npm ci --workspace backend --workspace @pashashapay/contracts --prefer-offline=false --no-audit --progress=false --legacy-peer-deps \
   && npm cache clean --force
+RUN npm run build --workspace @pashashapay/contracts
 RUN npm run build --workspace backend
 
 FROM node:20-alpine AS runtime

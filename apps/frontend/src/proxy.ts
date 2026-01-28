@@ -7,6 +7,19 @@ const API_ORIGIN =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_BACKEND_API_ROOT ||
   'https://d3513l2t9aq2xv.cloudfront.net';
+const RAW_VOUCHER_ORIGIN =
+  process.env.NEXT_PUBLIC_VOUCHER_API_BASE_URL ||
+  'https://2583b9v30b.execute-api.eu-west-1.amazonaws.com/v1';
+
+const normalizeOrigin = (value: string) => {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return value;
+  }
+};
+
+const VOUCHER_API_ORIGIN = normalizeOrigin(RAW_VOUCHER_ORIGIN);
 
 const normalizeGroup = (value: string) => value.toLowerCase().replace(/[\s_-]/g, '');
 
@@ -36,7 +49,7 @@ const buildSecurityHeaders = () => {
     "script-src 'self' 'unsafe-inline'",
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob: ${cloudfrontWildcard} ${pashashaWildcard} ${amazonAwsWildcard}`,
-    `connect-src 'self' ${API_ORIGIN} ${cloudfrontWildcard} ${pashashaWildcard} ${amazonAwsWildcard} http://localhost:4000`,
+    `connect-src 'self' ${API_ORIGIN} ${VOUCHER_API_ORIGIN} ${cloudfrontWildcard} ${pashashaWildcard} ${amazonAwsWildcard} http://localhost:4000 http://localhost:4100`,
     "font-src 'self' data:",
     "object-src 'self' blob:",
     "frame-ancestors 'none'",

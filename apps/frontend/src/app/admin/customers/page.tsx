@@ -11,6 +11,7 @@ import {
 } from '../../../components/dashboard/cards';
 import { mapDashboardTransactions } from '../../../components/dashboard/transactions';
 import { DashboardKycCard } from '../../../components/dashboard/kyc-card';
+import { eclipseEnabled } from '../../../lib/feature-flags';
 
 type Customer = {
   customerId: string;
@@ -33,6 +34,7 @@ type WalletInfo = {
 };
 
 export default function CustomerManagementPage() {
+  const eclipseActive = eclipseEnabled();
   const [form, setForm] = useState({
     firstName: '',
     familyName: '',
@@ -67,16 +69,19 @@ export default function CustomerManagementPage() {
 
   const selectedProfileFields: DashboardProfileField[] = useMemo(() => {
     if (!selected) return [];
-    return [
+    const fields: DashboardProfileField[] = [
       { id: 'firstName', label: 'First Name', value: profileForm.firstName },
       { id: 'familyName', label: 'Last Name', value: profileForm.familyName },
       { id: 'email', label: 'Email', value: profileForm.email },
       { id: 'phoneNumber', label: 'Phone', value: profileForm.phoneNumber ?? '—' },
       { id: 'address', label: 'Address', value: profileForm.address ?? '—', span: 2 },
       { label: 'Pashasha Account', value: selected.accountNumber, mono: true },
-      { label: 'Wallet ID', value: selected.eclipseWalletId ?? '—', mono: true },
     ];
-  }, [profileForm, selected]);
+    if (eclipseActive) {
+      fields.push({ label: 'Wallet ID', value: selected.eclipseWalletId ?? '—', mono: true });
+    }
+    return fields;
+  }, [eclipseActive, profileForm, selected]);
 
   const balanceValue =
     wallet?.currentBalance ?? wallet?.balance ?? wallet?.availableBalance ?? undefined;
@@ -126,7 +131,12 @@ export default function CustomerManagementPage() {
   };
 
   const refreshFinancials = useCallback(async () => {
-    if (!selected?.customerId) return;
+    if (!selected?.customerId || !eclipseActive) {
+      setTransactions([]);
+      setReservations([]);
+      setWallet(null);
+      return;
+    }
     setTxLoading(true);
     setReservationsLoading(true);
     try {
@@ -153,7 +163,7 @@ export default function CustomerManagementPage() {
       setTxLoading(false);
       setReservationsLoading(false);
     }
-  }, [selected?.customerId]);
+  }, [eclipseActive, selected?.customerId]);
 
   const refreshSelected = async () => {
     if (!selected?.customerId) return;
@@ -200,6 +210,7 @@ export default function CustomerManagementPage() {
     };
     void loadDetails();
   }, [
+    eclipseActive,
     selected?.customerId,
     selected?.firstName,
     selected?.familyName,
@@ -216,6 +227,12 @@ export default function CustomerManagementPage() {
 
   return (
     <div className="space-y-6">
+      {!eclipseActive && (
+        <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
+          Voucher mode is active. Eclipse wallet balances and transaction history are hidden during
+          the pilot.
+        </section>
+      )}
       <div className="flex items-center justify-end">
         <button
           type="button"
@@ -386,72 +403,76 @@ export default function CustomerManagementPage() {
             }
           />
           <DashboardKycCard profileType="customer" profileId={selected.customerId} />
-          <DashboardPaymentsCard
-            title="Transaction history"
-            collapsed={paymentsCollapsed}
-            onToggle={() => setPaymentsCollapsed((v) => !v)}
-            metrics={
-              balanceValue !== undefined && availableBalanceValue !== undefined
-                ? [
-                    { label: 'Balance', value: balanceValue },
-                    { label: 'Available Balance', value: availableBalanceValue },
-                  ]
-                : undefined
-            }
-            transactions={transactions}
-            loading={txLoading}
-            rightActions={
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={refreshFinancials}
-                  disabled={txLoading || reservationsLoading}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                  aria-label="Refresh transactions"
-                  title="Refresh transactions"
-                >
-                  {txLoading ? '⟳' : '⟲'}
-                </button>
-                <span className="text-xs text-slate-500">
-                  Wallet: {selected.eclipseWalletId ?? '—'}
-                </span>
-              </div>
-            }
-          />
+          {eclipseActive && (
+            <>
+              <DashboardPaymentsCard
+                title="Transaction history"
+                collapsed={paymentsCollapsed}
+                onToggle={() => setPaymentsCollapsed((v) => !v)}
+                metrics={
+                  balanceValue !== undefined && availableBalanceValue !== undefined
+                    ? [
+                        { label: 'Balance', value: balanceValue },
+                        { label: 'Available Balance', value: availableBalanceValue },
+                      ]
+                    : undefined
+                }
+                transactions={transactions}
+                loading={txLoading}
+                rightActions={
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={refreshFinancials}
+                      disabled={txLoading || reservationsLoading}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                      aria-label="Refresh transactions"
+                      title="Refresh transactions"
+                    >
+                      {txLoading ? '⟳' : '⟲'}
+                    </button>
+                    <span className="text-xs text-slate-500">
+                      Wallet: {selected.eclipseWalletId ?? '—'}
+                    </span>
+                  </div>
+                }
+              />
 
-          <DashboardPaymentsCard
-            title="Reservations"
-            collapsed={reservationsCollapsed}
-            onToggle={() => setReservationsCollapsed((v) => !v)}
-            metrics={[
-              { label: 'Pending Reservations', value: pendingReservationsTotal },
-              ...(availableBalanceValue !== undefined
-                ? [{ label: 'Available Balance', value: availableBalanceValue }]
-                : []),
-            ]}
-            transactions={reservations}
-            loading={reservationsLoading}
-            emptyLabel="No reservations."
-            rightActions={
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={refreshFinancials}
-                  disabled={txLoading || reservationsLoading}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-                  aria-label="Refresh reservations"
-                  title="Refresh reservations"
-                >
-                  {reservationsLoading ? '⟳' : '⟲'}
-                </button>
-                <span className="text-xs text-slate-500">
-                  Wallet: {selected.eclipseWalletId ?? '—'}
-                </span>
-              </div>
-            }
-            showBalanceColumn={false}
-            showExpiresColumn
-          />
+              <DashboardPaymentsCard
+                title="Reservations"
+                collapsed={reservationsCollapsed}
+                onToggle={() => setReservationsCollapsed((v) => !v)}
+                metrics={[
+                  { label: 'Pending Reservations', value: pendingReservationsTotal },
+                  ...(availableBalanceValue !== undefined
+                    ? [{ label: 'Available Balance', value: availableBalanceValue }]
+                    : []),
+                ]}
+                transactions={reservations}
+                loading={reservationsLoading}
+                emptyLabel="No reservations."
+                rightActions={
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={refreshFinancials}
+                      disabled={txLoading || reservationsLoading}
+                      className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                      aria-label="Refresh reservations"
+                      title="Refresh reservations"
+                    >
+                      {reservationsLoading ? '⟳' : '⟲'}
+                    </button>
+                    <span className="text-xs text-slate-500">
+                      Wallet: {selected.eclipseWalletId ?? '—'}
+                    </span>
+                  </div>
+                }
+                showBalanceColumn={false}
+                showExpiresColumn
+              />
+            </>
+          )}
         </div>
       )}
 

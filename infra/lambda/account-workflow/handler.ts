@@ -26,7 +26,8 @@ const s3 = new S3Client({});
 const USER_POOL_ID = process.env.USER_POOL_ID!;
 const CUSTOMERS_TABLE = process.env.CUSTOMERS_TABLE_NAME!;
 const CIVIL_TABLE = process.env.CIVIL_SERVANTS_TABLE_NAME!;
-const ECLIPSE_SECRET_ARN = process.env.ECLIPSE_SECRET_ARN!;
+const ECLIPSE_SECRET_ARN = process.env.ECLIPSE_SECRET_ARN ?? '';
+const DISABLE_ECLIPSE = process.env.DISABLE_ECLIPSE === 'true';
 const ERROR_TOPIC_ARN = process.env.SIGNUP_TOPIC_ARN;
 const COUNTER_TABLE_NAME = process.env.COUNTER_TABLE_NAME!;
 const USER_ASSETS_BUCKET = process.env.USER_ASSETS_BUCKET;
@@ -272,10 +273,12 @@ async function createProfile(input: WorkflowInput) {
     }
   }
 
-  return { ...input, step: 'createEclipseCustomer', profileId: id };
+  const nextStep = DISABLE_ECLIPSE ? 'ensureGuardAssets' : 'createEclipseCustomer';
+  return { ...input, step: nextStep, profileId: id };
 }
 
 async function createEclipseCustomer(input: WorkflowInput) {
+  if (DISABLE_ECLIPSE) return { ...input, step: 'ensureGuardAssets' };
   if (input.eclipseCustomerId) return { ...input, step: 'createEclipseWallet' };
 
   const normalizeName = (value?: string) => {
@@ -332,6 +335,7 @@ async function createEclipseCustomer(input: WorkflowInput) {
 }
 
 async function createEclipseWallet(input: WorkflowInput) {
+  if (DISABLE_ECLIPSE) return { ...input, step: 'ensureGuardAssets' };
   if (input.eclipseWalletId) return { ...input, step: 'updateProfile' };
   if (!input.eclipseCustomerId) {
     throw new Error('Eclipse wallet failed: missing eclipseCustomerId from previous step');
@@ -472,6 +476,12 @@ async function updateProfile(input: WorkflowInput) {
 }
 
 async function loadEclipseSecrets() {
+  if (DISABLE_ECLIPSE) {
+    throw new Error('Eclipse is disabled');
+  }
+  if (!ECLIPSE_SECRET_ARN) {
+    throw new Error('ECLIPSE_SECRET_ARN is not set');
+  }
   const secret = await secrets.send(
     new GetSecretValueCommand({
       SecretId: ECLIPSE_SECRET_ARN,

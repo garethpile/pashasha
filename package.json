@@ -6,6 +6,8 @@
   "workspaces": [
     "apps/frontend",
     "apps/backend",
+    "apps/flash-backend",
+    "apps/voucher-service",
     "packages/contracts"
   ],
   "scripts": {

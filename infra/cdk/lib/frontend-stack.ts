@@ -49,6 +49,11 @@ export interface PashashaPayFrontendStackProps extends cdk.StackProps {
   readonly branchName?: string;
 
   /**
+   * Enable patching the Amplify SSR logging role (only if the role exists).
+   */
+  readonly enableSsrLoggingRolePatch?: boolean;
+
+  /**
    * ARN of the frontend config secret in Secrets Manager.
    */
   readonly frontendSecretsArn: string;
@@ -132,10 +137,10 @@ export class PashashaPayFrontendStack extends cdk.Stack {
       sourceCodeProvider,
     };
 
-    const app = new amplify.App(this, 'AmplifyApp', appProps);
+    const app = new amplify.App(this, 'AmplifyAppV2', appProps);
 
-    const branch = app.addBranch('PrimaryBranch', {
-      branchName: props.branchName ?? 'main',
+    const branch = app.addBranch('PrimaryBranchV2', {
+      branchName: props.branchName ?? 'master',
       environmentVariables: envVars,
       stage: 'PRODUCTION',
       autoBuild: false,
@@ -203,8 +208,10 @@ export class PashashaPayFrontendStack extends cdk.Stack {
     this.primaryBranch = branch;
 
     // Patch SSR Logging Role for Amplify with secret access (if role exists)
-    new AmplifySSRLoggingRolePatch(this, 'SSRLoggingRolePatch', {
-      secretArn: props.frontendSecretsArn,
-    });
+    if (props.enableSsrLoggingRolePatch) {
+      new AmplifySSRLoggingRolePatch(this, 'SSRLoggingRolePatch', {
+        secretArn: props.frontendSecretsArn,
+      });
+    }
   }
 }

@@ -11,6 +11,7 @@ import {
 import { CivilServantProfileCard } from '../../../components/dashboard/civil-servant-profile-card';
 import { mapDashboardTransactions } from '../../../components/dashboard/transactions';
 import { DashboardKycCard } from '../../../components/dashboard/kyc-card';
+import { eclipseEnabled } from '../../../lib/feature-flags';
 
 type WalletInfo = {
   balance: number;
@@ -38,6 +39,7 @@ type CivilServant = {
 };
 
 export default function CivilServantManagementPage() {
+  const eclipseActive = eclipseEnabled();
   const [creation, setCreation] = useState({
     firstName: '',
     familyName: '',
@@ -216,7 +218,7 @@ export default function CivilServantManagementPage() {
 
   useEffect(() => {
     const loadTransactions = async () => {
-      if (!selected?.civilServantId) {
+      if (!selected?.civilServantId || !eclipseActive) {
         setTransactions([]);
         setReservations([]);
         setWalletInfo(null);
@@ -247,7 +249,7 @@ export default function CivilServantManagementPage() {
       }
     };
     loadTransactions();
-  }, [selected?.civilServantId]);
+  }, [eclipseActive, selected?.civilServantId]);
 
   const pendingReservationsTotal = reservations.reduce((sum, row) => {
     const value = Number(row.amount ?? 0);
@@ -407,6 +409,12 @@ export default function CivilServantManagementPage() {
 
   return (
     <div className="space-y-8">
+      {!eclipseActive && (
+        <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
+          Voucher mode is active. Eclipse wallet balances, transaction history, and payouts are
+          hidden during the pilot.
+        </section>
+      )}
       <div className="flex items-center justify-end">
         <button
           type="button"
@@ -521,10 +529,10 @@ export default function CivilServantManagementPage() {
               phoneNumber: profileForm.phoneNumber,
               homeAddress: profileForm.homeAddress,
               accountNumber: selected.accountNumber ?? null,
-              walletId: selected.eclipseWalletId ?? null,
+              walletId: eclipseActive ? (selected.eclipseWalletId ?? null) : null,
               guardToken: selected.guardToken ?? null,
-              eclipseCustomerId: selected.eclipseCustomerId ?? null,
-              eclipseWalletId: selected.eclipseWalletId ?? null,
+              eclipseCustomerId: eclipseActive ? (selected.eclipseCustomerId ?? null) : null,
+              eclipseWalletId: eclipseActive ? (selected.eclipseWalletId ?? null) : null,
               qrUrl: qrUrl ?? null,
             }}
             collapsed={profileCollapsed}
@@ -540,7 +548,8 @@ export default function CivilServantManagementPage() {
             saving={profileSaving}
             feedback={message}
             showWorkFields
-            showEclipseAccount
+            showEclipseAccount={eclipseActive}
+            showWalletId={eclipseActive}
             onRefresh={refreshSelected}
             refreshing={profileRefreshing}
             onViewQr={() => selected?.civilServantId && fetchQrUrl(selected.civilServantId, true)}
@@ -551,71 +560,75 @@ export default function CivilServantManagementPage() {
 
           <DashboardKycCard profileType="civil-servant" profileId={selected.civilServantId} />
 
-          <DashboardPaymentsCard
-            title="Transaction history"
-            collapsed={paymentsCollapsed}
-            onToggle={() => setPaymentsCollapsed((v) => !v)}
-            transactions={transactions}
-            loading={txLoading}
-            metrics={
-              walletInfo
-                ? [
-                    {
-                      label: 'Balance',
-                      value: walletInfo.currentBalance ?? walletInfo.balance ?? 0,
-                    },
-                    {
-                      label: 'Available Balance',
-                      value:
-                        walletInfo.availableBalance ??
-                        walletInfo.currentBalance ??
-                        walletInfo.balance ??
-                        0,
-                    },
-                  ]
-                : undefined
-            }
-            actions={
-              <span className="text-xs text-slate-500">
-                Wallet: {selected.eclipseWalletId ?? '—'}
-              </span>
-            }
-          />
+          {eclipseActive && (
+            <>
+              <DashboardPaymentsCard
+                title="Transaction history"
+                collapsed={paymentsCollapsed}
+                onToggle={() => setPaymentsCollapsed((v) => !v)}
+                transactions={transactions}
+                loading={txLoading}
+                metrics={
+                  walletInfo
+                    ? [
+                        {
+                          label: 'Balance',
+                          value: walletInfo.currentBalance ?? walletInfo.balance ?? 0,
+                        },
+                        {
+                          label: 'Available Balance',
+                          value:
+                            walletInfo.availableBalance ??
+                            walletInfo.currentBalance ??
+                            walletInfo.balance ??
+                            0,
+                        },
+                      ]
+                    : undefined
+                }
+                actions={
+                  <span className="text-xs text-slate-500">
+                    Wallet: {selected.eclipseWalletId ?? '—'}
+                  </span>
+                }
+              />
 
-          <DashboardPaymentsCard
-            title="Reservations"
-            collapsed={reservationsCollapsed}
-            onToggle={() => setReservationsCollapsed((v) => !v)}
-            transactions={reservations}
-            loading={reservationsLoading}
-            emptyLabel="No reservations."
-            metrics={
-              walletInfo
-                ? [
-                    {
-                      label: 'Balance',
-                      value: walletInfo.currentBalance ?? walletInfo.balance ?? 0,
-                    },
-                    { label: 'Pending Reservations', value: pendingReservationsTotal },
-                    {
-                      label: 'Available Balance',
-                      value:
-                        walletInfo.availableBalance ??
-                        walletInfo.currentBalance ??
-                        walletInfo.balance ??
-                        0,
-                    },
-                  ]
-                : [{ label: 'Pending Reservations', value: pendingReservationsTotal }]
-            }
-            actions={
-              <span className="text-xs text-slate-500">
-                Wallet: {selected.eclipseWalletId ?? '—'}
-              </span>
-            }
-            showBalanceColumn={false}
-            showExpiresColumn
-          />
+              <DashboardPaymentsCard
+                title="Reservations"
+                collapsed={reservationsCollapsed}
+                onToggle={() => setReservationsCollapsed((v) => !v)}
+                transactions={reservations}
+                loading={reservationsLoading}
+                emptyLabel="No reservations."
+                metrics={
+                  walletInfo
+                    ? [
+                        {
+                          label: 'Balance',
+                          value: walletInfo.currentBalance ?? walletInfo.balance ?? 0,
+                        },
+                        { label: 'Pending Reservations', value: pendingReservationsTotal },
+                        {
+                          label: 'Available Balance',
+                          value:
+                            walletInfo.availableBalance ??
+                            walletInfo.currentBalance ??
+                            walletInfo.balance ??
+                            0,
+                        },
+                      ]
+                    : [{ label: 'Pending Reservations', value: pendingReservationsTotal }]
+                }
+                actions={
+                  <span className="text-xs text-slate-500">
+                    Wallet: {selected.eclipseWalletId ?? '—'}
+                  </span>
+                }
+                showBalanceColumn={false}
+                showExpiresColumn
+              />
+            </>
+          )}
         </div>
       )}
 

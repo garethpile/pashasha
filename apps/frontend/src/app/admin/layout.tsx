@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { getSession } from '../../lib/auth/session';
 import { ChatAssistant } from '../../components/support/chat-assistant';
+import { eclipseEnabled } from '../../lib/feature-flags';
 
 const tabs = [
   { href: '/admin/civil-servants', label: 'Civil Servants' },
@@ -16,6 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const session = getSession();
+  const eclipseActive = eclipseEnabled();
 
   useEffect(() => {
     if (!session) {
@@ -54,6 +56,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             );
           })}
         </nav>
+        {!eclipseActive && (
+          <section className="mb-6 rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
+            Voucher mode is active. Eclipse wallet balances, transaction history, and payouts are
+            hidden during the pilot.
+          </section>
+        )}
         <section className="rounded-3xl border border-white/10 bg-white/95 p-6 shadow-2xl">
           {children}
         </section>

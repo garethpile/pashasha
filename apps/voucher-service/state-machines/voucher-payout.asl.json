@@ -1,0 +1,38 @@
+{
+  "Comment": "Voucher payout flow (Flash/1Voucher)",
+  "StartAt": "IssueVoucher",
+  "States": {
+    "IssueVoucher": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:issueVoucher",
+      "Retry": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "MarkFailed"
+        }
+      ],
+      "Next": "NotifyRecipient"
+    },
+    "NotifyRecipient": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:notifyRecipient",
+      "Next": "Done"
+    },
+    "MarkFailed": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:REGION:ACCOUNT_ID:function:markFailed",
+      "Next": "Done"
+    },
+    "Done": {
+      "Type": "Succeed"
+    }
+  }
+}

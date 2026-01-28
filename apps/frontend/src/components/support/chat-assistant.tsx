@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { supportApi, SupportUserInfo } from '../../lib/api/support';
+import { eclipseEnabled } from '../../lib/feature-flags';
 
 export function ChatAssistant() {
+  const eclipseActive = eclipseEnabled();
   const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState('');
   const [details, setDetails] = useState('');
@@ -124,7 +126,7 @@ export function ChatAssistant() {
                           <span className="font-mono">{userInfo.accountNumber}</span>
                         </div>
                       )}
-                      {userInfo.walletId && (
+                      {eclipseActive && userInfo.walletId && (
                         <div className="flex justify-between gap-2">
                           <span className="font-semibold">Wallet</span>
                           <span className="font-mono">{userInfo.walletId}</span>

@@ -107,6 +107,7 @@ export class PashashaPayBackendStack extends cdk.Stack {
         },
       },
       userPoolName: 'PashashaPay-UserPool',
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
     const userPoolClient = userPool.addClient('WebClient', {
@@ -133,7 +134,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
     const customersTable = new dynamodb.Table(this, 'CustomersTable', {
       partitionKey: { name: 'customerId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
       tableName: 'PashashaPay-Customers',
     });
     customersTable.addGlobalSecondaryIndex({
@@ -153,7 +155,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
     const civilServantsTable = new dynamodb.Table(this, 'CivilServantsTable', {
       partitionKey: { name: 'civilServantId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
       tableName: 'PashashaPay-Civil-servants',
     });
     civilServantsTable.addGlobalSecondaryIndex({
@@ -178,7 +181,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
     const administratorsTable = new dynamodb.Table(this, 'AdministratorsTable', {
       partitionKey: { name: 'username', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
       tableName: 'PashashaPay-Administrators',
     });
     administratorsTable.addGlobalSecondaryIndex({
@@ -190,7 +194,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
     const paymentsTable = new dynamodb.Table(this, 'PaymentsTable', {
       partitionKey: { name: 'paymentId', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
       tableName: 'PashashaPay-Payments',
     });
     paymentsTable.addGlobalSecondaryIndex({
@@ -211,14 +216,16 @@ export class PashashaPayBackendStack extends cdk.Stack {
       partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'sk', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
       tableName: 'PashashaPay-Account-counters',
     });
 
     const supportTicketsTable = new dynamodb.Table(this, 'SupportTicketsTable', {
       partitionKey: { name: 'supportCode', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
       tableName: 'PashashaPay-Support',
     });
     supportTicketsTable.addGlobalSecondaryIndex({
@@ -232,7 +239,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
       partitionKey: { name: 'auditId', type: dynamodb.AttributeType.STRING },
       sortKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+      deletionProtection: true,
       tableName: 'PashashaPay-AuditLogs',
     });
     auditLogsTable.addGlobalSecondaryIndex({
@@ -250,8 +258,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
 
     const userAssetsBucket = new s3.Bucket(this, 'UserAssetsBucket', {
       bucketName: 'pashashapay-user-assets',
-      autoDeleteObjects: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: false,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
@@ -265,8 +273,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
 
     const kycAssetsBucket = new s3.Bucket(this, 'KycAssetsBucket', {
       bucketName: 'pashashapay-kyc-assets',
-      autoDeleteObjects: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: false,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [
@@ -280,8 +288,8 @@ export class PashashaPayBackendStack extends cdk.Stack {
 
     const qrAssetsBucket = new s3.Bucket(this, 'QrAssetsBucket', {
       bucketName: 'pashashapay-qr-assets',
-      autoDeleteObjects: true,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
+      autoDeleteObjects: false,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
       encryption: s3.BucketEncryption.S3_MANAGED,
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       cors: [

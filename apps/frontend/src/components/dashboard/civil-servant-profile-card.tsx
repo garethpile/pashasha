@@ -31,6 +31,7 @@ export function CivilServantProfileCard({
   showWorkFields = true,
   showPrimarySite = true,
   occupationOptions,
+  showWalletId = true,
   showEclipseAccount = false,
   onViewQr,
   onGenerateQr,
@@ -53,6 +54,7 @@ export function CivilServantProfileCard({
   showWorkFields?: boolean;
   showPrimarySite?: boolean;
   occupationOptions?: { value: string; label: string }[];
+  showWalletId?: boolean;
   showEclipseAccount?: boolean;
   onViewQr?: () => void;
   onGenerateQr?: () => void;
@@ -215,7 +217,7 @@ export function CivilServantProfileCard({
             />
           </label>
 
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className={`grid gap-4 ${showWalletId ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
             <label className="text-xs font-semibold text-slate-600">
               Pashasha Account
               <input
@@ -224,14 +226,16 @@ export function CivilServantProfileCard({
                 className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 font-mono text-sm text-slate-700"
               />
             </label>
-            <label className="text-xs font-semibold text-slate-600">
-              Pashasha Wallet ID
-              <input
-                value={data.walletId ?? 'Not linked'}
-                disabled
-                className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 font-mono text-sm text-slate-700"
-              />
-            </label>
+            {showWalletId && (
+              <label className="text-xs font-semibold text-slate-600">
+                Pashasha Wallet ID
+                <input
+                  value={data.walletId ?? 'Not linked'}
+                  disabled
+                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2 font-mono text-sm text-slate-700"
+                />
+              </label>
+            )}
             <label className="text-xs font-semibold text-slate-600">
               Pashasha Token
               <input

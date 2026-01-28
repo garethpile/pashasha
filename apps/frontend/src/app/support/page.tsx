@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { supportApi, SupportTicket } from '../../lib/api/support';
 import { getSession } from '../../lib/auth/session';
+import { eclipseEnabled } from '../../lib/feature-flags';
 
 const formatDate = (value?: string) => {
   if (!value) return '—';
@@ -26,6 +27,7 @@ const statusBadgeClass = (status?: string) => {
 };
 
 const SupportPage = () => {
+  const eclipseActive = eclipseEnabled();
   const [filter, setFilter] = useState<'ACTIVE' | 'CLOSED'>('ACTIVE');
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [loading, setLoading] = useState(false);
@@ -134,6 +136,11 @@ const SupportPage = () => {
   return (
     <main className="min-h-screen bg-amber-50 px-4 pb-16 pt-24 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
+        {!eclipseActive && (
+          <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
+            Voucher mode is active. Eclipse wallet references are hidden during the pilot.
+          </section>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Support</p>
@@ -326,7 +333,7 @@ const SupportPage = () => {
                       <span className="font-mono">{selected.user.accountNumber}</span>
                     </p>
                   )}
-                  {selected.user?.walletId && (
+                  {eclipseActive && selected.user?.walletId && (
                     <p>
                       <span className="font-semibold">Wallet: </span>
                       <span className="font-mono">{selected.user.walletId}</span>
