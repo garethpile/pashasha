@@ -100,7 +100,7 @@ export class PashashaPayFrontendStack extends cdk.Stack {
               },
             },
             artifacts: {
-              baseDirectory: '.amplify-hosting',
+              baseDirectory: '.next',
               files: ['**/*'],
             },
             cache: {

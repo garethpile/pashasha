@@ -1,5 +1,3 @@
-import { withAmplifyHosting } from '@aws-amplify/adapter-nextjs';
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -7,4 +5,4 @@ const nextConfig = {
   },
 };
 
-export default withAmplifyHosting(nextConfig);
+export default nextConfig;
