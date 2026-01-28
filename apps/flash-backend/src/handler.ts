@@ -455,7 +455,10 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     return { statusCode: 204, headers: corsHeaders };
   }
 
-  const path = event.rawPath ?? '/';
+  const rawPath = event.rawPath ?? '/';
+  const stage = event.requestContext.stage ?? '';
+  const path =
+    stage && rawPath.startsWith(`/${stage}/`) ? rawPath.slice(stage.length + 1) : rawPath;
   const method = event.requestContext.http.method.toUpperCase();
   const claims = await getClaims(event);
 
