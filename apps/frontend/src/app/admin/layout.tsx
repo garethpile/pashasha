@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { isAdminGroup } from '../../lib/auth/groups';
 import { getSession } from '../../lib/auth/session';
 import { ChatAssistant } from '../../components/support/chat-assistant';
 import { eclipseEnabled } from '../../lib/feature-flags';
@@ -24,12 +25,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.replace('/login');
       return;
     }
-    if (!session.groups.includes('Administrators')) {
+    if (!isAdminGroup(session.groups)) {
       router.replace('/');
     }
   }, [router, session]);
 
-  if (!session || !session.groups.includes('Administrators')) {
+  if (!session || !isAdminGroup(session.groups)) {
     return null;
   }
 

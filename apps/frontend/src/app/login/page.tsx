@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthenticationDetails, CognitoUser, CognitoUserPool } from 'amazon-cognito-identity-js';
+import { isAdminGroup } from '../../lib/auth/groups';
 import { persistSession } from '../../lib/auth/session';
 
 type Stage = 'login' | 'forceChange' | 'forgotRequest' | 'forgotConfirm';
@@ -60,7 +61,7 @@ export default function LoginPage() {
 
     setPending(false);
     setStage('login');
-    const target = groups.includes('Administrators') ? '/admin' : '/';
+    const target = isAdminGroup(groups) ? '/admin' : '/';
     router.push(target);
   };
 

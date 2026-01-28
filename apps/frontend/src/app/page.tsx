@@ -14,6 +14,7 @@ import { mapDashboardTransactions } from '../components/dashboard/transactions';
 import { guardApi } from '../lib/api/guard';
 import { customerApi } from '../lib/api/customer';
 import { voucherApi } from '../lib/api/voucher';
+import { isAdminGroup, isCivilServantGroup, isCustomerGroup } from '../lib/auth/groups';
 import { getSession, sessionEventName } from '../lib/auth/session';
 import { guardsClient } from '../lib/guards-client';
 import { eclipseEnabled } from '../lib/feature-flags';
@@ -1540,15 +1541,9 @@ export default function DashboardPage() {
   const [session, setSession] = useState(() => getSession());
   const router = useRouter();
 
-  const normalizedGroups = (session?.groups ?? []).map((g) =>
-    g.toLowerCase().replace(/[\s_-]/g, '')
-  );
-  const hasGroup = (...targets: string[]) =>
-    normalizedGroups.some((g) => targets.some((t) => g === t.toLowerCase().replace(/[\s_-]/g, '')));
-
-  const isCivilServant = hasGroup('civilservants', 'civilservant');
-  const isCustomer = hasGroup('customers', 'customer');
-  const isAdmin = hasGroup('administrators', 'administrator');
+  const isCivilServant = isCivilServantGroup(session?.groups);
+  const isCustomer = isCustomerGroup(session?.groups);
+  const isAdmin = isAdminGroup(session?.groups);
 
   useEffect(() => {
     const handleSessionChange = () => setSession(getSession());
@@ -1576,6 +1571,10 @@ export default function DashboardPage() {
     return <CivilServantDashboard />;
   }
 
-  // Default to customer dashboard for non-admin accounts.
+  if (isCustomer) {
+    return <CustomerDashboard />;
+  }
+
+  // Default to customer dashboard for ungrouped accounts.
   return <CustomerDashboard />;
 }

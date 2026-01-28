@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { supportApi, SupportTicket } from '../../lib/api/support';
+import { isAdminGroup } from '../../lib/auth/groups';
 import { getSession } from '../../lib/auth/session';
 import { eclipseEnabled } from '../../lib/feature-flags';
 
@@ -42,8 +43,7 @@ const SupportPage = () => {
 
   useEffect(() => {
     const session = getSession();
-    const groups = (session?.groups ?? []).map((g) => g.toLowerCase());
-    setIsAdmin(groups.includes('administrators'));
+    setIsAdmin(isAdminGroup(session?.groups));
   }, []);
 
   const loadTickets = useCallback(

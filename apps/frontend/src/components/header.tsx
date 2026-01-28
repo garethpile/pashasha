@@ -11,6 +11,7 @@ import {
   getSession,
   sessionEventName,
 } from '../lib/auth/session';
+import { isAdminGroup, isCivilServantGroup, isCustomerGroup } from '../lib/auth/groups';
 
 export const Header = () => {
   const router = useRouter();
@@ -20,14 +21,9 @@ export const Header = () => {
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
 
-  const normalizedGroups = (session?.groups ?? []).map((g) =>
-    g.toLowerCase().replace(/[\s_-]/g, '')
-  );
-  const hasGroup = (...targets: string[]) =>
-    normalizedGroups.some((g) => targets.some((t) => g === t.toLowerCase().replace(/[\s_-]/g, '')));
-  const isCivilServant = hasGroup('civilservants', 'civilservant');
-  const isCustomer = hasGroup('customers', 'customer');
-  const isAdmin = hasGroup('administrators', 'admin');
+  const isCivilServant = isCivilServantGroup(session?.groups);
+  const isCustomer = isCustomerGroup(session?.groups);
+  const isAdmin = isAdminGroup(session?.groups);
   const dashboardLabel = session
     ? isCivilServant
       ? 'Civil Servant Dashboard'
