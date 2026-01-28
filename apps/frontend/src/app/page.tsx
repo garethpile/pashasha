@@ -637,9 +637,7 @@ function CivilServantDashboard() {
               <div>
                 <p className="text-sm text-slate-600">Available balance</p>
                 <p className="text-2xl font-semibold text-slate-900">
-                  {payoutInfo
-                    ? formatCurrency(payoutInfo.availableBalance ?? payoutInfo.balance ?? 0)
-                    : 'Loading...'}
+                  {payoutInfo ? formatCurrency(availableBalance) : 'Loading...'}
                 </p>
               </div>
               <button
