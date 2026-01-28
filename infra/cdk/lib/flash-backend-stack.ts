@@ -241,6 +241,29 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
     const api = new apigwv2.HttpApi(this, 'FlashHttpApi', {
       apiName: 'PashashaPay-FlashApi',
       createDefaultStage: false,
+      corsPreflight: {
+        allowHeaders: [
+          'Authorization',
+          'Content-Type',
+          'X-Amz-Date',
+          'X-Api-Key',
+          'X-Amz-Security-Token',
+          'X-Amz-User-Agent',
+        ],
+        allowMethods: [
+          apigwv2.CorsHttpMethod.GET,
+          apigwv2.CorsHttpMethod.POST,
+          apigwv2.CorsHttpMethod.PUT,
+          apigwv2.CorsHttpMethod.PATCH,
+          apigwv2.CorsHttpMethod.DELETE,
+          apigwv2.CorsHttpMethod.OPTIONS,
+        ],
+        allowOrigins: [
+          'https://master.d28mxe1buxl9n7.amplifyapp.com',
+          'https://dev.pashasha.com',
+          'https://www.dev.pashasha.com',
+        ],
+      },
     });
     const stage = new apigwv2.HttpStage(this, 'FlashHttpStage', {
       httpApi: api,
