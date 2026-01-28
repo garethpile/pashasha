@@ -237,6 +237,15 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
         resources: ['*'],
       })
     );
+    handler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['dynamodb:Query'],
+        resources: [
+          `${paymentsTable.tableArn}/index/byCivilServant`,
+          `${paymentsTable.tableArn}/index/byCustomer`,
+        ],
+      })
+    );
 
     const api = new apigwv2.HttpApi(this, 'FlashHttpApi', {
       apiName: 'PashashaPay-FlashApi',
