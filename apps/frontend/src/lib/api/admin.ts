@@ -24,7 +24,6 @@ const request = async <T>(
   const response = await fetch(`${API_ROOT}${path}`, {
     ...options,
     headers,
-    credentials: 'include',
   });
   if (!response.ok) {
     if (response.status === 401) {

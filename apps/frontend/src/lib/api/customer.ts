@@ -17,7 +17,6 @@ const request = async <T>(path: string, options: RequestInit = {}): Promise<T> =
   const response = await fetch(`${API_ROOT}${path}`, {
     ...options,
     headers,
-    credentials: 'include',
   });
 
   if (!response.ok) {
