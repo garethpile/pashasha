@@ -8,7 +8,12 @@ import {
   ScanCommand,
   DeleteCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  GetObjectCommand,
+  PutObjectCommand,
+  HeadObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { SNSClient, PublishCommand } from '@aws-sdk/client-sns';
 import {
@@ -382,6 +387,33 @@ const getQrUrl = async (key?: string | null) => {
   const command = new GetObjectCommand({ Bucket: QR_ASSETS_BUCKET, Key: key });
   const url = await getSignedUrl(s3, command, { expiresIn: 300 });
   return url;
+};
+
+const qrObjectExists = async (key?: string | null) => {
+  if (!key || !QR_ASSETS_BUCKET) return false;
+  try {
+    await s3.send(new HeadObjectCommand({ Bucket: QR_ASSETS_BUCKET, Key: key }));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const ensureGuardQr = async (guard: any, civilServantId: string) => {
+  if (!QR_ASSETS_BUCKET) return { url: null };
+  const existingKey = guard?.qrCodeKey as string | undefined;
+  if (existingKey && (await qrObjectExists(existingKey))) {
+    return { url: await getQrUrl(existingKey) };
+  }
+  const token = guard?.guardToken ?? randomUUID().replace(/-/g, '').slice(0, 16);
+  const qr = await generateGuardQr(civilServantId, token);
+  if (!qr?.key) return { url: null };
+  await updateProfile(TABLE_CIVIL, 'civilServantId', civilServantId, {
+    guardToken: guard?.guardToken ?? token,
+    guardTokenExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    qrCodeKey: qr.key,
+  });
+  return { url: await getQrUrl(qr.key) };
 };
 
 const generateGuardQr = async (civilServantId: string, token: string) => {
@@ -1018,7 +1050,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
     if (path === '/civil-servants/me/qr-code' && method === 'GET') {
       const guard = await getProfileById(TABLE_CIVIL, 'civilServantId', pickUserId(claims));
       if (!guard) return json(404, { error: 'Civil servant not found' }, corsHeaders);
-      const url = await getQrUrl(guard.qrCodeKey as string | undefined);
+      const { url } = await ensureGuardQr(guard, pickUserId(claims));
       if (!url) return json(404, { error: 'QR not available' }, corsHeaders);
       return json(200, { url }, corsHeaders);
     }
@@ -1243,7 +1275,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       if (parts[3] === 'qr-code' && method === 'GET') {
         const guard = await getProfileById(TABLE_CIVIL, 'civilServantId', civilServantId);
         if (!guard) return json(404, { error: 'Civil servant not found' }, corsHeaders);
-        const url = await getQrUrl(guard.qrCodeKey as string | undefined);
+        const { url } = await ensureGuardQr(guard, civilServantId);
         if (!url) return json(404, { error: 'QR not available' }, corsHeaders);
         return json(200, { url }, corsHeaders);
       }
