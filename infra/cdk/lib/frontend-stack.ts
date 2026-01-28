@@ -92,6 +92,7 @@ export class PashashaPayFrontendStack extends cdk.Stack {
               preBuild: {
                 commands: [
                   'npm ci --workspaces --prefer-offline=false --no-audit --progress=false',
+                  'npm run build --workspace @pashashapay/contracts',
                 ],
               },
               build: {
@@ -129,17 +130,16 @@ export class PashashaPayFrontendStack extends cdk.Stack {
         : undefined;
 
     const appProps: amplify.AppProps = {
-      appName: 'pashashapay-frontend',
-      description: 'Amplify hosted Next.js frontend for the Pashasha tip platform.',
+      appName: 'PashashaPay',
       buildSpec,
       environmentVariables: envVars,
       autoBranchDeletion: true,
       sourceCodeProvider,
     };
 
-    const app = new amplify.App(this, 'AmplifyAppV2', appProps);
+    const app = new amplify.App(this, 'AmplifyApp', appProps);
 
-    const branch = app.addBranch('PrimaryBranchV2', {
+    const branch = app.addBranch('PrimaryBranch', {
       branchName: props.branchName ?? 'master',
       environmentVariables: envVars,
       stage: 'PRODUCTION',

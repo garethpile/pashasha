@@ -638,10 +638,7 @@ function CivilServantDashboard() {
                 <p className="text-sm text-slate-600">Available balance</p>
                 <p className="text-2xl font-semibold text-slate-900">
                   {payoutInfo
-                    ? formatCurrency(
-                        payoutInfo.availableBalance ?? payoutInfo.balance ?? 0,
-                        payoutInfo.currency
-                      )
+                    ? formatCurrency(payoutInfo.availableBalance ?? payoutInfo.balance ?? 0)
                     : 'Loading...'}
                 </p>
               </div>
@@ -923,6 +920,7 @@ function CustomerDashboard() {
   });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileFeedback, setProfileFeedback] = useState<string | null>(null);
+  const eclipseActive = eclipseEnabled();
 
   const loadTransactions = async (offset = 0) => {
     setTxLoading(true);

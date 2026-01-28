@@ -17,7 +17,7 @@ applications:
               if ! command -v jq >/dev/null 2>&1; then
                 curl -L "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64" -o /tmp/jq && chmod +x /tmp/jq && export PATH="/tmp:$PATH";
               fi
-            - export COGNITO_JSON=$(aws secretsmanager get-secret-value --region $AWS_REGION --secret-id "pashashapay-frontend-config" --query SecretString --output text)
+            - export COGNITO_JSON=$(aws secretsmanager get-secret-value --region $AWS_REGION --secret-id "pashashapay-frontend-flash-config" --query SecretString --output text)
             - export NEXT_PUBLIC_COGNITO_USER_POOL_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_USER_POOL_ID)
             - export NEXT_PUBLIC_COGNITO_CLIENT_ID=$(echo $COGNITO_JSON | jq -r .NEXT_PUBLIC_COGNITO_CLIENT_ID)
             - echo "NEXT_PUBLIC_COGNITO_USER_POOL_ID=$NEXT_PUBLIC_COGNITO_USER_POOL_ID" >> .env.production
