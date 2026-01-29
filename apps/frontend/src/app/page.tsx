@@ -485,7 +485,7 @@ function CivilServantDashboard() {
         payoutResult?.withdrawal?.completionUrl ||
         payoutResult?.withdrawal?.voucherUrl;
       setPayoutAmount('');
-      setPayoutMethod('ATM_CASH');
+      setPayoutMethod('1VOUCHER');
       setPayoutOpen(false);
       setPayoutSuccessOpen(true);
       if (redirect && typeof window !== 'undefined') {
