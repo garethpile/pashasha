@@ -1,5 +1,9 @@
 {
   "app": "npx ts-node --prefer-ts-exts bin/pashashapay.ts",
-  "context": {},
+  "context": {
+    "voucher": {
+      "flashSecretsArn": "arn:aws:secretsmanager:eu-west-1:701158128147:secret:pashashapay-flash-Bpdhxs"
+    }
+  },
   "requireApproval": "never"
 }

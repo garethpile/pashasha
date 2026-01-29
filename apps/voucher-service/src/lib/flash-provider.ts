@@ -12,14 +12,17 @@ export class FlashPayoutProvider implements PayoutProvider {
   }
 
   async payout(intent: PayoutIntent): Promise<PayoutResult> {
-    if (intent.payoutMethod && intent.payoutMethod !== '1VOUCHER') {
-      return {
-        providerRef: intent.reference,
-        status: 'failed',
-        error: `payout method ${intent.payoutMethod} not supported yet`,
-      };
+    if (!intent.payoutMethod || intent.payoutMethod === '1VOUCHER') {
+      return this.client.purchase1Voucher(intent);
     }
-    return this.client.purchase1Voucher(intent);
+    if (intent.payoutMethod === 'CASH_OUT_PIN') {
+      return this.client.purchaseCashOutPin(intent);
+    }
+    return {
+      providerRef: intent.reference,
+      status: 'failed',
+      error: `payout method ${intent.payoutMethod} not supported yet`,
+    };
   }
 
   async getPayoutStatus(providerRef: string): Promise<PayoutResult> {

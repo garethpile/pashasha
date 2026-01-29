@@ -1,5 +1,5 @@
 import type { PayoutIntent, PayoutResult } from './types.js';
-import { buildMockPurchaseResponse } from './flash-mock.js';
+import { buildMockCashOutPinResponse, buildMockPurchaseResponse } from './flash-mock.js';
 
 type AccessToken = {
   token: string;
@@ -11,6 +11,7 @@ export type FlashClientConfig = {
   tokenUrl: string;
   apiKey?: string;
   accountNumber?: string;
+  cashOutProductCode?: number;
   useMock?: boolean;
 };
 
@@ -52,6 +53,134 @@ export class FlashClient {
     }
 
     return this.toResult(payload);
+  }
+
+  async purchaseCashOutPin(intent: PayoutIntent): Promise<PayoutResult> {
+    const productCode = this.config.cashOutProductCode;
+    if (productCode === undefined || Number.isNaN(productCode)) {
+      return {
+        providerRef: intent.reference,
+        status: 'failed',
+        error: 'cash out product code not configured',
+      };
+    }
+
+    if (this.config.useMock) {
+      const mock = buildMockCashOutPinResponse({
+        reference: intent.reference,
+        accountNumber: this.config.accountNumber ?? 'TEST-ACCOUNT',
+        amountCents: Math.round(intent.amount * 100),
+        productCode,
+      });
+      return this.toResult(mock);
+    }
+
+    const token = await this.getAccessToken();
+    const response = await this.request('/aggregation/4.0/cash-out-pin/purchase', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        reference: intent.reference,
+        accountNumber: this.config.accountNumber,
+        amount: Math.round(intent.amount * 100),
+        productCode,
+      }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload?.responseCode !== 0) {
+      return {
+        providerRef: payload?.reference ?? intent.reference,
+        status: 'failed',
+        error: payload?.responseMessage ?? 'flash cash out pin purchase failed',
+      };
+    }
+
+    return this.toResult(payload);
+  }
+
+  async cancelCashOutPin(payload: {
+    reference: string;
+    serialNumber: string;
+    productCode: number;
+  }): Promise<PayoutResult> {
+    const token = await this.getAccessToken();
+    const response = await this.request('/aggregation/4.0/cash-out-pin/cancel', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        reference: payload.reference,
+        accountNumber: this.config.accountNumber,
+        serialNumber: payload.serialNumber,
+        productCode: payload.productCode,
+      }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body?.responseCode !== 0) {
+      return {
+        providerRef: payload.reference,
+        status: 'failed',
+        error: body?.responseMessage ?? 'flash cash out pin cancel failed',
+      };
+    }
+    return { providerRef: payload.reference, status: 'issued' };
+  }
+
+  async lookupCashOutPin(payload: {
+    reference: string;
+    serialNumber: string;
+    productCode: number;
+  }): Promise<PayoutResult> {
+    const token = await this.getAccessToken();
+    const response = await this.request('/aggregation/4.0/cash-out-pin/lookup', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        reference: payload.reference,
+        accountNumber: this.config.accountNumber,
+        serialNumber: payload.serialNumber,
+        productCode: payload.productCode,
+      }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body?.responseCode !== 0) {
+      return {
+        providerRef: payload.reference,
+        status: 'failed',
+        error: body?.responseMessage ?? 'flash cash out pin lookup failed',
+      };
+    }
+    return this.toResult(body);
+  }
+
+  async reverseCashOutPin(payload: { reference: string; originalReference: string }) {
+    const token = await this.getAccessToken();
+    const response = await this.request('/aggregation/4.0/cash-out-pin/reverse', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        reference: payload.reference,
+        originalReference: payload.originalReference,
+        accountNumber: this.config.accountNumber,
+      }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body?.responseCode !== 0) {
+      return {
+        providerRef: payload.reference,
+        status: 'failed',
+        error: body?.responseMessage ?? 'flash cash out pin reverse failed',
+      };
+    }
+    return { providerRef: payload.reference, status: 'issued' };
   }
 
   async getVoucherStatus(providerRef: string): Promise<PayoutResult> {

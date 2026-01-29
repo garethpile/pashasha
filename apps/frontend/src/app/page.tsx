@@ -478,6 +478,7 @@ function CivilServantDashboard() {
             recipientId: profile.civilServantId,
             amount,
             reference: profile.accountNumber ?? undefined,
+            method: payoutMethod,
           });
       const redirect =
         payoutResult?.withdrawal?.redirectUrl ||

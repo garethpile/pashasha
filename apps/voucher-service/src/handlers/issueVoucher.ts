@@ -22,6 +22,11 @@ async function getClient(): Promise<FlashClient> {
         'https://api-flashswitch-sandbox.flash-group.com/token',
       apiKey: secrets.apiKey ?? process.env.FLASH_API_KEY,
       accountNumber: secrets.accountNumber ?? process.env.FLASH_ACCOUNT_NUMBER,
+      cashOutProductCode:
+        secrets.cashOutProductCode ??
+        (process.env.FLASH_CASH_OUT_PRODUCT_CODE
+          ? Number(process.env.FLASH_CASH_OUT_PRODUCT_CODE)
+          : undefined),
       useMock: secrets.useMock ?? process.env.FLASH_USE_MOCK === 'true',
     });
   })();
