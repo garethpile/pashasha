@@ -198,6 +198,22 @@ export class PashashaPayVoucherStack extends cdk.Stack {
     const api = new apigateway.RestApi(this, 'VoucherApi', {
       restApiName: 'PashashaPayVoucherApi',
       deployOptions: { stageName: 'v1' },
+      defaultCorsPreflightOptions: {
+        allowOrigins: [
+          'https://master.d28mxe1buxl9n7.amplifyapp.com',
+          'https://dev.pashasha.com',
+          'https://www.dev.pashasha.com',
+        ],
+        allowHeaders: [
+          'Authorization',
+          'Content-Type',
+          'X-Amz-Date',
+          'X-Api-Key',
+          'X-Amz-Security-Token',
+          'X-Amz-User-Agent',
+        ],
+        allowMethods: ['GET', 'POST', 'OPTIONS'],
+      },
     });
 
     const payouts = api.root.addResource('payouts');
