@@ -37,6 +37,7 @@ export class DynamoPayoutStore implements PayoutStore {
           currency: intent.currency,
           provider: intent.provider,
           reference: intent.reference,
+          payoutMethod: intent.payoutMethod ?? null,
           status: intent.status,
           createdAt: intent.createdAt,
           updatedAt: intent.createdAt,
@@ -62,6 +63,26 @@ export class DynamoPayoutStore implements PayoutStore {
     if (result?.voucherCode) {
       updates[':voucherCode'] = result.voucherCode;
       setParts.push('voucherCode = :voucherCode');
+    }
+    if (result?.voucherPin) {
+      updates[':voucherPin'] = result.voucherPin;
+      setParts.push('voucherPin = :voucherPin');
+    }
+    if (result?.voucherSerial) {
+      updates[':voucherSerial'] = result.voucherSerial;
+      setParts.push('voucherSerial = :voucherSerial');
+    }
+    if (result?.voucherExpiry) {
+      updates[':voucherExpiry'] = result.voucherExpiry;
+      setParts.push('voucherExpiry = :voucherExpiry');
+    }
+    if (result?.voucherStatus) {
+      updates[':voucherStatus'] = result.voucherStatus;
+      setParts.push('voucherStatus = :voucherStatus');
+    }
+    if (result?.voucherAmount !== undefined) {
+      updates[':voucherAmount'] = result.voucherAmount;
+      setParts.push('voucherAmount = :voucherAmount');
     }
     if (result?.expiresAt) {
       updates[':expiresAt'] = result.expiresAt;
@@ -104,6 +125,7 @@ export class DynamoPayoutStore implements PayoutStore {
       currency: result.Item.currency as 'ZAR',
       provider: result.Item.provider as 'flash' | 'eclipse',
       reference: result.Item.reference as string,
+      payoutMethod: (result.Item.payoutMethod as PayoutIntent['payoutMethod']) ?? undefined,
       status: result.Item.status as PayoutStatus,
       createdAt: result.Item.createdAt as string,
     };
@@ -131,6 +153,7 @@ export class DynamoPayoutStore implements PayoutStore {
         currency: item.currency as 'ZAR',
         provider: item.provider as 'flash' | 'eclipse',
         reference: item.reference as string,
+        payoutMethod: (item.payoutMethod as PayoutIntent['payoutMethod']) ?? undefined,
         status: item.status as PayoutStatus,
         createdAt: item.createdAt as string,
       })) ?? []

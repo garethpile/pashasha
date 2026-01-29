@@ -85,7 +85,10 @@ export const guardApi = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     }),
-  requestPayout: (payload: { amount: number; method: 'ATM_CASH' | 'PNP_CASH' | 'PNP_SPEND' }) =>
+  requestPayout: (payload: {
+    amount: number;
+    method: '1VOUCHER' | 'CASH_OUT_PIN' | 'FLASH_TOKEN';
+  }) =>
     request<any>('/civil-servants/me/payout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

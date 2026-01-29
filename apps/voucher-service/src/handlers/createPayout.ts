@@ -16,6 +16,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     recipientId?: string;
     amount?: number;
     reference?: string;
+    method?: '1VOUCHER' | 'CASH_OUT_PIN' | 'FLASH_TOKEN';
   };
 
   if (!payload.recipientId || !payload.amount || payload.amount <= 0) {
@@ -37,6 +38,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     currency: 'ZAR',
     provider: 'flash',
     reference: newId('ref'),
+    payoutMethod: payload.method ?? '1VOUCHER',
     status: 'created',
     createdAt: new Date().toISOString(),
   };

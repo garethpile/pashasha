@@ -1,87 +1,111 @@
-import type { PayoutIntent, PayoutResult, RecipientProfile } from './types.js';
+import type { PayoutIntent, PayoutResult } from './types.js';
+import { buildMockPurchaseResponse } from './flash-mock.js';
+
+type AccessToken = {
+  token: string;
+  expiresAt: number;
+};
 
 export type FlashClientConfig = {
   baseUrl: string;
+  tokenUrl: string;
   apiKey?: string;
-  apiSecret?: string;
-  apiToken?: string;
-  apiKeyHeader?: string;
-  apiSecretHeader?: string;
-  authScheme?: 'basic' | 'bearer' | 'headers';
+  accountNumber?: string;
+  useMock?: boolean;
 };
 
 export class FlashClient {
+  private accessToken: AccessToken | null = null;
+
   constructor(private readonly config: FlashClientConfig) {}
 
-  async createRecipient(recipient: RecipientProfile): Promise<string> {
-    const response = await this.request('/recipients', {
-      method: 'POST',
-      body: JSON.stringify({
-        externalId: recipient.id,
-        phone: recipient.phone,
-        fullName: recipient.fullName,
-        idNumber: recipient.idNumber,
-      }),
-    });
-
-    const payload = await response.json();
-    if (!response.ok) {
-      throw new Error(payload?.message ?? 'flash create recipient failed');
+  async purchase1Voucher(intent: PayoutIntent): Promise<PayoutResult> {
+    if (this.config.useMock) {
+      const mock = buildMockPurchaseResponse({
+        reference: intent.reference,
+        accountNumber: this.config.accountNumber ?? 'TEST-ACCOUNT',
+        amountCents: Math.round(intent.amount * 100),
+      });
+      return this.toResult(mock);
     }
 
-    return payload.recipientId as string;
-  }
-
-  async issueVoucher(intent: PayoutIntent): Promise<PayoutResult> {
-    const response = await this.request('/vouchers', {
+    const token = await this.getAccessToken();
+    const response = await this.request('/aggregation/4.0/1voucher/purchase', {
       method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({
-        externalRef: intent.id,
-        recipientId: intent.recipientId,
-        amount: intent.amount,
-        currency: intent.currency,
+        reference: intent.reference,
+        accountNumber: this.config.accountNumber,
+        amount: Math.round(intent.amount * 100),
       }),
     });
 
-    const payload = await response.json();
-    if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload?.responseCode !== 0) {
       return {
-        providerRef: payload?.reference ?? intent.id,
+        providerRef: payload?.reference ?? intent.reference,
         status: 'failed',
-        error: payload?.message ?? 'flash voucher issuance failed',
+        error: payload?.responseMessage ?? 'flash 1voucher purchase failed',
       };
     }
 
-    return {
-      providerRef: payload.reference ?? intent.id,
-      status: 'issued',
-      voucherCode: payload.voucherCode,
-      expiresAt: payload.expiresAt,
-      receiptUrl: payload.receiptUrl,
-    };
+    return this.toResult(payload);
   }
 
   async getVoucherStatus(providerRef: string): Promise<PayoutResult> {
-    const response = await this.request(`/vouchers/${providerRef}`, {
-      method: 'GET',
-    });
-
-    const payload = await response.json();
-    if (!response.ok) {
-      return {
-        providerRef,
-        status: 'failed',
-        error: payload?.message ?? 'flash status lookup failed',
-      };
-    }
-
     return {
       providerRef,
-      status: payload.status ?? 'issued',
-      voucherCode: payload.voucherCode,
-      expiresAt: payload.expiresAt,
-      receiptUrl: payload.receiptUrl,
+      status: 'issued',
     };
+  }
+
+  private toResult(payload: any): PayoutResult {
+    return {
+      providerRef: payload?.reference ?? String(payload?.transactionId ?? ''),
+      status: 'issued',
+      voucherCode: payload?.voucher?.pin ?? payload?.voucher?.serialNumber,
+      voucherPin: payload?.voucher?.pin,
+      voucherSerial: payload?.voucher?.serialNumber,
+      voucherExpiry: payload?.voucher?.expiryDate,
+      voucherStatus: payload?.voucher?.status,
+      voucherAmount: payload?.voucher?.amount,
+    };
+  }
+
+  private async getAccessToken(): Promise<string> {
+    const now = Date.now();
+    if (this.accessToken && this.accessToken.expiresAt > now + 10_000) {
+      return this.accessToken.token;
+    }
+
+    if (!this.config.apiKey) {
+      throw new Error('flash api key not configured');
+    }
+
+    const body = new URLSearchParams({ grant_type: 'client_credentials' });
+    const response = await fetch(this.config.tokenUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${this.config.apiKey}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
+      },
+      body,
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload?.access_token) {
+      throw new Error(payload?.error_description ?? 'unable to fetch flash token');
+    }
+
+    const expiresIn = Number(payload.expires_in ?? 3600);
+    this.accessToken = {
+      token: payload.access_token,
+      expiresAt: now + expiresIn * 1000,
+    };
+    return this.accessToken.token;
   }
 
   private async request(path: string, init: RequestInit): Promise<Response> {
@@ -91,23 +115,7 @@ export class FlashClient {
     if (!headers.has('content-type') && init.body) {
       headers.set('content-type', 'application/json');
     }
-
-    const scheme = this.config.authScheme ?? 'headers';
-    if (scheme === 'basic' && this.config.apiKey && this.config.apiSecret) {
-      const token = Buffer.from(`${this.config.apiKey}:${this.config.apiSecret}`).toString(
-        'base64'
-      );
-      headers.set('authorization', `Basic ${token}`);
-    } else if (scheme === 'bearer' && this.config.apiToken) {
-      headers.set('authorization', `Bearer ${this.config.apiToken}`);
-    } else {
-      if (this.config.apiKey) {
-        headers.set(this.config.apiKeyHeader ?? 'x-api-key', this.config.apiKey);
-      }
-      if (this.config.apiSecret) {
-        headers.set(this.config.apiSecretHeader ?? 'x-api-secret', this.config.apiSecret);
-      }
-    }
+    headers.set('accept', 'application/json');
 
     return fetch(url, { ...init, headers });
   }

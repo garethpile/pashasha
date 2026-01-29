@@ -57,10 +57,12 @@ export class PashashaPayVoucherStack extends cdk.Stack {
       RECIPIENTS_TABLE_NAME: recipientsTable.tableName,
       EVENTS_TABLE_NAME: eventsTable.tableName,
       LEDGER_TABLE_NAME: ledgerTable.tableName,
-      FLASH_API_BASE_URL: props.flashApiBaseUrl ?? 'https://api.flash.example',
+      FLASH_BASE_URL: props.flashApiBaseUrl ?? 'https://api-flashswitch-sandbox.flash-group.com',
+      FLASH_TOKEN_URL: 'https://api-flashswitch-sandbox.flash-group.com/token',
+      FLASH_ACCOUNT_NUMBER: '',
       FLASH_SECRETS_ARN: props.flashSecretsArn ?? '',
-      FLASH_API_AUTH_SCHEME: 'headers',
       FLASH_WEBHOOK_SIGNATURE_HEADER: 'x-flash-signature',
+      FLASH_USE_MOCK: 'true',
     };
 
     const createPayoutFn = new lambdaNodejs.NodejsFunction(this, 'VoucherCreatePayoutFn', {

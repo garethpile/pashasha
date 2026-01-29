@@ -5,11 +5,10 @@ const cache = new Map<string, string>();
 
 export type FlashSecrets = {
   apiKey?: string;
-  apiSecret?: string;
-  apiToken?: string;
-  authScheme?: 'basic' | 'bearer' | 'headers';
-  apiKeyHeader?: string;
-  apiSecretHeader?: string;
+  accountNumber?: string;
+  tokenUrl?: string;
+  baseUrl?: string;
+  useMock?: boolean;
   webhookSecret?: string;
 };
 
@@ -31,7 +30,7 @@ export async function loadFlashSecrets(): Promise<FlashSecrets> {
     return parsed;
   } catch {
     return {
-      apiToken: secret,
+      apiKey: secret,
     };
   }
 }

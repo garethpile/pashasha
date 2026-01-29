@@ -4,6 +4,8 @@ export type PayoutStatus = 'created' | 'submitted' | 'issued' | 'failed' | 'rede
 
 export type ProviderType = 'flash' | 'eclipse';
 
+export type PayoutMethod = '1VOUCHER' | 'CASH_OUT_PIN' | 'FLASH_TOKEN';
+
 export type RecipientProfile = {
   id: string;
   phone: string;
@@ -18,6 +20,7 @@ export type PayoutIntent = {
   currency: Currency;
   provider: ProviderType;
   reference: string;
+  payoutMethod?: PayoutMethod;
   status: PayoutStatus;
   createdAt: string;
 };
@@ -26,6 +29,11 @@ export type PayoutResult = {
   providerRef: string;
   status: 'issued' | 'failed' | 'queued';
   voucherCode?: string;
+  voucherPin?: string;
+  voucherSerial?: string;
+  voucherExpiry?: string;
+  voucherStatus?: string;
+  voucherAmount?: number;
   expiresAt?: string;
   receiptUrl?: string;
   error?: string;

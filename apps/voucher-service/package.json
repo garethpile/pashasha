@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "contract:flash": "ts-node --esm scripts/flash-contract-harness.ts",
+    "mock:flash": "node dist/mock/flash-mock.js",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

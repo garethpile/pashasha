@@ -12,16 +12,17 @@ async function getClient(): Promise<FlashClient> {
   clientPromise = (async () => {
     const secrets = await loadFlashSecrets();
     return new FlashClient({
-      baseUrl: process.env.FLASH_API_BASE_URL ?? 'https://api.flash.example',
+      baseUrl:
+        secrets.baseUrl ??
+        process.env.FLASH_BASE_URL ??
+        'https://api-flashswitch-sandbox.flash-group.com',
+      tokenUrl:
+        secrets.tokenUrl ??
+        process.env.FLASH_TOKEN_URL ??
+        'https://api-flashswitch-sandbox.flash-group.com/token',
       apiKey: secrets.apiKey ?? process.env.FLASH_API_KEY,
-      apiSecret: secrets.apiSecret ?? process.env.FLASH_API_SECRET,
-      apiToken: secrets.apiToken ?? process.env.FLASH_API_TOKEN,
-      apiKeyHeader: secrets.apiKeyHeader ?? process.env.FLASH_API_KEY_HEADER,
-      apiSecretHeader: secrets.apiSecretHeader ?? process.env.FLASH_API_SECRET_HEADER,
-      authScheme:
-        secrets.authScheme ??
-        (process.env.FLASH_API_AUTH_SCHEME as 'basic' | 'bearer' | 'headers' | undefined) ??
-        'headers',
+      accountNumber: secrets.accountNumber ?? process.env.FLASH_ACCOUNT_NUMBER,
+      useMock: secrets.useMock ?? process.env.FLASH_USE_MOCK === 'true',
     });
   })();
   return clientPromise;

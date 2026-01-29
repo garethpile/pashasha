@@ -1039,7 +1039,8 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
           const result = await forwardVoucher('/payouts', {
             recipientId: guard.civilServantId,
             amount: payload.amount,
-            reference: guard.accountNumber,
+            reference: payload.reference ?? guard.accountNumber,
+            method: payload.method ?? '1VOUCHER',
           });
           return json(200, result, corsHeaders);
         }

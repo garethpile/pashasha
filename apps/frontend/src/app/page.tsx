@@ -191,8 +191,8 @@ function CivilServantDashboard() {
   const [payoutOpen, setPayoutOpen] = useState(false);
   const [payoutInfo, setPayoutInfo] = useState<WalletInfo | null>(null);
   const [payoutAmount, setPayoutAmount] = useState('');
-  const [payoutMethod, setPayoutMethod] = useState<'ATM_CASH' | 'PNP_CASH' | 'PNP_SPEND'>(
-    'ATM_CASH'
+  const [payoutMethod, setPayoutMethod] = useState<'1VOUCHER' | 'CASH_OUT_PIN' | 'FLASH_TOKEN'>(
+    '1VOUCHER'
   );
   const [payoutFeedback, setPayoutFeedback] = useState<string | null>(null);
   const [payoutPending, setPayoutPending] = useState(false);
@@ -768,7 +768,7 @@ function CivilServantDashboard() {
             <p className="mt-1 text-sm text-slate-500">
               {eclipseActive
                 ? 'Choose a payout method and amount. A 1% platform fee will be collected to the tenant wallet.'
-                : 'Choose a withdrawal amount. A voucher will be issued for the total after fees.'}
+                : 'Choose a payout method and amount. A voucher will be issued for the total after fees.'}
             </p>
 
             <div className="mt-4 space-y-3">
@@ -827,20 +827,22 @@ function CivilServantDashboard() {
                 />
               </label>
 
-              {eclipseActive && (
-                <label className="text-sm font-semibold text-slate-600">
-                  Method
-                  <select
-                    value={payoutMethod}
-                    onChange={(e) => setPayoutMethod(e.target.value as any)}
-                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
-                  >
-                    <option value="ATM_CASH">ATM cash</option>
-                    <option value="PNP_CASH">Pick n Pay cash</option>
-                    <option value="PNP_SPEND">Pick n Pay spending</option>
-                  </select>
-                </label>
-              )}
+              <label className="text-sm font-semibold text-slate-600">
+                Payout Method
+                <select
+                  value={payoutMethod}
+                  onChange={(e) => setPayoutMethod(e.target.value as any)}
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                >
+                  <option value="1VOUCHER">1Voucher (SMS code)</option>
+                  <option value="CASH_OUT_PIN" disabled>
+                    Cash-Out PIN (coming soon)
+                  </option>
+                  <option value="FLASH_TOKEN" disabled>
+                    Flash Token (coming soon)
+                  </option>
+                </select>
+              </label>
 
               {payoutFeedback && <p className="text-sm text-rose-600">{payoutFeedback}</p>}
 
