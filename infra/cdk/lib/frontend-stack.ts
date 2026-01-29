@@ -80,6 +80,7 @@ export class PashashaPayFrontendStack extends cdk.Stack {
       NEXT_PUBLIC_COGNITO_USER_POOL_ID: props.cognitoUserPoolId,
       NEXT_PUBLIC_COGNITO_CLIENT_ID: props.cognitoUserPoolClientId,
       NEXT_PUBLIC_AWS_REGION: props.awsRegion,
+      NEXT_PUBLIC_ENABLE_ECLIPSE: 'false',
     };
 
     const buildSpec = codebuild.BuildSpec.fromObject({
