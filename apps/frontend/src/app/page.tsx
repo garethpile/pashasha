@@ -296,7 +296,14 @@ function CivilServantDashboard() {
         setPayoutInfo(wallet);
         return wallet;
       } catch {
-        return undefined;
+        const wallet: WalletInfo = {
+          balance: 0,
+          availableBalance: 0,
+          currentBalance: 0,
+          currency: 'ZAR',
+        };
+        setPayoutInfo(wallet);
+        return wallet;
       }
     },
     [eclipseActive]

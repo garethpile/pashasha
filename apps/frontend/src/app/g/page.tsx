@@ -125,14 +125,11 @@ export default function GuardPublicPage() {
       setPaymentStatus(null);
 
       try {
-        const response = await fetch(
-          `${apiRoot}/guards/${encodeURIComponent(token)}/topup-sandbox`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: activeAmount, currency: 'ZAR' }),
-          }
-        );
+        const response = await fetch(`${apiRoot}/guards/${encodeURIComponent(token)}/topup-ozow`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount: activeAmount, currency: 'ZAR' }),
+        });
 
         const text = await response.text();
         let payload: unknown = text;
@@ -150,6 +147,8 @@ export default function GuardPublicPage() {
           paymentId?: string;
           authorizationUrl?: string | null;
           status?: string;
+          formUrl?: string;
+          fields?: Record<string, string>;
         };
 
         if (result.paymentId) {
@@ -164,7 +163,23 @@ export default function GuardPublicPage() {
             (result.status ? ` Status: ${result.status}.` : '')
         );
 
-        if (result.authorizationUrl) {
+        if (result.formUrl && result.fields) {
+          setAuthorizationUrl(result.formUrl);
+          const form = document.createElement('form');
+          form.method = 'POST';
+          form.action = result.formUrl;
+          form.target = '_blank';
+          Object.entries(result.fields).forEach(([key, value]) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+          });
+          document.body.appendChild(form);
+          form.submit();
+          form.remove();
+        } else if (result.authorizationUrl) {
           setAuthorizationUrl(result.authorizationUrl);
           window.open(result.authorizationUrl, '_blank', 'noopener,noreferrer');
         }
@@ -188,7 +203,7 @@ export default function GuardPublicPage() {
   const pollPaymentStatus = async (id: string) => {
     const apiRoot = resolveApiRoot();
     try {
-      const resp = await fetch(`${apiRoot}/payments/eclipse/${encodeURIComponent(id)}`, {
+      const resp = await fetch(`${apiRoot}/payments/ozow/${encodeURIComponent(id)}`, {
         cache: 'no-store',
       });
       if (!resp.ok) return;

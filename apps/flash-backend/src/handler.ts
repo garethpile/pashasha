@@ -1,5 +1,6 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { randomUUID } from 'crypto';
+import { createHash } from 'crypto';
 import {
   PutCommand,
   GetCommand,
@@ -48,6 +49,17 @@ const GUARD_PORTAL_BASE =
 const USER_POOL_ID = process.env.USER_POOL_ID ?? '';
 const ACCOUNT_WORKFLOW_ARN = process.env.ACCOUNT_WORKFLOW_ARN ?? '';
 const ADMIN_WORKFLOW_ARN = process.env.ADMIN_WORKFLOW_ARN ?? ACCOUNT_WORKFLOW_ARN;
+const OZOW_SITE_CODE = process.env.OZOW_SITE_CODE ?? '';
+const OZOW_SECRET_KEY = process.env.OZOW_SECRET_KEY ?? '';
+const OZOW_API_KEY = process.env.OZOW_API_KEY ?? '';
+const OZOW_PAYMENT_URL = process.env.OZOW_PAYMENT_URL ?? 'https://pay.ozow.com';
+const OZOW_COUNTRY_CODE = process.env.OZOW_COUNTRY_CODE ?? 'ZA';
+const OZOW_CURRENCY_CODE = process.env.OZOW_CURRENCY_CODE ?? 'ZAR';
+const OZOW_SUCCESS_URL = process.env.OZOW_SUCCESS_URL ?? 'https://example.com/ozow/success';
+const OZOW_CANCEL_URL = process.env.OZOW_CANCEL_URL ?? 'https://example.com/ozow/cancel';
+const OZOW_ERROR_URL = process.env.OZOW_ERROR_URL ?? 'https://example.com/ozow/error';
+const OZOW_NOTIFY_URL = process.env.OZOW_NOTIFY_URL ?? 'https://example.com/ozow/notify';
+const OZOW_IS_TEST = (process.env.OZOW_IS_TEST ?? 'true').toLowerCase() === 'true';
 
 const s3 = new S3Client({});
 const sns = new SNSClient({});
@@ -67,6 +79,41 @@ const parseBody = <T>(event: APIGatewayProxyEventV2): T | null => {
     ? Buffer.from(event.body, 'base64').toString('utf8')
     : event.body;
   return JSON.parse(raw) as T;
+};
+
+const parseFormBody = (body: string): Record<string, string> => {
+  const params = new URLSearchParams(body);
+  const out: Record<string, string> = {};
+  params.forEach((value, key) => {
+    out[key] = value;
+  });
+  return out;
+};
+
+const buildOzowHash = (payload: Record<string, string>): string => {
+  const raw = [
+    payload.SiteCode,
+    payload.CountryCode,
+    payload.CurrencyCode,
+    payload.Amount,
+    payload.TransactionReference,
+    payload.BankReference,
+    payload.NotifyUrl,
+    payload.SuccessUrl,
+    payload.CancelUrl,
+    payload.ErrorUrl,
+    payload.IsTest,
+    OZOW_SECRET_KEY,
+  ]
+    .filter(Boolean)
+    .join('');
+  return createHash('sha512').update(raw).digest('hex').toLowerCase();
+};
+
+const isOzowSuccess = (status?: string | null) => {
+  if (!status) return false;
+  const normalized = status.toLowerCase();
+  return normalized.includes('complete') || normalized.includes('success') || normalized === 'paid';
 };
 
 const getClaims = async (event: APIGatewayProxyEventV2): Promise<AuthClaims | null> => {
@@ -722,6 +769,75 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
           corsHeaders
         );
       }
+
+      if (method === 'POST' && token && action === 'topup-ozow') {
+        const payload = parseBody<any>(event) ?? {};
+        const amount = Number(payload.amount);
+        if (!Number.isFinite(amount) || amount <= 0) {
+          return json(400, { error: 'invalid amount' }, corsHeaders);
+        }
+        const guard = await docClient.send(
+          new QueryCommand({
+            TableName: TABLE_CIVIL,
+            IndexName: 'guardToken',
+            KeyConditionExpression: 'guardToken = :token',
+            ExpressionAttributeValues: { ':token': token },
+            Limit: 1,
+          })
+        );
+        const guardProfile = (guard.Items ?? [])[0] as any;
+        if (!guardProfile) {
+          return json(404, { error: 'Guard not found' }, corsHeaders);
+        }
+        const paymentId = randomUUID();
+        const now = new Date().toISOString();
+        await docClient.send(
+          new PutCommand({
+            TableName: TABLE_PAYMENTS,
+            Item: {
+              paymentId,
+              status: 'PENDING',
+              amount,
+              currency: payload.currency ?? 'ZAR',
+              guardToken: token,
+              civilServantId: guardProfile.civilServantId,
+              customerId: payload.customerId,
+              createdAt: now,
+              updatedAt: now,
+              metadata: {
+                source: 'ozow',
+              },
+            },
+          })
+        );
+
+        const formattedAmount = amount.toFixed(2);
+        const formPayload: Record<string, string> = {
+          SiteCode: OZOW_SITE_CODE,
+          CountryCode: OZOW_COUNTRY_CODE,
+          CurrencyCode: OZOW_CURRENCY_CODE,
+          Amount: formattedAmount,
+          TransactionReference: paymentId,
+          BankReference: `Pashasha-${paymentId.slice(0, 8)}`,
+          NotifyUrl: OZOW_NOTIFY_URL,
+          SuccessUrl: OZOW_SUCCESS_URL,
+          CancelUrl: OZOW_CANCEL_URL,
+          ErrorUrl: OZOW_ERROR_URL,
+          IsTest: OZOW_IS_TEST ? 'true' : 'false',
+        };
+        formPayload.HashCheck = buildOzowHash(formPayload);
+
+        return json(
+          201,
+          {
+            paymentId,
+            status: 'PENDING',
+            formUrl: OZOW_PAYMENT_URL,
+            fields: formPayload,
+          },
+          corsHeaders
+        );
+      }
     }
 
     if (method === 'GET' && path.startsWith('/payments/eclipse/')) {
@@ -736,6 +852,79 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
         {
           status: res.Item.status ?? 'PENDING',
           completionUrl: null,
+        },
+        corsHeaders
+      );
+    }
+
+    if (path === '/webhooks/ozow' && method === 'POST') {
+      const contentType = event.headers?.['content-type'] ?? event.headers?.['Content-Type'] ?? '';
+      const rawBody = event.body
+        ? event.isBase64Encoded
+          ? Buffer.from(event.body, 'base64').toString('utf8')
+          : event.body
+        : '';
+      const payload =
+        contentType.includes('application/x-www-form-urlencoded') && rawBody
+          ? parseFormBody(rawBody)
+          : rawBody
+            ? (JSON.parse(rawBody) as Record<string, string>)
+            : {};
+      const paymentId =
+        payload.TransactionReference ||
+        payload.transactionReference ||
+        payload.Reference ||
+        payload.reference;
+      if (!paymentId) {
+        return json(400, { error: 'missing transaction reference' }, corsHeaders);
+      }
+      const statusRaw = payload.Status || payload.status || payload.TransactionStatus;
+      const success = isOzowSuccess(statusRaw);
+      const res = await docClient.send(
+        new GetCommand({ TableName: TABLE_PAYMENTS, Key: { paymentId } })
+      );
+      const current = res.Item as any;
+      if (!current) {
+        return json(404, { error: 'payment not found' }, corsHeaders);
+      }
+
+      const nextStatus = success ? 'SUCCESSFUL' : 'FAILED';
+      await docClient.send(
+        new UpdateCommand({
+          TableName: TABLE_PAYMENTS,
+          Key: { paymentId },
+          UpdateExpression: 'SET #status = :status, updatedAt = :updatedAt',
+          ExpressionAttributeNames: { '#status': 'status' },
+          ExpressionAttributeValues: {
+            ':status': nextStatus,
+            ':updatedAt': new Date().toISOString(),
+          },
+        })
+      );
+
+      if (success && current.status !== 'SUCCESSFUL' && VOUCHER_API_BASE_URL) {
+        await forwardVoucher('/credits', {
+          recipientId: current.civilServantId,
+          amount: current.amount,
+          reference: paymentId,
+          source: 'ozow',
+        });
+      }
+
+      return json(200, { ok: true }, corsHeaders);
+    }
+
+    if (method === 'GET' && path.startsWith('/payments/ozow/')) {
+      const paymentId = path.split('/')[3];
+      if (!paymentId) return json(400, { error: 'missing paymentId' }, corsHeaders);
+      const res = await docClient.send(
+        new GetCommand({ TableName: TABLE_PAYMENTS, Key: { paymentId } })
+      );
+      if (!res.Item) return json(404, { error: 'payment not found' }, corsHeaders);
+      return json(
+        200,
+        {
+          status: res.Item.status ?? 'PENDING',
         },
         corsHeaders
       );
