@@ -1,5 +1,9 @@
 import type { PayoutIntent, PayoutResult } from './types.js';
-import { buildMockCashOutPinResponse, buildMockPurchaseResponse } from './flash-mock.js';
+import {
+  buildMockCashOutPinResponse,
+  buildMockFlashTokenResponse,
+  buildMockPurchaseResponse,
+} from './flash-mock.js';
 
 type AccessToken = {
   token: string;
@@ -12,6 +16,7 @@ export type FlashClientConfig = {
   apiKey?: string;
   accountNumber?: string;
   cashOutProductCode?: number;
+  flashTokenProductCode?: number;
   useMock?: boolean;
 };
 
@@ -66,7 +71,7 @@ export class FlashClient {
     }
 
     if (this.config.useMock) {
-      const mock = buildMockCashOutPinResponse({
+      const mock = buildMockFlashTokenResponse({
         reference: intent.reference,
         accountNumber: this.config.accountNumber ?? 'TEST-ACCOUNT',
         amountCents: Math.round(intent.amount * 100),
@@ -99,6 +104,76 @@ export class FlashClient {
     }
 
     return this.toResult(payload);
+  }
+
+  async purchaseFlashToken(intent: PayoutIntent): Promise<PayoutResult> {
+    const productCode = this.config.flashTokenProductCode;
+    if (productCode === undefined || Number.isNaN(productCode)) {
+      return {
+        providerRef: intent.reference,
+        status: 'failed',
+        error: 'flash token product code not configured',
+      };
+    }
+
+    if (this.config.useMock) {
+      const mock = buildMockCashOutPinResponse({
+        reference: intent.reference,
+        accountNumber: this.config.accountNumber ?? 'TEST-ACCOUNT',
+        amountCents: Math.round(intent.amount * 100),
+        productCode,
+      });
+      return this.toResult(mock);
+    }
+
+    const token = await this.getAccessToken();
+    const response = await this.request('/aggregation/4.0/flash-token/purchase', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        reference: intent.reference,
+        accountNumber: this.config.accountNumber,
+        amount: Math.round(intent.amount * 100),
+        productCode,
+      }),
+    });
+
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || payload?.responseCode !== 0) {
+      return {
+        providerRef: payload?.reference ?? intent.reference,
+        status: 'failed',
+        error: payload?.responseMessage ?? 'flash token purchase failed',
+      };
+    }
+
+    return this.toResult(payload);
+  }
+
+  async reverseFlashToken(payload: { reference: string; originalReference: string }) {
+    const token = await this.getAccessToken();
+    const response = await this.request('/aggregation/4.0/flash-token/reverse', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        reference: payload.reference,
+        originalReference: payload.originalReference,
+        accountNumber: this.config.accountNumber,
+      }),
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok || body?.responseCode !== 0) {
+      return {
+        providerRef: payload.reference,
+        status: 'failed',
+        error: body?.responseMessage ?? 'flash token reverse failed',
+      };
+    }
+    return { providerRef: payload.reference, status: 'issued' };
   }
 
   async cancelCashOutPin(payload: {

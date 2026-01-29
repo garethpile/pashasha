@@ -27,6 +27,11 @@ async function getClient(): Promise<FlashClient> {
         (process.env.FLASH_CASH_OUT_PRODUCT_CODE
           ? Number(process.env.FLASH_CASH_OUT_PRODUCT_CODE)
           : undefined),
+      flashTokenProductCode:
+        secrets.flashTokenProductCode ??
+        (process.env.FLASH_TOKEN_PRODUCT_CODE
+          ? Number(process.env.FLASH_TOKEN_PRODUCT_CODE)
+          : undefined),
       useMock: secrets.useMock ?? process.env.FLASH_USE_MOCK === 'true',
     });
   })();

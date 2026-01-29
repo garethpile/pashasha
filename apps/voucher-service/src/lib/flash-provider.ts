@@ -18,6 +18,9 @@ export class FlashPayoutProvider implements PayoutProvider {
     if (intent.payoutMethod === 'CASH_OUT_PIN') {
       return this.client.purchaseCashOutPin(intent);
     }
+    if (intent.payoutMethod === 'FLASH_TOKEN') {
+      return this.client.purchaseFlashToken(intent);
+    }
     return {
       providerRef: intent.reference,
       status: 'failed',

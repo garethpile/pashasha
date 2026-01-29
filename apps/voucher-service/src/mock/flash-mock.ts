@@ -1,5 +1,9 @@
 import http from 'http';
-import { buildMockCashOutPinResponse, buildMockPurchaseResponse } from '../lib/flash-mock.js';
+import {
+  buildMockCashOutPinResponse,
+  buildMockFlashTokenResponse,
+  buildMockPurchaseResponse,
+} from '../lib/flash-mock.js';
 
 const port = Number(process.env.FLASH_MOCK_PORT ?? 4010);
 
@@ -113,6 +117,44 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'POST' && req.url === '/aggregation/4.0/cash-out-pin/reverse') {
+    const raw = await readBody(req);
+    const payload = raw ? JSON.parse(raw) : {};
+    return sendJson(res, 200, {
+      responseCode: 0,
+      responseMessage: 'Success',
+      accountNumber: payload?.accountNumber ?? '',
+      reference: payload?.reference ?? '',
+      transactionDate: new Date().toISOString(),
+      transactionId: Math.floor(Math.random() * 1_000_000),
+      metadata: payload?.metadata ?? {},
+    });
+  }
+
+  if (req.method === 'POST' && req.url === '/aggregation/4.0/flash-token/purchase') {
+    const raw = await readBody(req);
+    const payload = raw ? JSON.parse(raw) : {};
+    if (
+      !payload?.reference ||
+      !payload?.accountNumber ||
+      !payload?.amount ||
+      payload?.productCode === undefined
+    ) {
+      return sendJson(res, 400, {
+        responseCode: 4001,
+        responseMessage: 'missing reference, accountNumber, amount or productCode',
+        reference: payload?.reference ?? '',
+      });
+    }
+    const response = buildMockFlashTokenResponse({
+      reference: String(payload.reference),
+      accountNumber: String(payload.accountNumber),
+      amountCents: Number(payload.amount),
+      productCode: Number(payload.productCode),
+    });
+    return sendJson(res, 200, response);
+  }
+
+  if (req.method === 'POST' && req.url === '/aggregation/4.0/flash-token/reverse') {
     const raw = await readBody(req);
     const payload = raw ? JSON.parse(raw) : {};
     return sendJson(res, 200, {

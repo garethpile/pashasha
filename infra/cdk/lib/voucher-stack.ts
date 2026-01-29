@@ -61,6 +61,7 @@ export class PashashaPayVoucherStack extends cdk.Stack {
       FLASH_TOKEN_URL: 'https://api-flashswitch-sandbox.flash-group.com/token',
       FLASH_ACCOUNT_NUMBER: '',
       FLASH_CASH_OUT_PRODUCT_CODE: '',
+      FLASH_TOKEN_PRODUCT_CODE: '',
       FLASH_SECRETS_ARN: props.flashSecretsArn ?? '',
       FLASH_WEBHOOK_SIGNATURE_HEADER: 'x-flash-signature',
       FLASH_USE_MOCK: 'true',

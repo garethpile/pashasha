@@ -9,6 +9,7 @@ export type FlashSecrets = {
   tokenUrl?: string;
   baseUrl?: string;
   cashOutProductCode?: number;
+  flashTokenProductCode?: number;
   useMock?: boolean;
   webhookSecret?: string;
 };
