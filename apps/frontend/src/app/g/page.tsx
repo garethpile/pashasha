@@ -47,7 +47,7 @@ export default function GuardPublicPage() {
         console.warn('Guard lookup via client failed, attempting direct fetch', error);
       }
       try {
-        const response = await fetch(`${apiRoot}/guards/${encodeURIComponent(token)}`, {
+        const response = await fetch(`${apiRoot}/civil-servants/${encodeURIComponent(token)}`, {
           cache: 'no-store',
         });
         if (!response.ok) {
@@ -69,7 +69,7 @@ export default function GuardPublicPage() {
   useEffect(() => {
     if (!token) return;
     const apiRoot = resolveApiRoot();
-    setScanToPayQr(`${apiRoot}/guards/${encodeURIComponent(token)}/qr`);
+    setScanToPayQr(`${apiRoot}/civil-servants/${encodeURIComponent(token)}/qr`);
 
     const url = `https://main.d2vxflzymkt19g.amplifyapp.com/g?token=${encodeURIComponent(token)}`;
     QRCode.toDataURL(url, { width: 160, margin: 1 })
@@ -125,11 +125,14 @@ export default function GuardPublicPage() {
       setPaymentStatus(null);
 
       try {
-        const response = await fetch(`${apiRoot}/guards/${encodeURIComponent(token)}/topup-ozow`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: activeAmount, currency: 'ZAR' }),
-        });
+        const response = await fetch(
+          `${apiRoot}/civil-servants/${encodeURIComponent(token)}/topup-ozow`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: activeAmount, currency: 'ZAR' }),
+          }
+        );
 
         const text = await response.text();
         let payload: unknown = text;

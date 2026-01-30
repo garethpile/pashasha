@@ -597,7 +597,11 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       return json(200, { status: 'queued', executionArn }, corsHeaders);
     }
 
-    if (path.startsWith('/guards/')) {
+    const isPublicCivilServantPath =
+      path.startsWith('/guards/') ||
+      (path.startsWith('/civil-servants/') && !path.startsWith('/civil-servants/me'));
+
+    if (isPublicCivilServantPath) {
       const [, , token, action] = path.split('/');
       if (method === 'GET' && token && !action) {
         const result = await docClient.send(
@@ -610,7 +614,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
           })
         );
         const guard = (result.Items ?? [])[0] as any;
-        if (!guard) return json(404, { error: 'Guard not found' }, corsHeaders);
+        if (!guard) return json(404, { error: 'Civil servant not found' }, corsHeaders);
         return json(
           200,
           {
@@ -649,7 +653,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
         );
         const guardProfile = (guard.Items ?? [])[0] as any;
         if (!guardProfile) {
-          return json(404, { error: 'Guard not found' }, corsHeaders);
+          return json(404, { error: 'Civil servant not found' }, corsHeaders);
         }
         await docClient.send(
           new PutCommand({
@@ -705,7 +709,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
           })
         );
         const guard = (result.Items ?? [])[0] as any;
-        if (!guard) return json(404, { error: 'Guard not found' }, corsHeaders);
+        if (!guard) return json(404, { error: 'Civil servant not found' }, corsHeaders);
         const landingUrl = GUARD_PORTAL_BASE + encodeURIComponent(token);
         const buffer = await QRCode.toBuffer(landingUrl, { width: 512, margin: 1, type: 'png' });
         return binary(200, buffer, { ...corsHeaders, 'Content-Type': 'image/png' });
@@ -728,7 +732,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
         );
         const guardProfile = (guard.Items ?? [])[0] as any;
         if (!guardProfile) {
-          return json(404, { error: 'Guard not found' }, corsHeaders);
+          return json(404, { error: 'Civil servant not found' }, corsHeaders);
         }
         const paymentId = randomUUID();
         const now = new Date().toISOString();
@@ -787,7 +791,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
         );
         const guardProfile = (guard.Items ?? [])[0] as any;
         if (!guardProfile) {
-          return json(404, { error: 'Guard not found' }, corsHeaders);
+          return json(404, { error: 'Civil servant not found' }, corsHeaders);
         }
         const paymentId = randomUUID();
         const now = new Date().toISOString();

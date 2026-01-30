@@ -3,7 +3,7 @@ import { resolveApiRoot } from './api/config';
 
 // Default to the resolved API root so production falls back to CloudFront when
 // env vars are missing (e.g. QR scans on Amplify builds).
-const defaultBaseUrl = `${resolveApiRoot()}/guards`;
+const defaultBaseUrl = `${resolveApiRoot()}/civil-servants`;
 
 // Bind fetch to the global object to avoid illegal invocation errors in browsers.
 const boundFetch: typeof globalThis.fetch =
