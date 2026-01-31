@@ -1049,6 +1049,10 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       );
     }
 
+    if (method === 'GET' && path === '/audit') {
+      return json(200, [], corsHeaders);
+    }
+
     if (method === 'GET' && path === '/civil-servants/me') {
       const guard = await getProfileById(TABLE_CIVIL, 'civilServantId', pickUserId(claims));
       if (!guard) return json(404, { error: 'Civil servant not found' }, corsHeaders);
