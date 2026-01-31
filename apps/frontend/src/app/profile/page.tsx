@@ -1,30 +1,41 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { getSession } from '../../lib/auth/session';
+import { isAdminGroup, isCivilServantGroup, isCustomerGroup } from '../../lib/auth/groups';
+
+const resolveProfileDestination = () => {
+  const session = getSession();
+  if (!session) return '/login';
+  if (isAdminGroup(session.groups)) return '/admin/civil-servants';
+  if (isCivilServantGroup(session.groups)) return '/';
+  if (isCustomerGroup(session.groups)) return '/';
+  return '/';
+};
 
 export default function ProfilePage() {
+  const router = useRouter();
+  const [destination, setDestination] = useState<string | null>(null);
+
+  useEffect(() => {
+    const next = resolveProfileDestination();
+    setDestination(next);
+    router.replace(next);
+  }, [router]);
+
   return (
-    <main className="mx-auto flex min-h-screen max-w-4xl flex-col gap-6 px-4 pb-16 pt-20 sm:px-6 lg:px-8">
-      <div className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">My profile</p>
-        <h1 className="text-2xl font-semibold text-slate-900">Profile</h1>
-        <p className="text-sm text-slate-600">
-          Your profile page isn&apos;t available yet. Please use the admin dashboard to manage
-          accounts or return to the home page.
-        </p>
-      </div>
-      <div className="flex gap-3">
+    <main className="mx-auto flex min-h-screen max-w-4xl flex-col items-center justify-center gap-4 px-4 pb-16 pt-20 sm:px-6 lg:px-8">
+      <p className="text-sm text-slate-600">Redirecting to your profile…</p>
+      {destination && (
         <Link
-          href="/"
+          href={destination}
           className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700"
         >
-          Go home
+          Continue
         </Link>
-        <Link
-          href="/admin/civil-servants"
-          className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:border-sky-300 hover:text-sky-700"
-        >
-          Go to admin
-        </Link>
-      </div>
+      )}
     </main>
   );
 }
