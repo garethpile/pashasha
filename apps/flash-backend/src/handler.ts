@@ -102,11 +102,15 @@ const loadOzowSecrets = async (): Promise<OzowSecrets> => {
   return cachedOzowSecrets!;
 };
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Credentials': 'true',
-  'Access-Control-Allow-Headers': 'authorization,content-type',
-  'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+const buildCorsHeaders = (event: APIGatewayProxyEventV2) => {
+  const origin =
+    event.headers?.origin ?? event.headers?.Origin ?? event.headers?.['x-forwarded-host'];
+  return {
+    'Access-Control-Allow-Origin': origin || '*',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Allow-Headers': 'authorization,content-type',
+    'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+  };
 };
 
 const parseBody = <T>(event: APIGatewayProxyEventV2): T | null => {
@@ -566,6 +570,7 @@ const forwardVoucher = async (path: string, payload?: any) => {
 const pickUserId = (claims: AuthClaims | null) => claims?.sub ?? claims?.username ?? '';
 
 export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
+  const corsHeaders = buildCorsHeaders(event);
   if (event.requestContext.http.method === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders };
   }
