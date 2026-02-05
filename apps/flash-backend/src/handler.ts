@@ -25,6 +25,7 @@ import {
   AdminDeleteUserCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import QRCode from 'qrcode';
 import { docClient } from './lib/dynamo.js';
 import { json, text, binary } from './lib/response.js';
@@ -49,6 +50,7 @@ const GUARD_PORTAL_BASE =
 const USER_POOL_ID = process.env.USER_POOL_ID ?? '';
 const ACCOUNT_WORKFLOW_ARN = process.env.ACCOUNT_WORKFLOW_ARN ?? '';
 const ADMIN_WORKFLOW_ARN = process.env.ADMIN_WORKFLOW_ARN ?? ACCOUNT_WORKFLOW_ARN;
+const OZOW_SECRET_ARN = process.env.OZOW_SECRET_ARN ?? '';
 const OZOW_SITE_CODE = process.env.OZOW_SITE_CODE ?? '';
 const OZOW_SECRET_KEY = process.env.OZOW_SECRET_KEY ?? '';
 const OZOW_API_KEY = process.env.OZOW_API_KEY ?? '';
@@ -65,6 +67,40 @@ const s3 = new S3Client({});
 const sns = new SNSClient({});
 const cognito = new CognitoIdentityProviderClient({});
 const sfn = new SFNClient({});
+const secrets = new SecretsManagerClient({});
+
+type OzowSecrets = {
+  siteCode?: string;
+  secretKey?: string;
+  apiKey?: string;
+};
+
+let cachedOzowSecrets: OzowSecrets | null = null;
+
+const loadOzowSecrets = async (): Promise<OzowSecrets> => {
+  if (cachedOzowSecrets) return cachedOzowSecrets;
+  if (!OZOW_SECRET_ARN) {
+    cachedOzowSecrets = {
+      siteCode: OZOW_SITE_CODE || undefined,
+      secretKey: OZOW_SECRET_KEY || undefined,
+      apiKey: OZOW_API_KEY || undefined,
+    };
+    return cachedOzowSecrets;
+  }
+  const resp = await secrets.send(new GetSecretValueCommand({ SecretId: OZOW_SECRET_ARN }));
+  const secretString = resp.SecretString ?? '';
+  try {
+    const parsed = JSON.parse(secretString) as OzowSecrets;
+    cachedOzowSecrets = parsed;
+  } catch {
+    cachedOzowSecrets = {
+      siteCode: OZOW_SITE_CODE || undefined,
+      secretKey: OZOW_SECRET_KEY || undefined,
+      apiKey: OZOW_API_KEY || undefined,
+    };
+  }
+  return cachedOzowSecrets!;
+};
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -90,7 +126,7 @@ const parseFormBody = (body: string): Record<string, string> => {
   return out;
 };
 
-const buildOzowHash = (payload: Record<string, string>): string => {
+const buildOzowHash = (payload: Record<string, string>, secretKey: string): string => {
   const raw = [
     payload.SiteCode,
     payload.CountryCode,
@@ -103,7 +139,7 @@ const buildOzowHash = (payload: Record<string, string>): string => {
     payload.CancelUrl,
     payload.ErrorUrl,
     payload.IsTest,
-    OZOW_SECRET_KEY,
+    secretKey,
   ]
     .filter(Boolean)
     .join('');
@@ -780,6 +816,10 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
         if (!Number.isFinite(amount) || amount <= 0) {
           return json(400, { error: 'invalid amount' }, corsHeaders);
         }
+        const ozowSecrets = await loadOzowSecrets();
+        if (!ozowSecrets.siteCode || !ozowSecrets.secretKey) {
+          return json(500, { error: 'ozow credentials not configured' }, corsHeaders);
+        }
         const guard = await docClient.send(
           new QueryCommand({
             TableName: TABLE_CIVIL,
@@ -817,7 +857,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
 
         const formattedAmount = amount.toFixed(2);
         const formPayload: Record<string, string> = {
-          SiteCode: OZOW_SITE_CODE,
+          SiteCode: ozowSecrets.siteCode,
           CountryCode: OZOW_COUNTRY_CODE,
           CurrencyCode: OZOW_CURRENCY_CODE,
           Amount: formattedAmount,
@@ -829,7 +869,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
           ErrorUrl: OZOW_ERROR_URL,
           IsTest: OZOW_IS_TEST ? 'true' : 'false',
         };
-        formPayload.HashCheck = buildOzowHash(formPayload);
+        formPayload.HashCheck = buildOzowHash(formPayload, ozowSecrets.secretKey);
 
         return json(
           201,

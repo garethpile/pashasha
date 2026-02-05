@@ -209,9 +209,7 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
         USER_POOL_ID: props.userPoolId,
         ACCOUNT_WORKFLOW_ARN: accountWorkflow.stateMachineArn,
         ADMIN_WORKFLOW_ARN: accountWorkflow.stateMachineArn,
-        OZOW_SITE_CODE: 'M36-M36-001',
-        OZOW_SECRET_KEY: '134e44243dbe4246b5e2051aeb29259d',
-        OZOW_API_KEY: '8df58b6ca0c24394a5a0d341562a415e',
+        OZOW_SECRET_ARN: 'pashashapay-ozow',
         OZOW_PAYMENT_URL: 'https://stagingapi.ozow.com/PostPaymentRequest',
         OZOW_COUNTRY_CODE: 'ZA',
         OZOW_CURRENCY_CODE: 'ZAR',
@@ -237,6 +235,12 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
     qrAssetsBucket.grantReadWrite(handler);
     supportTopic.grantPublish(handler);
     accountWorkflow.grantStartExecution(handler);
+    handler.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ['secretsmanager:GetSecretValue'],
+        resources: ['arn:aws:secretsmanager:eu-west-1:701158128147:secret:pashashapay-ozow*'],
+      })
+    );
     handler.addToRolePolicy(
       new iam.PolicyStatement({
         actions: [
