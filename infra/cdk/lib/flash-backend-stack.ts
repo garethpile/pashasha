@@ -212,7 +212,7 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
         OZOW_SITE_CODE: 'M36-M36-001',
         OZOW_SECRET_KEY: '134e44243dbe4246b5e2051aeb29259d',
         OZOW_API_KEY: '8df58b6ca0c24394a5a0d341562a415e',
-        OZOW_PAYMENT_URL: 'https://pay.ozow.com',
+        OZOW_PAYMENT_URL: 'https://stagingapi.ozow.com/PostPaymentRequest',
         OZOW_COUNTRY_CODE: 'ZA',
         OZOW_CURRENCY_CODE: 'ZAR',
         OZOW_SUCCESS_URL: 'https://example.com/ozow/success',
