@@ -256,6 +256,7 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
           `${paymentsTable.tableArn}/index/byCustomer`,
           `${civilServantsTable.tableArn}/index/familyNameUpper`,
           `${civilServantsTable.tableArn}/index/accountNumber`,
+          `${civilServantsTable.tableArn}/index/guardToken`,
           `${customersTable.tableArn}/index/familyNameUpper`,
           `${customersTable.tableArn}/index/accountNumber`,
           `${civilServantsTable.tableArn}/index/email`,
