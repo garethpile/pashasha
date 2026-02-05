@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { guardsClient } from '../../lib/guards-client';
 import type { GuardProfile } from '@pashashapay/contracts';
 import QRCode from 'qrcode';
-import { resolveApiRoot } from '../../lib/api/config';
+import { resolveAppApiRoot } from '../../lib/api/config';
 
 export const dynamic = 'force-static';
 export const dynamicParams = true;
@@ -35,7 +35,7 @@ export default function GuardPublicPage() {
     if (!token) return;
     setFeedback(null);
     setSuccessMessage(null);
-    const apiRoot = resolveApiRoot();
+    const apiRoot = resolveAppApiRoot();
     const load = async () => {
       try {
         const profile = await guardsClient.getGuard(token);
@@ -68,7 +68,7 @@ export default function GuardPublicPage() {
 
   useEffect(() => {
     if (!token) return;
-    const apiRoot = resolveApiRoot();
+    const apiRoot = resolveAppApiRoot();
     setScanToPayQr(`${apiRoot}/civil-servants/${encodeURIComponent(token)}/qr`);
 
     const url = `https://main.d2vxflzymkt19g.amplifyapp.com/g?token=${encodeURIComponent(token)}`;
@@ -104,7 +104,7 @@ export default function GuardPublicPage() {
 
   const handleInitiateTip = () => {
     if (!guard || !amountIsValid || activeAmount === null) return;
-    const apiRoot = resolveApiRoot();
+    const apiRoot = resolveAppApiRoot();
 
     const parseErrorMessage = (payload: unknown, status: number) => {
       if (typeof payload === 'string' && payload.trim().length > 0) return payload;
@@ -204,7 +204,7 @@ export default function GuardPublicPage() {
   };
 
   const pollPaymentStatus = async (id: string) => {
-    const apiRoot = resolveApiRoot();
+    const apiRoot = resolveAppApiRoot();
     try {
       const resp = await fetch(`${apiRoot}/payments/ozow/${encodeURIComponent(id)}`, {
         cache: 'no-store',

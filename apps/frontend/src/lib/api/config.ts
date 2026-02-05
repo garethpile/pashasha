@@ -9,6 +9,16 @@ const ENV_VOUCHER_API_ROOT = process.env.NEXT_PUBLIC_VOUCHER_API_BASE_URL;
 const PROD_VOUCHER_API_ROOT =
   ENV_VOUCHER_API_ROOT || 'https://2583b9v30b.execute-api.eu-west-1.amazonaws.com/v1';
 const LOCAL_VOUCHER_API_ROOT = 'http://localhost:4100/v1';
+const ENV_FLASH_API_ROOT = process.env.NEXT_PUBLIC_FLASH_API_BASE_URL;
+const PROD_FLASH_API_ROOT =
+  ENV_FLASH_API_ROOT || 'https://p3ynlo9v2l.execute-api.eu-west-1.amazonaws.com/v1';
+const LOCAL_FLASH_API_ROOT = 'http://localhost:4200/v1';
+
+const eclipseEnabled = () => {
+  const raw = process.env.NEXT_PUBLIC_ENABLE_ECLIPSE;
+  if (!raw) return false;
+  return raw.toLowerCase() === 'true';
+};
 
 export const resolveApiRoot = () => {
   // For production/static export builds we always point to the API CloudFront.
@@ -24,3 +34,13 @@ export const resolveVoucherApiRoot = () => {
   }
   return PROD_VOUCHER_API_ROOT;
 };
+
+export const resolveFlashApiRoot = () => {
+  if (process.env.NODE_ENV === 'development') {
+    return LOCAL_FLASH_API_ROOT;
+  }
+  return PROD_FLASH_API_ROOT;
+};
+
+export const resolveAppApiRoot = () =>
+  eclipseEnabled() ? resolveApiRoot() : resolveFlashApiRoot();

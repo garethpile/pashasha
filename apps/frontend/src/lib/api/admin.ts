@@ -1,9 +1,9 @@
 'use client';
 
 import { clearSession, getSession } from '../auth/session';
-import { resolveApiRoot } from './config';
+import { resolveAppApiRoot } from './config';
 
-const API_ROOT = resolveApiRoot();
+const API_ROOT = resolveAppApiRoot();
 
 const request = async <T>(
   path: string,

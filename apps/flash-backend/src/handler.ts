@@ -1162,8 +1162,24 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       const occupation = event.queryStringParameters?.occupation?.trim().toLowerCase();
       const site = event.queryStringParameters?.site?.trim().toLowerCase();
 
-      const res = await docClient.send(new ScanCommand({ TableName: TABLE_CIVIL, Limit: 200 }));
-      const items = (res.Items ?? []) as any[];
+      let items: any[] = [];
+      if (familyName) {
+        const key = familyName.toUpperCase();
+        const query = await docClient.send(
+          new QueryCommand({
+            TableName: TABLE_CIVIL,
+            IndexName: 'familyNameUpper',
+            KeyConditionExpression: 'familyNameUpper = :family',
+            ExpressionAttributeValues: { ':family': key },
+            Limit: 200,
+          })
+        );
+        items = (query.Items ?? []) as any[];
+      } else {
+        const res = await docClient.send(new ScanCommand({ TableName: TABLE_CIVIL, Limit: 200 }));
+        items = (res.Items ?? []) as any[];
+      }
+
       const filtered = items.filter((item) => {
         if (
           firstName &&
