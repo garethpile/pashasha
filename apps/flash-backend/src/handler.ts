@@ -635,7 +635,9 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
 
     const isPublicCivilServantPath =
       path.startsWith('/guards/') ||
-      (path.startsWith('/civil-servants/') && !path.startsWith('/civil-servants/me'));
+      (path.startsWith('/civil-servants/') &&
+        !path.startsWith('/civil-servants/me') &&
+        !path.startsWith('/civil-servants/lookup'));
 
     if (isPublicCivilServantPath) {
       const [, , token, action] = path.split('/');
