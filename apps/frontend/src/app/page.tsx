@@ -17,6 +17,7 @@ import { voucherApi } from '../lib/api/voucher';
 import { isAdminGroup, isCivilServantGroup, isCustomerGroup } from '../lib/auth/groups';
 import { getSession, sessionEventName } from '../lib/auth/session';
 import { guardsClient } from '../lib/guards-client';
+import { resolveAppApiRoot } from '../lib/api/config';
 import { eclipseEnabled } from '../lib/feature-flags';
 import {
   DashboardCivilServantKycCard,
@@ -1055,17 +1056,63 @@ function CustomerDashboard() {
     setPayPending(true);
     try {
       const token = `${selectedGuard.guardToken}`.trim();
-      const intent = await guardsClient.createTipIntent(token, {
-        amount,
-        currency: 'ZAR',
-        returnUrl: typeof window !== 'undefined' ? window.location.href : undefined,
-        guardToken: token,
-        yourReference: yourReference || undefined,
-        theirReference: theirReference || undefined,
-      });
+      const apiRoot = resolveAppApiRoot();
+      const response = await fetch(
+        `${apiRoot}/civil-servants/${encodeURIComponent(token)}/topup-ozow`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amount,
+            currency: 'ZAR',
+            yourReference: yourReference || undefined,
+            theirReference: theirReference || undefined,
+          }),
+        }
+      );
+
+      const text = await response.text();
+      let payload: any = text;
+      try {
+        payload = text ? JSON.parse(text) : null;
+      } catch {
+        payload = text;
+      }
+
+      if (!response.ok) {
+        const message =
+          payload?.message || payload?.error || text || `Request failed (${response.status})`;
+        throw new Error(message);
+      }
+
+      const result = (payload || {}) as {
+        paymentId?: string;
+        status?: string;
+        formUrl?: string;
+        fields?: Record<string, string>;
+        authorizationUrl?: string | null;
+      };
+
       setPayFeedback('Payment initiated. Opening payment page...');
-      if (intent.authorizationUrl) {
-        window.open(intent.authorizationUrl, '_blank', 'noopener,noreferrer');
+      if (result.formUrl && result.fields) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = result.formUrl;
+        form.target = '_blank';
+        Object.entries(result.fields).forEach(([key, value]) => {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+        form.remove();
+        return;
+      }
+      if (result.authorizationUrl) {
+        window.open(result.authorizationUrl, '_blank', 'noopener,noreferrer');
       }
     } catch (err: any) {
       setPayFeedback(err?.message ?? 'Unable to start payment.');
