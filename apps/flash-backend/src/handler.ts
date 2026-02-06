@@ -150,6 +150,27 @@ const buildOzowHash = (payload: Record<string, string>, secretKey: string): stri
   return createHash('sha512').update(raw).digest('hex').toLowerCase();
 };
 
+const isOzowApiEndpoint = () =>
+  /postpaymentrequest/i.test(OZOW_PAYMENT_URL) || /stagingapi\.ozow\.com/i.test(OZOW_PAYMENT_URL);
+
+const pickOzowRedirectUrl = (payload: Record<string, unknown>): string | null => {
+  const candidates = [
+    'PaymentUrl',
+    'paymentUrl',
+    'PaymentURL',
+    'paymentURL',
+    'RedirectUrl',
+    'redirectUrl',
+    'url',
+    'Url',
+  ];
+  for (const key of candidates) {
+    const value = payload[key];
+    if (typeof value === 'string' && value.trim().length > 0) return value;
+  }
+  return null;
+};
+
 const isOzowSuccess = (status?: string | null) => {
   if (!status) return false;
   const normalized = status.toLowerCase();
@@ -877,6 +898,54 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
           IsTest: OZOW_IS_TEST ? 'true' : 'false',
         };
         formPayload.HashCheck = buildOzowHash(formPayload, ozowSecrets.secretKey);
+
+        if (isOzowApiEndpoint()) {
+          if (!ozowSecrets.apiKey) {
+            return json(500, { error: 'ozow api key not configured' }, corsHeaders);
+          }
+          const apiPayload = {
+            ...formPayload,
+            ApiKey: ozowSecrets.apiKey,
+          };
+          const ozowResp = await fetch(OZOW_PAYMENT_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ApiKey: ozowSecrets.apiKey,
+            },
+            body: JSON.stringify(apiPayload),
+          });
+          const responseText = await ozowResp.text();
+          let responseJson: Record<string, unknown> = {};
+          try {
+            responseJson = responseText
+              ? (JSON.parse(responseText) as Record<string, unknown>)
+              : {};
+          } catch {
+            responseJson = {};
+          }
+          if (!ozowResp.ok) {
+            return json(
+              ozowResp.status,
+              {
+                error: responseJson?.message ?? responseText ?? 'Ozow request failed',
+                status: ozowResp.status,
+              },
+              corsHeaders
+            );
+          }
+          const redirectUrl = pickOzowRedirectUrl(responseJson);
+          return json(
+            201,
+            {
+              paymentId,
+              status: 'PENDING',
+              authorizationUrl: redirectUrl,
+              ozow: responseJson,
+            },
+            corsHeaders
+          );
+        }
 
         return json(
           201,
