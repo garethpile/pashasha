@@ -18,35 +18,54 @@ const parseAmount = (value: any): number | undefined => {
 };
 
 export const mapDashboardTransactions = (tx: any[] = []): DashboardTransaction[] =>
-  tx.map((item: any) => ({
-    id: item.paymentId ?? item.externalId ?? crypto.randomUUID(),
-    amount: parseAmount(item.amount) ?? 0,
-    status: item.status ?? 'UNKNOWN',
-    createdAt: item.createdAt ?? item.raw?.created,
-    expiresAt:
-      item.expiresAt ??
-      item.expiryDate ??
-      item.expiry ??
-      item.raw?.expiresAt ??
-      item.raw?.expiry ??
-      item.raw?.expiresOn ??
-      item.raw?.expiryDate,
-    paymentType: item.paymentType ?? item.raw?.type,
-    externalId: item.externalId ?? item.raw?.paymentReference ?? item.raw?.externalUniqueId,
-    balance:
-      parseAmount(item.balance) ??
-      parseAmount(item.raw?.balance) ??
-      parseAmount(item.raw?.balanceAfter) ??
-      parseAmount(item.raw?.balanceAmount) ??
-      parseAmount(item.raw?.walletBalance) ??
-      parseAmount(item.raw?.currentBalance) ??
-      parseAmount(item.raw?.availableBalance),
-    availableBalance:
-      parseAmount(item.availableBalance) ??
-      parseAmount(item.raw?.availableBalance) ??
-      parseAmount(item.raw?.balanceAmountAvailable) ??
-      parseAmount(item.raw?.currentBalance),
-    description: item.raw?.description ?? item.metadata?.description ?? '',
-    reference:
-      item.raw?.paymentReference ?? item.raw?.externalUniqueId ?? item.externalId ?? item.paymentId,
-  }));
+  tx.map((item: any) => {
+    const civilServantName =
+      item.metadata?.civilServantName ??
+      item.raw?.civilServantName ??
+      item.raw?.recipientName ??
+      undefined;
+    return {
+      id: item.paymentId ?? item.externalId ?? crypto.randomUUID(),
+      amount: parseAmount(item.amount) ?? 0,
+      status: item.status ?? 'UNKNOWN',
+      createdAt: item.createdAt ?? item.raw?.created,
+      expiresAt:
+        item.expiresAt ??
+        item.expiryDate ??
+        item.expiry ??
+        item.raw?.expiresAt ??
+        item.raw?.expiry ??
+        item.raw?.expiresOn ??
+        item.raw?.expiryDate,
+      paymentType: item.paymentType ?? item.raw?.type,
+      externalId: item.externalId ?? item.raw?.paymentReference ?? item.raw?.externalUniqueId,
+      balance:
+        parseAmount(item.balance) ??
+        parseAmount(item.raw?.balance) ??
+        parseAmount(item.raw?.balanceAfter) ??
+        parseAmount(item.raw?.balanceAmount) ??
+        parseAmount(item.raw?.walletBalance) ??
+        parseAmount(item.raw?.currentBalance) ??
+        parseAmount(item.raw?.availableBalance),
+      availableBalance:
+        parseAmount(item.availableBalance) ??
+        parseAmount(item.raw?.availableBalance) ??
+        parseAmount(item.raw?.balanceAmountAvailable) ??
+        parseAmount(item.raw?.currentBalance),
+      description:
+        item.raw?.description ??
+        item.metadata?.description ??
+        (civilServantName ? `Payment to ${civilServantName}` : ''),
+      reference:
+        item.raw?.paymentReference ??
+        item.raw?.externalUniqueId ??
+        item.externalId ??
+        item.paymentId,
+      civilServantId:
+        item.civilServantId ??
+        item.metadata?.civilServantId ??
+        item.raw?.civilServantId ??
+        undefined,
+      civilServantName,
+    };
+  });

@@ -930,6 +930,8 @@ function CustomerDashboard() {
   });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileFeedback, setProfileFeedback] = useState<string | null>(null);
+  const [sentStatusFilter, setSentStatusFilter] = useState('ALL');
+  const [sentCivilServantFilter, setSentCivilServantFilter] = useState('');
   const eclipseActive = eclipseEnabled();
 
   const loadTransactions = async (offset = 0) => {
@@ -1067,6 +1069,7 @@ function CustomerDashboard() {
             currency: 'ZAR',
             yourReference: yourReference || undefined,
             theirReference: theirReference || undefined,
+            returnPath: '/?view=sent-payments',
           }),
         }
       );
@@ -1162,6 +1165,28 @@ function CustomerDashboard() {
     const paidOut = 0;
     return { received, pending, paidOut };
   }, [transactions]);
+
+  const filteredSentTransactions = useMemo(() => {
+    const query = sentCivilServantFilter.trim().toLowerCase();
+    return sentTransactions.filter((tx) => {
+      const status = (tx.status ?? '').toUpperCase();
+      const statusMatch =
+        sentStatusFilter === 'ALL' ? true : status === sentStatusFilter.toUpperCase();
+      if (!statusMatch) return false;
+      if (!query) return true;
+      const searchText = [
+        tx.civilServantName,
+        tx.civilServantId,
+        tx.description,
+        tx.reference,
+        tx.id,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return searchText.includes(query);
+    });
+  }, [sentCivilServantFilter, sentStatusFilter, sentTransactions]);
 
   if (loading) return <LoadingPanel text="Loading your profile…" />;
   if (error) return <ErrorPanel text={error} />;
@@ -1384,11 +1409,29 @@ function CustomerDashboard() {
               onToggle={() => setPaymentsCollapsed((v) => !v)}
               balance={balanceValue}
               availableBalance={availableBalance}
-              transactions={sentTransactions}
+              transactions={filteredSentTransactions}
               loading={sentLoading}
-              emptyLabel="No sent payments yet."
+              emptyLabel="No sent payments match this filter."
               actions={
-                <span className="text-xs text-slate-500">Wallet: {wallet?.walletId ?? '—'}</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    value={sentCivilServantFilter}
+                    onChange={(e) => setSentCivilServantFilter(e.target.value)}
+                    placeholder="Filter by civil servant"
+                    className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-700"
+                  />
+                  <select
+                    value={sentStatusFilter}
+                    onChange={(e) => setSentStatusFilter(e.target.value)}
+                    className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-700"
+                  >
+                    <option value="ALL">All statuses</option>
+                    <option value="SUCCESSFUL">Successful</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="FAILED">Failed</option>
+                  </select>
+                  <span className="text-xs text-slate-500">Wallet: {wallet?.walletId ?? '—'}</span>
+                </div>
               }
               pagination={{
                 onPrev: async () => {

@@ -210,7 +210,7 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
         ACCOUNT_WORKFLOW_ARN: accountWorkflow.stateMachineArn,
         ADMIN_WORKFLOW_ARN: accountWorkflow.stateMachineArn,
         OZOW_SECRET_ARN: 'pashashapay-ozow',
-        OZOW_PAYMENT_URL: 'https://stagingapi.ozow.com/PostPaymentRequest',
+        OZOW_PAYMENT_URL: 'https://pay.ozow.com',
         OZOW_COUNTRY_CODE: 'ZA',
         OZOW_CURRENCY_CODE: 'ZAR',
         OZOW_SUCCESS_URL: 'https://example.com/ozow/success',
@@ -275,6 +275,7 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
       apiName: 'PashashaPay-FlashApi',
       createDefaultStage: false,
       corsPreflight: {
+        allowCredentials: true,
         allowHeaders: [
           'Authorization',
           'Content-Type',
@@ -303,6 +304,13 @@ export class PashashaPayFlashBackendStack extends cdk.Stack {
       stageName: 'v1',
       autoDeploy: true,
     });
+
+    const flashApiBase = `${api.apiEndpoint}/${stage.stageName}`;
+    const guardPortalBase = props.guardPortalBaseUrl ?? 'https://dev.pashasha.com';
+    handler.addEnvironment('OZOW_NOTIFY_URL', `${flashApiBase}/webhooks/ozow`);
+    handler.addEnvironment('OZOW_SUCCESS_URL', `${guardPortalBase}/g`);
+    handler.addEnvironment('OZOW_CANCEL_URL', `${guardPortalBase}/g`);
+    handler.addEnvironment('OZOW_ERROR_URL', `${guardPortalBase}/g`);
 
     const integration = new apigwv2Integrations.HttpLambdaIntegration(
       'FlashBackendIntegration',

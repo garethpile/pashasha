@@ -6,6 +6,8 @@ import { guardsClient } from '../../lib/guards-client';
 import type { GuardProfile } from '@pashashapay/contracts';
 import QRCode from 'qrcode';
 import { resolveAppApiRoot } from '../../lib/api/config';
+import { getSession } from '../../lib/auth/session';
+import { isCustomerGroup } from '../../lib/auth/groups';
 
 export const dynamic = 'force-static';
 export const dynamicParams = true;
@@ -130,7 +132,19 @@ export default function GuardPublicPage() {
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: activeAmount, currency: 'ZAR' }),
+            // Logged-in customers should return to dashboard history; guests stay on /g.
+            // This keeps post-payment UX aligned with where the payment was initiated.
+            body: (() => {
+              const session = getSession();
+              const returnPath = isCustomerGroup(session?.groups)
+                ? '/?view=sent-payments'
+                : `/g?token=${encodeURIComponent(token)}`;
+              return JSON.stringify({
+                amount: activeAmount,
+                currency: 'ZAR',
+                returnPath,
+              });
+            })(),
           }
         );
 

@@ -14,6 +14,8 @@ export type DashboardTransaction = {
   availableBalance?: number;
   description?: string;
   reference?: string;
+  civilServantId?: string;
+  civilServantName?: string;
 };
 
 export type DashboardProfileField = {

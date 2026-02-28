@@ -64,7 +64,7 @@ export class PashashaPayVoucherStack extends cdk.Stack {
       FLASH_TOKEN_PRODUCT_CODE: '',
       FLASH_SECRETS_ARN: props.flashSecretsArn ?? '',
       FLASH_WEBHOOK_SIGNATURE_HEADER: 'x-flash-signature',
-      FLASH_USE_MOCK: 'true',
+      FLASH_USE_MOCK: props.flashSecretsArn ? 'false' : 'true',
     };
 
     const createPayoutFn = new lambdaNodejs.NodejsFunction(this, 'VoucherCreatePayoutFn', {

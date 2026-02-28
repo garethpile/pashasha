@@ -35,16 +35,16 @@ The CDK sketch lives in `infra/cdk/lib/voucher-stack.ts` and is wired into `infr
 - `RECIPIENTS_TABLE_NAME`
 - `EVENTS_TABLE_NAME`
 - `LEDGER_TABLE_NAME`
-- `FLASH_API_BASE_URL`
-- `FLASH_SECRETS_ARN` (Secrets Manager JSON with API credentials)
-- `FLASH_API_KEY`
-- `FLASH_API_SECRET`
-- `FLASH_API_TOKEN`
-- `FLASH_API_KEY_HEADER`
-- `FLASH_API_SECRET_HEADER`
-- `FLASH_API_AUTH_SCHEME` (`basic` | `bearer` | `headers`)
-- `FLASH_WEBHOOK_SECRET`
+- `FLASH_BASE_URL` (defaults to `https://api-flashswitch-sandbox.flash-group.com`)
+- `FLASH_TOKEN_URL` (defaults to `https://api-flashswitch-sandbox.flash-group.com/token`)
+- `FLASH_SECRETS_ARN` (Secrets Manager JSON with Flash API credentials)
+- `FLASH_API_KEY` (fallback if `FLASH_SECRETS_ARN` is not set)
+- `FLASH_ACCOUNT_NUMBER` (fallback if `FLASH_SECRETS_ARN` is not set)
+- `FLASH_CASH_OUT_PRODUCT_CODE`
+- `FLASH_TOKEN_PRODUCT_CODE`
 - `FLASH_WEBHOOK_SIGNATURE_HEADER`
+- `FLASH_WEBHOOK_SECRET`
+- `FLASH_USE_MOCK` (`true` for local/simulated mode, `false` for real Flash sandbox)
 - `SMS_SENDER_ID`
 
 ### Secrets Manager payload
@@ -53,12 +53,13 @@ If `FLASH_SECRETS_ARN` is set, the secret value can be JSON:
 
 ```
 {
-  "apiKey": "...",
-  "apiSecret": "...",
-  "apiToken": "...",
-  "authScheme": "headers",
-  "apiKeyHeader": "x-api-key",
-  "apiSecretHeader": "x-api-secret",
+  "apiKey": "<base64(client_id:client_secret)>",
+  "accountNumber": "3346-3276-9212-2982",
+  "tokenUrl": "https://api-flashswitch-sandbox.flash-group.com/token",
+  "baseUrl": "https://api-flashswitch-sandbox.flash-group.com",
+  "cashOutProductCode": 1234,
+  "flashTokenProductCode": 5678,
+  "useMock": false,
   "webhookSecret": "..."
 }
 ```

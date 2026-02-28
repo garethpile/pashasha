@@ -45,8 +45,8 @@ const KYC_ASSETS_BUCKET = process.env.KYC_ASSETS_BUCKET ?? '';
 const QR_ASSETS_BUCKET = process.env.QR_ASSETS_BUCKET || USER_ASSETS_BUCKET;
 const SUPPORT_TOPIC_ARN = process.env.SUPPORT_TOPIC_ARN;
 const VOUCHER_API_BASE_URL = process.env.VOUCHER_API_BASE_URL;
-const GUARD_PORTAL_BASE =
-  (process.env.GUARD_PORTAL_BASE_URL ?? 'https://dev.pashasha.com') + '/g?token=';
+const GUARD_PORTAL_BASE_URL = process.env.GUARD_PORTAL_BASE_URL ?? 'https://dev.pashasha.com';
+const GUARD_PORTAL_BASE = `${GUARD_PORTAL_BASE_URL}/g?token=`;
 const USER_POOL_ID = process.env.USER_POOL_ID ?? '';
 const ACCOUNT_WORKFLOW_ARN = process.env.ACCOUNT_WORKFLOW_ARN ?? '';
 const ADMIN_WORKFLOW_ARN = process.env.ADMIN_WORKFLOW_ARN ?? ACCOUNT_WORKFLOW_ARN;
@@ -113,6 +113,25 @@ const buildCorsHeaders = (event: APIGatewayProxyEventV2) => {
   };
 };
 
+const pickReturnBaseUrl = (event: APIGatewayProxyEventV2) => {
+  const requestOrigin = event.headers?.origin ?? event.headers?.Origin;
+  if (!requestOrigin) return GUARD_PORTAL_BASE_URL;
+  if (requestOrigin === 'https://master.d28mxe1buxl9n7.amplifyapp.com') return requestOrigin;
+  if (requestOrigin === 'https://dev.pashasha.com') return requestOrigin;
+  if (requestOrigin === 'https://www.dev.pashasha.com') return requestOrigin;
+  return GUARD_PORTAL_BASE_URL;
+};
+
+const pickReturnPath = (value: unknown, fallbackToken: string) => {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.startsWith('/') && !trimmed.startsWith('//')) {
+      return trimmed;
+    }
+  }
+  return `/g?token=${encodeURIComponent(fallbackToken)}`;
+};
+
 const parseBody = <T>(event: APIGatewayProxyEventV2): T | null => {
   if (!event.body) return null;
   const raw = event.isBase64Encoded
@@ -131,23 +150,28 @@ const parseFormBody = (body: string): Record<string, string> => {
 };
 
 const buildOzowHash = (payload: Record<string, string>, secretKey: string): string => {
-  const raw = [
+  // Ozow requires hashing the request fields in the exact documented order.
+  const orderedValues = [
     payload.SiteCode,
     payload.CountryCode,
     payload.CurrencyCode,
     payload.Amount,
     payload.TransactionReference,
     payload.BankReference,
-    payload.NotifyUrl,
-    payload.SuccessUrl,
+    payload.Optional1,
+    payload.Optional2,
+    payload.Optional3,
+    payload.Optional4,
+    payload.Optional5,
+    payload.Customer,
     payload.CancelUrl,
     payload.ErrorUrl,
+    payload.SuccessUrl,
+    payload.NotifyUrl,
     payload.IsTest,
-    secretKey,
-  ]
-    .filter(Boolean)
-    .join('');
-  return createHash('sha512').update(raw).digest('hex').toLowerCase();
+  ].filter((value) => value !== undefined && value !== null && value !== '');
+  const raw = `${orderedValues.join('')}${secretKey}`.toLowerCase();
+  return createHash('sha512').update(raw).digest('hex');
 };
 
 const isOzowApiEndpoint = () =>
@@ -199,7 +223,7 @@ const requireAdmin = (claims: AuthClaims | null) => {
   }
 };
 
-const buildResponse = (err: any): APIGatewayProxyResultV2 => {
+const buildResponse = (err: any, corsHeaders: Record<string, string>): APIGatewayProxyResultV2 => {
   const status = err?.statusCode ?? 500;
   const message = err?.message ?? 'Server error';
   return json(status, { error: message }, corsHeaders);
@@ -878,12 +902,22 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
               updatedAt: now,
               metadata: {
                 source: 'ozow',
+                civilServantId: guardProfile.civilServantId,
+                civilServantName: `${guardProfile.firstName ?? ''} ${
+                  guardProfile.familyName ?? ''
+                }`.trim(),
+                guardToken: token,
+                yourReference: payload.yourReference ?? null,
+                theirReference: payload.theirReference ?? null,
               },
             },
           })
         );
 
         const formattedAmount = amount.toFixed(2);
+        const returnBaseUrl = pickReturnBaseUrl(event);
+        const returnPath = pickReturnPath(payload.returnPath, token);
+        const returnUrl = `${returnBaseUrl}${returnPath}`;
         const formPayload: Record<string, string> = {
           SiteCode: ozowSecrets.siteCode,
           CountryCode: OZOW_COUNTRY_CODE,
@@ -892,9 +926,9 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
           TransactionReference: paymentId,
           BankReference: `Pashasha-${paymentId.slice(0, 8)}`,
           NotifyUrl: OZOW_NOTIFY_URL,
-          SuccessUrl: OZOW_SUCCESS_URL,
-          CancelUrl: OZOW_CANCEL_URL,
-          ErrorUrl: OZOW_ERROR_URL,
+          SuccessUrl: returnUrl,
+          CancelUrl: returnUrl,
+          ErrorUrl: returnUrl,
           IsTest: OZOW_IS_TEST ? 'true' : 'false',
         };
         formPayload.HashCheck = buildOzowHash(formPayload, ozowSecrets.secretKey);
@@ -2022,6 +2056,13 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
 
     return json(404, { error: 'not found' }, corsHeaders);
   } catch (err: any) {
-    return buildResponse(err);
+    console.error('Flash backend request failed', {
+      path,
+      method,
+      message: err?.message,
+      statusCode: err?.statusCode,
+      stack: err?.stack,
+    });
+    return buildResponse(err, corsHeaders);
   }
 };

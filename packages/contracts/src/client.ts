@@ -39,7 +39,8 @@ export class GuardsClient {
   private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
     const url = this.resolveUrl(path);
     const response = await this.fetchFn(url, {
-      credentials: 'include',
+      // Public guard endpoints do not require cookies/session credentials.
+      credentials: 'omit',
       cache: init.cache ?? 'no-store',
       ...init,
       headers: {
