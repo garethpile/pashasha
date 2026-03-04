@@ -1141,8 +1141,8 @@ function CustomerDashboard() {
         if (eclipseActive) {
           await Promise.all([loadTransactions(0), loadSentTransactions(0), loadWallet()]);
         } else {
+          await loadSentTransactions(0);
           setTransactions([]);
-          setSentTransactions([]);
           setWallet(null);
         }
       } catch (err: any) {
@@ -1223,8 +1223,7 @@ function CustomerDashboard() {
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         {!eclipseActive && (
           <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
-            Voucher mode is active. Eclipse wallet balances and transaction history are hidden
-            during the pilot.
+            Voucher mode is active. Eclipse wallet balances are hidden during the pilot.
           </section>
         )}
         <DashboardNameCard
@@ -1368,86 +1367,87 @@ function CustomerDashboard() {
         )}
 
         {eclipseActive && (
-          <>
-            <DashboardPaymentsCard
-              title="Payments"
-              collapsed={paymentsCollapsed}
-              onToggle={() => setPaymentsCollapsed((v) => !v)}
-              balance={balanceValue}
-              availableBalance={availableBalance}
-              transactions={transactions}
-              loading={txLoading}
-              rightActions={
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPayModalOpen(true);
-                    setPayFeedback(null);
-                  }}
-                  className="inline-flex items-center gap-2 rounded-full border border-orange-500 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-50"
-                >
-                  Pay Civil Servant
-                </button>
-              }
-              pagination={{
-                onPrev: async () => {
-                  if (txOffset <= 0) return;
-                  await loadTransactions(Math.max(0, txOffset - 14));
-                },
-                onNext: async () => {
-                  await loadTransactions(txOffset + 14);
-                },
-                hasPrev: txOffset > 0,
-                hasNext: txHasMore,
-                disabled: txLoading,
-              }}
-            />
-
-            <DashboardPaymentsCard
-              title="Sent payments"
-              collapsed={paymentsCollapsed}
-              onToggle={() => setPaymentsCollapsed((v) => !v)}
-              balance={balanceValue}
-              availableBalance={availableBalance}
-              transactions={filteredSentTransactions}
-              loading={sentLoading}
-              emptyLabel="No sent payments match this filter."
-              actions={
-                <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    value={sentCivilServantFilter}
-                    onChange={(e) => setSentCivilServantFilter(e.target.value)}
-                    placeholder="Filter by civil servant"
-                    className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-700"
-                  />
-                  <select
-                    value={sentStatusFilter}
-                    onChange={(e) => setSentStatusFilter(e.target.value)}
-                    className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-700"
-                  >
-                    <option value="ALL">All statuses</option>
-                    <option value="SUCCESSFUL">Successful</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="FAILED">Failed</option>
-                  </select>
-                  <span className="text-xs text-slate-500">Wallet: {wallet?.walletId ?? '—'}</span>
-                </div>
-              }
-              pagination={{
-                onPrev: async () => {
-                  if (sentOffset <= 0) return;
-                  await loadSentTransactions(Math.max(0, sentOffset - 14));
-                },
-                onNext: async () => {
-                  await loadSentTransactions(sentOffset + 14);
-                },
-                hasPrev: sentOffset > 0,
-                hasNext: sentHasMore,
-                disabled: sentLoading,
-              }}
-            />
-          </>
+          <DashboardPaymentsCard
+            title="Payments"
+            collapsed={paymentsCollapsed}
+            onToggle={() => setPaymentsCollapsed((v) => !v)}
+            balance={balanceValue}
+            availableBalance={availableBalance}
+            transactions={transactions}
+            loading={txLoading}
+            rightActions={
+              <button
+                type="button"
+                onClick={() => {
+                  setPayModalOpen(true);
+                  setPayFeedback(null);
+                }}
+                className="inline-flex items-center gap-2 rounded-full border border-orange-500 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-50"
+              >
+                Pay Civil Servant
+              </button>
+            }
+            pagination={{
+              onPrev: async () => {
+                if (txOffset <= 0) return;
+                await loadTransactions(Math.max(0, txOffset - 14));
+              },
+              onNext: async () => {
+                await loadTransactions(txOffset + 14);
+              },
+              hasPrev: txOffset > 0,
+              hasNext: txHasMore,
+              disabled: txLoading,
+            }}
+          />
         )}
+
+        <DashboardPaymentsCard
+          title="Sent payments"
+          collapsed={paymentsCollapsed}
+          onToggle={() => setPaymentsCollapsed((v) => !v)}
+          balance={balanceValue}
+          availableBalance={availableBalance}
+          transactions={filteredSentTransactions}
+          loading={sentLoading}
+          emptyLabel="No sent payments match this filter."
+          showBalanceColumn={false}
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                value={sentCivilServantFilter}
+                onChange={(e) => setSentCivilServantFilter(e.target.value)}
+                placeholder="Filter by civil servant"
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-700"
+              />
+              <select
+                value={sentStatusFilter}
+                onChange={(e) => setSentStatusFilter(e.target.value)}
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-700"
+              >
+                <option value="ALL">All statuses</option>
+                <option value="SUCCESSFUL">Successful</option>
+                <option value="PENDING">Pending</option>
+                <option value="FAILED">Failed</option>
+              </select>
+              {eclipseActive && (
+                <span className="text-xs text-slate-500">Wallet: {wallet?.walletId ?? '—'}</span>
+              )}
+            </div>
+          }
+          pagination={{
+            onPrev: async () => {
+              if (sentOffset <= 0) return;
+              await loadSentTransactions(Math.max(0, sentOffset - 14));
+            },
+            onNext: async () => {
+              await loadSentTransactions(sentOffset + 14);
+            },
+            hasPrev: sentOffset > 0,
+            hasNext: sentHasMore,
+            disabled: sentLoading,
+          }}
+        />
       </div>
 
       {payModalOpen && (
