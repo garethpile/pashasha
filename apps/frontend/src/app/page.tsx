@@ -754,7 +754,7 @@ function CivilServantDashboard() {
             <p className="mt-1 text-sm text-slate-500">
               {eclipseActive
                 ? 'Choose a payout method and amount. A 1% platform fee will be collected to the tenant wallet.'
-                : 'Choose a payout method and amount. A voucher will be issued for the total after fees.'}
+                : 'Choose a payout amount. The 1% platform fee is included in this amount and the remaining value is issued as a voucher.'}
             </p>
 
             <div className="mt-4 space-y-3">
@@ -780,10 +780,10 @@ function CivilServantDashboard() {
                   </p>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="font-semibold">Total Deduction</p>
+                  <p className="font-semibold">Voucher Amount (After Fee)</p>
                   <p className="text-base font-semibold text-slate-900">
                     {payoutAmount
-                      ? formatCurrency(Number(payoutAmount) + Number(payoutAmount) * 0.01)
+                      ? formatCurrency(Number(payoutAmount) - Number(payoutAmount) * 0.01)
                       : '—'}
                   </p>
                 </div>
@@ -792,8 +792,7 @@ function CivilServantDashboard() {
                   <p className="text-base font-semibold text-slate-900">
                     {payoutInfo && payoutAmount
                       ? formatCurrency(
-                          (payoutInfo.availableBalance ?? payoutInfo.balance) -
-                            (Number(payoutAmount) + Number(payoutAmount) * 0.01)
+                          (payoutInfo.availableBalance ?? payoutInfo.balance) - Number(payoutAmount)
                         )
                       : '—'}
                   </p>

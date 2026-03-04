@@ -1401,14 +1401,61 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       }
       if (method === 'POST') {
         const payload = parseBody<any>(event) ?? {};
+        const requestedAmount = Number(payload.amount);
+        if (!Number.isFinite(requestedAmount) || requestedAmount <= 0) {
+          return json(400, { error: 'invalid amount' }, corsHeaders);
+        }
         if (VOUCHER_API_BASE_URL) {
           const result = await forwardVoucher('/payouts', {
             recipientId: guard.civilServantId,
-            amount: payload.amount,
+            amount: requestedAmount,
             reference: payload.reference ?? guard.accountNumber,
             method: payload.method ?? '1VOUCHER',
           });
-          return json(200, result, corsHeaders);
+          const paymentId = randomUUID();
+          const now = new Date().toISOString();
+          const feeAmountRaw = Number(result?.feeAmount);
+          const voucherAmountRaw = Number(result?.voucherAmount);
+          const feeAmount =
+            Number.isFinite(feeAmountRaw) && feeAmountRaw >= 0
+              ? feeAmountRaw
+              : Math.round(requestedAmount * 0.01 * 100) / 100;
+          const voucherAmount =
+            Number.isFinite(voucherAmountRaw) && voucherAmountRaw >= 0
+              ? voucherAmountRaw
+              : Math.round((requestedAmount - feeAmount) * 100) / 100;
+          const payoutId = String(result?.payoutId ?? '');
+          const statusRaw = String(result?.status ?? '').toLowerCase();
+          const payoutStatus = statusRaw.includes('fail') ? 'FAILED' : 'SUCCESSFUL';
+          const description = `Withdrawal ${requestedAmount.toFixed(2)} (Voucher ${voucherAmount.toFixed(2)}, Fee ${feeAmount.toFixed(2)})`;
+
+          await docClient.send(
+            new PutCommand({
+              TableName: TABLE_PAYMENTS,
+              Item: {
+                paymentId,
+                status: payoutStatus,
+                amount: -requestedAmount,
+                currency: 'ZAR',
+                paymentType: 'WITHDRAWAL',
+                civilServantId: guard.civilServantId,
+                customerId: 'SYSTEM',
+                createdAt: now,
+                updatedAt: now,
+                metadata: {
+                  source: 'voucher-payout',
+                  payoutId,
+                  totalAmount: requestedAmount,
+                  voucherAmount,
+                  feeAmount,
+                  method: payload.method ?? '1VOUCHER',
+                  description,
+                },
+              },
+            })
+          );
+
+          return json(200, { ...result, paymentId }, corsHeaders);
         }
         return json(501, { error: 'voucher payout not configured' }, corsHeaders);
       }

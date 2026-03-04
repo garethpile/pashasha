@@ -23,10 +23,17 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     return json(400, { error: 'invalid recipientId or amount' });
   }
 
+  const totalAmount = Math.round(Number(payload.amount) * 100) / 100;
+  const feeAmount = Math.round(totalAmount * 0.01 * 100) / 100;
+  const voucherAmount = Math.round((totalAmount - feeAmount) * 100) / 100;
+  if (!Number.isFinite(totalAmount) || totalAmount <= 0 || voucherAmount <= 0) {
+    return json(400, { error: 'invalid payout amount' });
+  }
+
   const store = createStore();
   let balance = null;
   try {
-    balance = await store.adjustRecipientBalance(payload.recipientId, -payload.amount, 'ZAR', true);
+    balance = await store.adjustRecipientBalance(payload.recipientId, -totalAmount, 'ZAR', true);
   } catch (err: any) {
     return json(409, { error: err?.message ?? 'insufficient balance' });
   }
@@ -34,7 +41,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   const intent: PayoutIntent = {
     id: newId('payout'),
     recipientId: payload.recipientId,
-    amount: payload.amount,
+    amount: voucherAmount,
     currency: 'ZAR',
     provider: 'flash',
     reference: newId('ref'),
@@ -48,7 +55,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     id: newId('ledger'),
     recipientId: payload.recipientId,
     type: 'debit',
-    amount: payload.amount,
+    amount: totalAmount,
     currency: 'ZAR',
     reference: payload.reference ?? intent.reference,
     source: 'withdrawal',
@@ -69,6 +76,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   return json(202, {
     payoutId: intent.id,
     status: intent.status,
+    totalAmount,
+    voucherAmount,
+    feeAmount,
     balance: balance?.availableBalance ?? 0,
   });
 };
