@@ -725,6 +725,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       if (method === 'POST' && token && action === 'tips') {
         const payload = parseBody<any>(event) ?? {};
         const amount = Number(payload.amount);
+        const resolvedCustomerId = pickUserId(claims) || payload.customerId || null;
         if (!Number.isFinite(amount) || amount <= 0) {
           return json(400, { error: 'invalid amount' }, corsHeaders);
         }
@@ -753,7 +754,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
               currency: payload.currency ?? 'ZAR',
               guardToken: token,
               civilServantId: guardProfile.civilServantId,
-              customerId: payload.customerId,
+              customerId: resolvedCustomerId,
               createdAt: now,
               updatedAt: now,
               metadata: {
@@ -806,6 +807,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       if (method === 'POST' && token && action === 'topup-sandbox') {
         const payload = parseBody<any>(event) ?? {};
         const amount = Number(payload.amount);
+        const resolvedCustomerId = pickUserId(claims) || payload.customerId || null;
         if (!Number.isFinite(amount) || amount <= 0) {
           return json(400, { error: 'invalid amount' }, corsHeaders);
         }
@@ -834,7 +836,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
               currency: payload.currency ?? 'ZAR',
               guardToken: token,
               civilServantId: guardProfile.civilServantId,
-              customerId: payload.customerId,
+              customerId: resolvedCustomerId,
               createdAt: now,
               updatedAt: now,
               metadata: {
@@ -865,6 +867,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       if (method === 'POST' && token && action === 'topup-ozow') {
         const payload = parseBody<any>(event) ?? {};
         const amount = Number(payload.amount);
+        const resolvedCustomerId = pickUserId(claims) || payload.customerId || null;
         if (!Number.isFinite(amount) || amount <= 0) {
           return json(400, { error: 'invalid amount' }, corsHeaders);
         }
@@ -897,7 +900,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
               currency: payload.currency ?? 'ZAR',
               guardToken: token,
               civilServantId: guardProfile.civilServantId,
-              customerId: payload.customerId,
+              customerId: resolvedCustomerId,
               createdAt: now,
               updatedAt: now,
               metadata: {

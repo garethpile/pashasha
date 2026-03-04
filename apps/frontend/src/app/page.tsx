@@ -345,9 +345,11 @@ function CivilServantDashboard() {
             walletInfo?.currentBalance ?? walletInfo?.balance ?? walletInfo?.availableBalance;
           await Promise.all([loadTransactions(0, currentBalance), loadPendingTransactions(0)]);
         } else {
-          setTransactions([]);
+          const walletInfo = await loadPayoutInfo(data.civilServantId);
+          const currentBalance =
+            walletInfo?.currentBalance ?? walletInfo?.balance ?? walletInfo?.availableBalance;
+          await loadTransactions(0, currentBalance);
           setPendingTransactions([]);
-          await loadPayoutInfo(data.civilServantId);
         }
       } catch (err: any) {
         setError(err?.message ?? 'Unable to load profile.');
@@ -576,8 +578,7 @@ function CivilServantDashboard() {
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         {!eclipseActive && (
           <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
-            Voucher mode is active. Eclipse wallet balances, transaction history, and payouts are
-            hidden during the pilot.
+            Voucher mode is active. Reservation details are hidden during the pilot.
           </section>
         )}
         <DashboardNameCard
@@ -637,78 +638,54 @@ function CivilServantDashboard() {
 
         <DashboardCivilServantKycCard />
 
-        {!eclipseActive && (
-          <section className="w-full max-w-4xl self-center rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <header className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Balance</p>
-              <span className="text-xs font-semibold text-slate-500">Voucher mode</span>
-            </header>
-            <div className="mt-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm text-slate-600">Available balance</p>
-                <p className="text-2xl font-semibold text-slate-900">
-                  {payoutInfo ? formatCurrency(availableBalance) : 'Loading...'}
-                </p>
-              </div>
+        <DashboardPaymentsCard
+          title={
+            <div className="whitespace-pre leading-tight">
+              <span className="block">TRANSACTION HISTORY</span>
+            </div>
+          }
+          collapsed={paymentsCollapsed}
+          onToggle={() => setPaymentsCollapsed((v) => !v)}
+          metrics={transactionMetrics}
+          rightActions={
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => loadTransactions(txOffset, payoutBalance)}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                aria-label="Refresh transactions"
+                title="Refresh"
+              >
+                ⟳
+              </button>
               <button
                 type="button"
                 onClick={() => setPayoutOpen(true)}
                 className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
               >
-                Withdraw
+                {eclipseActive ? 'Payout' : 'Withdraw'}
               </button>
             </div>
-          </section>
-        )}
+          }
+          transactions={transactions}
+          loading={txLoading}
+          showBalanceColumn
+          pagination={{
+            onPrev: async () => {
+              if (txOffset <= 0) return;
+              await loadTransactions(Math.max(0, txOffset - 14), payoutBalance);
+            },
+            onNext: async () => {
+              await loadTransactions(txOffset + 14, payoutBalance);
+            },
+            hasPrev: txOffset > 0,
+            hasNext: txHasMore,
+            disabled: txLoading,
+          }}
+        />
 
         {eclipseActive && (
           <>
-            <DashboardPaymentsCard
-              title={
-                <div className="whitespace-pre leading-tight">
-                  <span className="block">TRANSACTIONS</span>
-                </div>
-              }
-              collapsed={paymentsCollapsed}
-              onToggle={() => setPaymentsCollapsed((v) => !v)}
-              metrics={transactionMetrics}
-              rightActions={
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => loadTransactions(txOffset, payoutBalance)}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-                    aria-label="Refresh transactions"
-                    title="Refresh"
-                  >
-                    ⟳
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPayoutOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
-                  >
-                    Payout
-                  </button>
-                </div>
-              }
-              transactions={transactions}
-              loading={txLoading}
-              showBalanceColumn
-              pagination={{
-                onPrev: async () => {
-                  if (txOffset <= 0) return;
-                  await loadTransactions(Math.max(0, txOffset - 14), payoutBalance);
-                },
-                onNext: async () => {
-                  await loadTransactions(txOffset + 14, payoutBalance);
-                },
-                hasPrev: txOffset > 0,
-                hasNext: txHasMore,
-                disabled: txLoading,
-              }}
-            />
-
             <DashboardPaymentsCard
               title={
                 <div className="whitespace-pre leading-tight">
@@ -1059,16 +1036,22 @@ function CustomerDashboard() {
     try {
       const token = `${selectedGuard.guardToken}`.trim();
       const apiRoot = resolveAppApiRoot();
+      const session = getSession();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (session?.accessToken) {
+        headers.Authorization = `Bearer ${session.accessToken}`;
+      }
       const response = await fetch(
         `${apiRoot}/civil-servants/${encodeURIComponent(token)}/topup-ozow`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({
             amount,
             currency: 'ZAR',
             yourReference: yourReference || undefined,
             theirReference: theirReference || undefined,
+            customerId: profile?.customerId || undefined,
             returnPath: '/?view=sent-payments',
           }),
         }
