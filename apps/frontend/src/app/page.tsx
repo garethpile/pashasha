@@ -495,6 +495,15 @@ function CivilServantDashboard() {
         payoutResult?.withdrawal?.authorizationUrl ||
         payoutResult?.withdrawal?.completionUrl ||
         payoutResult?.withdrawal?.voucherUrl;
+
+      const walletInfo = await loadPayoutInfo(profile.civilServantId);
+      const currentBalance =
+        walletInfo?.currentBalance ?? walletInfo?.balance ?? walletInfo?.availableBalance;
+      await loadTransactions(0, currentBalance);
+      if (eclipseActive) {
+        await loadPendingTransactions(0);
+      }
+
       setPayoutAmount('');
       setPayoutMethod('1VOUCHER');
       setPayoutOpen(false);
@@ -511,13 +520,12 @@ function CivilServantDashboard() {
 
   const handlePayoutSuccessClose = async () => {
     setPayoutSuccessOpen(false);
+    const walletInfo = await loadPayoutInfo(profile?.civilServantId);
+    const currentBalance =
+      walletInfo?.currentBalance ?? walletInfo?.balance ?? walletInfo?.availableBalance;
+    await loadTransactions(0, currentBalance);
     if (eclipseActive) {
-      const walletInfo = await loadPayoutInfo();
-      const currentBalance =
-        walletInfo?.currentBalance ?? walletInfo?.balance ?? walletInfo?.availableBalance;
-      await Promise.all([loadTransactions(0, currentBalance), loadPendingTransactions(0)]);
-    } else {
-      await loadPayoutInfo(profile?.civilServantId);
+      await loadPendingTransactions(0);
     }
   };
 
