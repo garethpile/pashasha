@@ -11,6 +11,7 @@ import { eclipseEnabled } from '../../lib/feature-flags';
 const tabs = [
   { href: '/admin/civil-servants', label: 'Civil Servants' },
   { href: '/admin/customers', label: 'Customers' },
+  { href: '/admin/vouchers', label: 'Vouchers' },
   { href: '/admin/administrators', label: 'Administrators' },
 ];
 

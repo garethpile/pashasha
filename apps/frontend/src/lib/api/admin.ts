@@ -41,6 +41,27 @@ const request = async <T>(
   return (await response.json()) as T;
 };
 
+export type AdminVoucher = {
+  voucherId: string;
+  supplier: string;
+  supplierKey: string;
+  amount: number;
+  amountMinor: number;
+  currency: string;
+  status: 'available';
+  barcodeMasked: string;
+  barcodeLast4: string;
+  source: 'telegram-admin-bot' | 'web-admin-console';
+  ingestedAt: string;
+  updatedAt: string;
+  ingestedByUserId: string;
+  ingestedByActorId?: string;
+  storage: {
+    mode: string;
+    barcodeVisibleToAdmins: boolean;
+  };
+};
+
 export const adminApi = {
   searchCivilServants: (params: { accountNumber?: string; familyName?: string }) => {
     const query = new URLSearchParams();
@@ -152,6 +173,17 @@ export const adminApi = {
   deleteAdministrator: (username: string) =>
     request(`/admin/users/administrators/${encodeURIComponent(username)}`, {
       method: 'DELETE',
+    }),
+  listVouchers: (params?: { limit?: number }) => {
+    const query = new URLSearchParams();
+    if (params?.limit !== undefined) query.set('limit', String(params.limit));
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    return request<AdminVoucher[]>(`/admin/vouchers${suffix}`);
+  },
+  ingestShopriteCheckersVoucher: (payload: { smsText: string }) =>
+    request<AdminVoucher>(`/admin/vouchers/suppliers/shoprite-checkers/ingest`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
     }),
 
   getCustomerKyc: (id: string) => request(`/customers/${id}/kyc`),

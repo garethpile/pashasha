@@ -11,6 +11,8 @@ That means the clean MVP is to keep the Telegram bot dumb and let the backend do
 
 ## Proposed Telegram flow
 
+Bot name: **PashashaPayBot**
+
 ```text
 /admin
   -> vouchers
@@ -97,7 +99,7 @@ This is not a full HSM-backed vault yet, but it is already far better than dropp
 
 ## Telegram bot integration sketch
 
-The separate bot should:
+The separate bot process for **PashashaPayBot** should:
 
 1. Maintain a tiny admin conversation state machine:
    - `idle`
@@ -108,6 +110,13 @@ The separate bot should:
 2. When in `awaiting_shoprite_sms`, send pasted SMS directly to backend endpoint
 3. Never persist the full SMS/barcode in bot logs or chat summaries beyond the original Telegram message
 4. Delete or redact internal bot debug logs for this step
+
+## Web admin view added in this repo
+
+- Route: `/admin/vouchers`
+- Supports Shoprite Checkers SMS paste + ingest
+- Lists recent voucher ingests with masked barcode only
+- Uses the same secure backend endpoint and never exposes full barcode plaintext in the UI
 
 ## Example bot copy
 

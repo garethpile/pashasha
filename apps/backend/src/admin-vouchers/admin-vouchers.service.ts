@@ -20,6 +20,7 @@ export class AdminVouchersService {
   async ingestShopriteCheckersSms(params: {
     smsText: string;
     actor: { sub?: string; email?: string; ['cognito:groups']?: string[] };
+    source?: 'telegram-admin-bot' | 'web-admin-console';
   }) {
     const parsed = this.parseShopriteCheckersSms(params.smsText);
     const now = new Date().toISOString();
@@ -37,7 +38,7 @@ export class AdminVouchersService {
       rawSmsHash: this.vault.fingerprint(params.smsText),
       barcodeVault: this.vault.encryptString(parsed.barcode),
       rawSmsVault: this.vault.encryptString(params.smsText),
-      source: 'telegram-admin-bot',
+      source: params.source ?? 'telegram-admin-bot',
       createdAt: now,
       updatedAt: now,
       ingestedByUserId: params.actor.sub ?? 'unknown',
@@ -76,6 +77,31 @@ export class AdminVouchersService {
         barcodeVisibleToAdmins: false,
       },
     };
+  }
+
+  async listRecentVouchers(limit = 25) {
+    const vouchers = await this.repo.listRecent(limit);
+
+    return vouchers.map((voucher) => ({
+      voucherId: voucher.voucherId,
+      supplier: voucher.supplierLabel,
+      supplierKey: voucher.supplierKey,
+      amount: voucher.amountMinor / 100,
+      amountMinor: voucher.amountMinor,
+      currency: voucher.currency,
+      status: voucher.status,
+      barcodeMasked: this.vault.redactBarcode(voucher.barcodeLast4),
+      barcodeLast4: voucher.barcodeLast4,
+      source: voucher.source,
+      ingestedAt: voucher.createdAt,
+      updatedAt: voucher.updatedAt,
+      ingestedByUserId: voucher.ingestedByUserId,
+      ingestedByActorId: voucher.ingestedByActorId,
+      storage: {
+        mode: 'encrypted-at-rest-and-application-encrypted',
+        barcodeVisibleToAdmins: false,
+      },
+    }));
   }
 
   private parseShopriteCheckersSms(smsText: string) {
