@@ -24,6 +24,7 @@ export const envSchema = z
       .min(1, 'ADMINISTRATORS_TABLE_NAME is required'),
     AUDIT_TABLE_NAME: z.string().min(1, 'AUDIT_TABLE_NAME is required'),
     PAYMENTS_TABLE_NAME: z.string().min(1, 'PAYMENTS_TABLE_NAME is required'),
+    VOUCHER_INVENTORY_TABLE_NAME: z.string().optional(),
     USER_ASSETS_BUCKET: z.string().min(1, 'USER_ASSETS_BUCKET is required'),
     KYC_ASSETS_BUCKET: z.string().optional(),
     QR_ASSETS_BUCKET: z.string().optional(),
@@ -76,6 +77,9 @@ export const envSchema = z
     ALLOWED_ORIGINS: z.string().optional(),
     BODY_LIMIT: z.string().default('2mb'),
     DISABLE_CSP: z.enum(['true', 'false']).optional(),
+
+    VOUCHER_VAULT_MASTER_KEY_B64: z.string().optional(),
+    VOUCHER_VAULT_KEY_VERSION: z.string().optional(),
 
     // Guard QR/token controls
     GUARD_TOKEN_TTL_SECONDS: z.coerce

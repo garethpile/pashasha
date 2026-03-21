@@ -15,6 +15,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { WorkflowsModule } from './workflows/workflows.module';
 import { SupportModule } from './support/support.module';
 import { AuditModule } from './audit/audit.module';
+import { AdminVouchersModule } from './admin-vouchers/admin-vouchers.module';
 import { loadValidatedEnv, runtimeConfig } from './config/runtime.config';
 
 @Module({
@@ -63,6 +64,7 @@ import { loadValidatedEnv, runtimeConfig } from './config/runtime.config';
     WorkflowsModule,
     SupportModule,
     AuditModule,
+    AdminVouchersModule,
     HealthModule,
   ],
   providers: [
