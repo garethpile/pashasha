@@ -51,8 +51,10 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
       if (['paid', 'successful', 'success', 'complete', 'completed'].includes(value)) return 'paid';
       if (['cancelled', 'canceled', 'cancel'].includes(value)) return 'cancelled';
       if (['failed', 'failure', 'error'].includes(value)) return 'failed';
-      if (['pending', 'pending investigation', 'pending_investigation'].includes(value))
-        return 'pending';
+      if (value === 'abandoned') return 'abandoned';
+      if (['pending investigation', 'pending_investigation'].includes(value))
+        return 'pending-investigation';
+      if (value === 'pending') return 'pending';
       return value;
     })();
 
@@ -89,7 +91,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
     if (normalizedStatus === 'paid') {
       const callbackKey = await getCoreCallbackKey();
-      await fetch(
+      const response = await fetch(
         `${requireEnv('CORE_API_URL').replace(/\/$/, '')}/internal/payments/${paymentIntentId}/confirm`,
         {
           method: 'POST',
@@ -102,6 +104,31 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
           }),
         }
       );
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Core payment confirmation failed.');
+      }
+    } else {
+      const callbackKey = await getCoreCallbackKey();
+      const response = await fetch(
+        `${requireEnv('CORE_API_URL').replace(/\/$/, '')}/internal/payments/${paymentIntentId}/status`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-payment-callback-key': callbackKey,
+          },
+          body: JSON.stringify({
+            paymentIntentId,
+            status: normalizedStatus,
+            rawStatus: statusSource,
+          }),
+        }
+      );
+      if (!response.ok) {
+        const message = await response.text();
+        throw new Error(message || 'Core payment status sync failed.');
+      }
     }
 
     return json(200, { ok: true, paymentIntentId, status: normalizedStatus });

@@ -36,6 +36,12 @@ const getStatusTone = (status: string | null) => {
     case 'successful':
     case 'paid':
       return 'border-emerald-200 bg-emerald-50 text-emerald-900';
+    case 'pending-investigation':
+      return 'border-amber-200 bg-amber-50 text-amber-900';
+    case 'pending':
+    case 'pending-payment':
+      return 'border-amber-200 bg-amber-50 text-amber-900';
+    case 'abandoned':
     case 'failed':
     case 'cancelled':
       return 'border-rose-200 bg-rose-50 text-rose-900';

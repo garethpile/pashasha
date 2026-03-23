@@ -1,40 +1,27 @@
-import { GetCommand, QueryCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
-import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
-import type { APIGatewayProxyEventV2 } from 'aws-lambda';
-import { dynamo, json, requireEnv } from '../lib/shared';
 import { timingSafeEqual } from 'crypto';
+import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import { SFNClient, StartExecutionCommand } from '@aws-sdk/client-sfn';
+import type { APIGatewayProxyEventV2 } from 'aws-lambda';
+import { json, requireEnv } from '../lib/shared';
 
 const secrets = new SecretsManagerClient({});
+const sfn = new SFNClient({});
 let cachedPaymentCallbackKey: string | undefined;
-let cachedVoucherCoreKey: string | undefined;
-let cachedNotificationsCoreKey: string | undefined;
 
-const getApiKey = async (envName: string, cache: 'payment' | 'voucher' | 'notifications') => {
-  if (cache === 'payment' && cachedPaymentCallbackKey) return cachedPaymentCallbackKey;
-  if (cache === 'voucher' && cachedVoucherCoreKey) return cachedVoucherCoreKey;
-  if (cache === 'notifications' && cachedNotificationsCoreKey) return cachedNotificationsCoreKey;
-
-  const response = await secrets.send(new GetSecretValueCommand({ SecretId: requireEnv(envName) }));
+const getPaymentCallbackKey = async () => {
+  if (cachedPaymentCallbackKey) return cachedPaymentCallbackKey;
+  const response = await secrets.send(
+    new GetSecretValueCommand({ SecretId: requireEnv('PAYMENT_TO_CORE_API_KEY_SECRET_ARN') })
+  );
   const parsed = JSON.parse(response.SecretString ?? '{}') as { apiKey?: string };
-  if (!parsed.apiKey) throw new Error(`Secret ${envName} missing apiKey.`);
-
-  if (cache === 'payment') cachedPaymentCallbackKey = parsed.apiKey;
-  if (cache === 'voucher') cachedVoucherCoreKey = parsed.apiKey;
-  if (cache === 'notifications') cachedNotificationsCoreKey = parsed.apiKey;
-  return parsed.apiKey;
+  if (!parsed.apiKey) throw new Error('Secret PAYMENT_TO_CORE_API_KEY_SECRET_ARN missing apiKey.');
+  cachedPaymentCallbackKey = parsed.apiKey;
+  return cachedPaymentCallbackKey;
 };
-
-const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat('en-ZA', {
-    style: 'currency',
-    currency: 'ZAR',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
 
 const assertPaymentCallbackKey = async (provided?: string) => {
   if (!provided) throw new Error('Missing payment callback key.');
-  const expected = await getApiKey('PAYMENT_TO_CORE_API_KEY_SECRET_ARN', 'payment');
+  const expected = await getPaymentCallbackKey();
   const providedBuffer = Buffer.from(provided);
   const expectedBuffer = Buffer.from(expected);
   if (
@@ -50,206 +37,31 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     await assertPaymentCallbackKey(
       event.headers['x-payment-callback-key'] ?? event.headers['X-Payment-Callback-Key']
     );
+
     const paymentIntentId = event.pathParameters?.paymentIntentId;
-    if (!paymentIntentId) return json(400, { message: 'paymentIntentId is required.' });
-
-    const query = await dynamo.send(
-      new QueryCommand({
-        TableName: requireEnv('TRANSACTIONS_TABLE_NAME'),
-        IndexName: 'byPaymentIntent',
-        KeyConditionExpression: 'paymentIntentId = :paymentIntentId',
-        ExpressionAttributeValues: {
-          ':paymentIntentId': paymentIntentId,
-        },
-        Limit: 1,
-      })
-    );
-    const transaction = query.Items?.[0] as
-      | {
-          transactionId: string;
-          civilServantId: string;
-          voucherDenomination: number;
-          status?: string;
-          customerId?: string;
-          customerPhoneNumber?: string;
-          customerEmail?: string;
-          customerName?: string;
-          payerDisplayName?: string;
-          customerChargeAmount?: number;
-          paymentProviderFeeAmount?: number;
-          platformFeeAmount?: number;
-          civilServantName?: string;
-          paymentIntentId?: string;
-        }
-      | undefined;
-    if (!transaction) return json(404, { message: 'Transaction not found.' });
-
-    if ((transaction.status ?? '').toLowerCase() === 'completed') {
-      return json(200, {
-        transactionId: transaction.transactionId,
-        status: 'completed',
-        message: 'Transaction already completed.',
-      });
+    if (!paymentIntentId) {
+      return json(400, { message: 'paymentIntentId is required.' });
     }
 
-    const profile = await dynamo.send(
-      new GetCommand({
-        TableName: requireEnv('PROFILES_TABLE_NAME'),
-        Key: { profileId: transaction.civilServantId },
-      })
-    );
-    const civilServant = profile.Item as
-      | {
-          phoneNumber?: string;
-          displayName?: string;
-          firstName?: string;
-          familyName?: string;
-        }
-      | undefined;
-
-    const voucherKey = await getApiKey('VOUCHER_CORE_API_KEY_SECRET_ARN', 'voucher');
-    const voucherResponse = await fetch(
-      `${requireEnv('VOUCHER_API_URL').replace(/\/$/, '')}/internal/allocations`,
-      {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'x-core-api-key': voucherKey,
-        },
-        body: JSON.stringify({
-          transactionId: transaction.transactionId,
-          civilServantId: transaction.civilServantId,
-          denomination: transaction.voucherDenomination,
+    const execution = await sfn.send(
+      new StartExecutionCommand({
+        stateMachineArn: requireEnv('PAYMENT_COMPLETION_STATE_MACHINE_ARN'),
+        input: JSON.stringify({
+          paymentIntentId,
+          trigger: 'payment-callback',
+          requestedAt: new Date().toISOString(),
         }),
-      }
-    );
-    if (!voucherResponse.ok) {
-      return json(502, { message: 'Voucher allocation failed.' });
-    }
-    const voucherAllocation = (await voucherResponse.json()) as {
-      voucherAllocationId: string;
-      voucherCode: string;
-      status: string;
-      deliveryStatus: string;
-      supplier?: string;
-      barcodeLast4?: string;
-    };
-
-    const civilServantName =
-      transaction.civilServantName?.trim() ||
-      civilServant?.displayName?.trim() ||
-      `${civilServant?.firstName ?? ''} ${civilServant?.familyName ?? ''}`.trim() ||
-      'Civil Servant';
-    const payerDisplayName =
-      transaction.customerName?.trim() || transaction.payerDisplayName?.trim() || 'Anonymous';
-    const amountLabel = formatCurrency(transaction.voucherDenomination);
-    const supplierName = voucherAllocation.supplier?.trim() || 'Shoprite Checkers';
-    const reference = transaction.paymentIntentId ?? transaction.transactionId;
-
-    let deliveryStatus = 'pending';
-    let customerNotificationStatus = 'not-requested';
-
-    if (civilServant?.phoneNumber) {
-      const notificationsKey = await getApiKey(
-        'NOTIFICATIONS_CORE_API_KEY_SECRET_ARN',
-        'notifications'
-      );
-      const recipientNotification = await fetch(
-        `${requireEnv('NOTIFICATIONS_API_URL').replace(/\/$/, '')}/internal/notifications/send`,
-        {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            'x-core-api-key': notificationsKey,
-          },
-          body: JSON.stringify({
-            notificationType: 'voucher-issued',
-            recipient: {
-              phoneNumber: civilServant.phoneNumber,
-            },
-            templateData: {
-              civilServantName,
-              payerDisplayName,
-              amountLabel,
-              voucherCode: voucherAllocation.voucherCode,
-              supplierName,
-              barcodeLast4: voucherAllocation.barcodeLast4,
-              voucherAllocationId: voucherAllocation.voucherAllocationId,
-              reference,
-            },
-          }),
-        }
-      );
-      deliveryStatus = recipientNotification.ok ? 'sent' : 'failed';
-    } else {
-      deliveryStatus = 'no-recipient-phone';
-    }
-
-    if (!transaction.customerId?.startsWith('guest:') && transaction.customerPhoneNumber?.trim()) {
-      const notificationsKey = await getApiKey(
-        'NOTIFICATIONS_CORE_API_KEY_SECRET_ARN',
-        'notifications'
-      );
-      const customerNotification = await fetch(
-        `${requireEnv('NOTIFICATIONS_API_URL').replace(/\/$/, '')}/internal/notifications/send`,
-        {
-          method: 'POST',
-          headers: {
-            'content-type': 'application/json',
-            'x-core-api-key': notificationsKey,
-          },
-          body: JSON.stringify({
-            notificationType: 'customer-voucher-sent',
-            recipient: {
-              phoneNumber: transaction.customerPhoneNumber,
-            },
-            templateData: {
-              civilServantName,
-              amountLabel,
-              supplierName,
-              reference,
-            },
-          }),
-        }
-      );
-      customerNotificationStatus = customerNotification.ok ? 'sent' : 'failed';
-    }
-
-    const now = new Date().toISOString();
-    await dynamo.send(
-      new UpdateCommand({
-        TableName: requireEnv('TRANSACTIONS_TABLE_NAME'),
-        Key: { transactionId: transaction.transactionId },
-        UpdateExpression:
-          'SET #status = :status, updatedAt = :updatedAt, completedAt = :completedAt, voucherAllocationId = :voucherAllocationId, supplierName = :supplierName, voucherBarcodeLast4 = :voucherBarcodeLast4, deliveryStatus = :deliveryStatus, customerNotificationStatus = :customerNotificationStatus, payerDisplayName = :payerDisplayName',
-        ExpressionAttributeNames: { '#status': 'status' },
-        ExpressionAttributeValues: {
-          ':status': 'completed',
-          ':updatedAt': now,
-          ':completedAt': now,
-          ':voucherAllocationId': voucherAllocation.voucherAllocationId,
-          ':supplierName': supplierName,
-          ':voucherBarcodeLast4': voucherAllocation.barcodeLast4 ?? '',
-          ':deliveryStatus': deliveryStatus,
-          ':customerNotificationStatus': customerNotificationStatus,
-          ':payerDisplayName': payerDisplayName,
-        },
       })
     );
 
-    return json(200, {
-      transactionId: transaction.transactionId,
-      status: 'completed',
-      voucherAllocationId: voucherAllocation.voucherAllocationId,
-      deliveryStatus,
-      customerNotificationStatus,
+    return json(202, {
+      paymentIntentId,
+      status: 'accepted',
+      executionArn: execution.executionArn,
+      startDate: execution.startDate?.toISOString?.() ?? null,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    const statusCode =
-      message === 'Missing payment callback key.' || message === 'Invalid payment callback key.'
-        ? 401
-        : 400;
-    return json(statusCode, { message });
+    return json(400, { message });
   }
 };

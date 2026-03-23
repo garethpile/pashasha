@@ -27,6 +27,31 @@ import { CivilServantProfileCard } from '../components/dashboard/civil-servant-p
 const OZOW_FEE_AMOUNT = 1.5;
 const PLATFORM_FEE_AMOUNT = 1;
 
+const normalizePaymentOutcome = (status?: string | null) => (status ?? '').trim().toLowerCase();
+
+const getPaymentFeedback = (status?: string | null) => {
+  switch (normalizePaymentOutcome(status)) {
+    case 'paid':
+    case 'completed':
+    case 'successful':
+      return 'Payment Successful!';
+    case 'cancelled':
+      return 'Payment cancelled.';
+    case 'failed':
+    case 'error':
+      return 'Payment failed.';
+    case 'abandoned':
+      return 'Payment abandoned.';
+    case 'pending-investigation':
+      return 'Payment pending investigation.';
+    case 'pending':
+    case 'pending-payment':
+      return 'Awaiting payment.';
+    default:
+      return null;
+  }
+};
+
 type GuardProfile = {
   civilServantId: string;
   accountNumber: string;
@@ -382,6 +407,54 @@ function CivilServantDashboard() {
     if (!eclipseActive || !profile?.eclipseWalletId) return;
     void loadPayoutInfo();
   }, [eclipseActive, loadPayoutInfo, profile?.eclipseWalletId]);
+
+  useEffect(() => {
+    if (!profile?.civilServantId) return;
+
+    let stopped = false;
+    const refreshTransactions = async () => {
+      if (stopped || (typeof document !== 'undefined' && document.visibilityState === 'hidden')) {
+        return;
+      }
+      const walletInfo = await loadPayoutInfo(profile.civilServantId);
+      const currentBalance =
+        walletInfo?.currentBalance ?? walletInfo?.balance ?? walletInfo?.availableBalance;
+      await loadTransactions(0, currentBalance);
+      if (eclipseActive) {
+        await loadPendingTransactions(0);
+      }
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshTransactions();
+    }, 15000);
+
+    const handleFocus = () => {
+      void refreshTransactions();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshTransactions();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      stopped = true;
+      window.clearInterval(intervalId);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [
+    eclipseActive,
+    loadPendingTransactions,
+    loadPayoutInfo,
+    loadTransactions,
+    profile?.civilServantId,
+  ]);
 
   useEffect(() => {
     const balanceFromTx = transactions.find(
@@ -1103,11 +1176,11 @@ function CustomerDashboard() {
       try {
         const latest = await corePublicApi.getPaymentIntent(paymentIntentId);
         setPaymentIntent(latest);
-        const status = (latest.status ?? '').toLowerCase();
+        const status = normalizePaymentOutcome(latest.status);
         if (['paid', 'completed', 'successful'].includes(status)) {
           handlePaymentCompleted(latest);
-        } else if (['failed', 'cancelled'].includes(status)) {
-          setPayFeedback(`Payment ${status}.`);
+        } else {
+          setPayFeedback(getPaymentFeedback(status));
         }
       } catch {
         // ignore transient polling failures
@@ -1130,11 +1203,11 @@ function CustomerDashboard() {
       try {
         const latest = await corePublicApi.getPaymentIntent(paymentIntentId);
         setPaymentIntent(latest);
-        const status = (latest.status ?? '').toLowerCase();
+        const status = normalizePaymentOutcome(latest.status);
         if (['paid', 'completed', 'successful'].includes(status)) {
           handlePaymentCompleted(latest);
-        } else if (['failed', 'cancelled'].includes(status)) {
-          setPayFeedback(`Payment ${status}.`);
+        } else {
+          setPayFeedback(getPaymentFeedback(status));
         }
       } catch {
         // ignore focus refresh failures
@@ -1172,10 +1245,8 @@ function CustomerDashboard() {
         } else {
           setPayFeedback('Payment Successful!');
         }
-      } else if (status === 'cancelled') {
-        setPayFeedback('Payment cancelled.');
-      } else if (status === 'error') {
-        setPayFeedback('Payment error.');
+      } else {
+        setPayFeedback(getPaymentFeedback(status));
       }
     };
 
@@ -1298,11 +1369,7 @@ function CustomerDashboard() {
     return { received, pending, paidOut };
   }, [transactions]);
 
-  const effectivePayFeedback =
-    payFeedback ??
-    (['paid', 'completed', 'successful'].includes((paymentIntent?.status ?? '').toLowerCase())
-      ? 'Payment Successful!'
-      : null);
+  const effectivePayFeedback = payFeedback ?? getPaymentFeedback(paymentIntent?.status);
 
   const filteredSentTransactions = useMemo(() => {
     const query = sentCivilServantFilter.trim().toLowerCase();
@@ -1865,10 +1932,14 @@ function CustomerDashboard() {
                     effectivePayFeedback === 'Payment Successful!'
                       ? 'text-emerald-600'
                       : effectivePayFeedback.toLowerCase().includes('cancelled') ||
+                          effectivePayFeedback.toLowerCase().includes('failed') ||
                           effectivePayFeedback.toLowerCase().includes('error') ||
+                          effectivePayFeedback.toLowerCase().includes('abandoned') ||
                           effectivePayFeedback.toLowerCase().includes('unable')
                         ? 'text-rose-600'
-                        : 'text-slate-600'
+                        : effectivePayFeedback.toLowerCase().includes('pending')
+                          ? 'text-amber-700'
+                          : 'text-slate-600'
                   }`}
                 >
                   {effectivePayFeedback}

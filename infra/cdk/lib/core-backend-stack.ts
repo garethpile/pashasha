@@ -9,6 +9,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as lambdaNodejs from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as logs from 'aws-cdk-lib/aws-logs';
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as sfn from 'aws-cdk-lib/aws-stepfunctions';
+import * as tasks from 'aws-cdk-lib/aws-stepfunctions-tasks';
 
 export interface PashashaPayCoreBackendStackProps extends cdk.StackProps {
   readonly paymentApiUrl?: string;
@@ -275,9 +277,71 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(handlersRoot, 'confirmPayment.ts'),
       handler: 'handler',
-      timeout: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.seconds(15),
       environment: runtimeEnv,
     });
+    const syncPaymentStatusFn = new lambdaNodejs.NodejsFunction(this, 'SyncPaymentStatusFn', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(handlersRoot, 'syncPaymentStatus.ts'),
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(15),
+      environment: runtimeEnv,
+    });
+    const loadPaymentCompletionContextFn = new lambdaNodejs.NodejsFunction(
+      this,
+      'LoadPaymentCompletionContextFn',
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: path.join(handlersRoot, 'loadPaymentCompletionContext.ts'),
+        handler: 'handler',
+        timeout: cdk.Duration.seconds(20),
+        environment: runtimeEnv,
+      }
+    );
+    const ensureVoucherAllocationFn = new lambdaNodejs.NodejsFunction(
+      this,
+      'EnsureVoucherAllocationFn',
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: path.join(handlersRoot, 'ensureVoucherAllocation.ts'),
+        handler: 'handler',
+        timeout: cdk.Duration.seconds(20),
+        environment: runtimeEnv,
+      }
+    );
+    const sendPaymentNotificationsFn = new lambdaNodejs.NodejsFunction(
+      this,
+      'SendPaymentNotificationsFn',
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: path.join(handlersRoot, 'sendPaymentNotifications.ts'),
+        handler: 'handler',
+        timeout: cdk.Duration.seconds(20),
+        environment: runtimeEnv,
+      }
+    );
+    const finalizePaymentCompletionFn = new lambdaNodejs.NodejsFunction(
+      this,
+      'FinalizePaymentCompletionFn',
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: path.join(handlersRoot, 'finalizePaymentCompletion.ts'),
+        handler: 'handler',
+        timeout: cdk.Duration.seconds(20),
+        environment: runtimeEnv,
+      }
+    );
+    const markPaymentCompletionFailedFn = new lambdaNodejs.NodejsFunction(
+      this,
+      'MarkPaymentCompletionFailedFn',
+      {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        entry: path.join(handlersRoot, 'markPaymentCompletionFailed.ts'),
+        handler: 'handler',
+        timeout: cdk.Duration.seconds(20),
+        environment: runtimeEnv,
+      }
+    );
     const getCustomerMeFn = new lambdaNodejs.NodejsFunction(this, 'GetCustomerMeFn', {
       runtime: lambda.Runtime.NODEJS_20_X,
       entry: path.join(handlersRoot, 'getCustomerMe.ts'),
@@ -353,6 +417,92 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
         environment: runtimeEnv,
       }
     );
+
+    const loadPaymentCompletionContextTask = new tasks.LambdaInvoke(
+      this,
+      'LoadPaymentCompletionContextTask',
+      {
+        lambdaFunction: loadPaymentCompletionContextFn,
+        payloadResponseOnly: true,
+        resultPath: '$.context',
+      }
+    );
+    const ensureVoucherAllocationTask = new tasks.LambdaInvoke(
+      this,
+      'EnsureVoucherAllocationTask',
+      {
+        lambdaFunction: ensureVoucherAllocationFn,
+        payloadResponseOnly: true,
+        resultPath: '$.allocation',
+      }
+    );
+    const sendPaymentNotificationsTask = new tasks.LambdaInvoke(
+      this,
+      'SendPaymentNotificationsTask',
+      {
+        lambdaFunction: sendPaymentNotificationsFn,
+        payloadResponseOnly: true,
+        resultPath: '$.notifications',
+      }
+    );
+    const finalizePaymentCompletionTask = new tasks.LambdaInvoke(
+      this,
+      'FinalizePaymentCompletionTask',
+      {
+        lambdaFunction: finalizePaymentCompletionFn,
+        payloadResponseOnly: true,
+        resultPath: '$.finalized',
+      }
+    );
+    const markPaymentCompletionFailedTask = new tasks.LambdaInvoke(
+      this,
+      'MarkPaymentCompletionFailedTask',
+      {
+        lambdaFunction: markPaymentCompletionFailedFn,
+        payloadResponseOnly: true,
+        resultPath: '$.failure',
+      }
+    );
+
+    const alreadyCompletedSucceed = new sfn.Succeed(this, 'PaymentAlreadyCompleted');
+    const workflowSucceeded = new sfn.Succeed(this, 'PaymentCompletionSucceeded');
+    const workflowFailed = new sfn.Fail(this, 'PaymentCompletionFailed');
+    const failureChain = markPaymentCompletionFailedTask.next(workflowFailed);
+
+    loadPaymentCompletionContextTask.addCatch(failureChain, { resultPath: '$.error' });
+    ensureVoucherAllocationTask.addCatch(failureChain, { resultPath: '$.error' });
+    sendPaymentNotificationsTask.addCatch(failureChain, { resultPath: '$.error' });
+    finalizePaymentCompletionTask.addCatch(failureChain, { resultPath: '$.error' });
+
+    const paymentCompletionStateMachine = new sfn.StateMachine(
+      this,
+      'PaymentCompletionStateMachine',
+      {
+        stateMachineName: 'PashashaPay-PaymentCompletion',
+        timeout: cdk.Duration.minutes(2),
+        definitionBody: sfn.DefinitionBody.fromChainable(
+          loadPaymentCompletionContextTask.next(
+            new sfn.Choice(this, 'PaymentAlreadyCompletedChoice')
+              .when(
+                sfn.Condition.booleanEquals('$.context.alreadyCompleted', true),
+                alreadyCompletedSucceed
+              )
+              .otherwise(
+                ensureVoucherAllocationTask
+                  .next(sendPaymentNotificationsTask)
+                  .next(finalizePaymentCompletionTask)
+                  .next(workflowSucceeded)
+              )
+          )
+        ),
+      }
+    );
+
+    confirmPaymentFn.addEnvironment(
+      'PAYMENT_COMPLETION_STATE_MACHINE_ARN',
+      paymentCompletionStateMachine.stateMachineArn
+    );
+    paymentCompletionStateMachine.grantStartExecution(confirmPaymentFn);
 
     api.addRoutes({
       path: '/api/health',
@@ -521,6 +671,14 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
         confirmPaymentFn
       ),
     });
+    api.addRoutes({
+      path: '/internal/payments/{paymentIntentId}/status',
+      methods: [apigwv2.HttpMethod.POST],
+      integration: new integrations.HttpLambdaIntegration(
+        'CoreSyncPaymentStatusIntegration',
+        syncPaymentStatusFn
+      ),
+    });
 
     profilesTable.grantReadWriteData(createCivilServantFn);
     accountSequencesTable.grantReadWriteData(createCivilServantFn);
@@ -541,11 +699,18 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
     profilesTable.grantReadData(getCivilServantKycFn);
     profilesTable.grantReadData(listCustomerTransactionsMeFn);
     profilesTable.grantReadData(listCivilServantTransactionsMeFn);
+    transactionsTable.grantReadData(listCustomerTransactionsMeFn);
+    transactionsTable.grantReadData(listCivilServantTransactionsMeFn);
     profilesTable.grantReadData(createPaymentIntentFn);
     transactionsTable.grantReadWriteData(createPaymentIntentFn);
     transactionsTable.grantReadData(getPaymentIntentFn);
     transactionsTable.grantReadWriteData(confirmPaymentFn);
     profilesTable.grantReadData(confirmPaymentFn);
+    transactionsTable.grantReadWriteData(syncPaymentStatusFn);
+    transactionsTable.grantReadWriteData(loadPaymentCompletionContextFn);
+    profilesTable.grantReadData(loadPaymentCompletionContextFn);
+    transactionsTable.grantReadWriteData(finalizePaymentCompletionFn);
+    transactionsTable.grantReadWriteData(markPaymentCompletionFailedFn);
     adminApiKeySecret.grantRead(createCivilServantFn);
     userPool.grant(checkEmailFn, 'cognito-idp:ListUsers');
     userPool.grant(signupFn, 'cognito-idp:SignUp');
@@ -577,6 +742,7 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
         props.paymentToCoreApiKeySecretArn
       );
       paymentToCoreApiKeySecret.grantRead(confirmPaymentFn);
+      paymentToCoreApiKeySecret.grantRead(syncPaymentStatusFn);
     }
     if (props.voucherCoreApiKeySecretArn) {
       const voucherCoreApiKeySecret = secretsmanager.Secret.fromSecretCompleteArn(
@@ -586,7 +752,7 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
       );
       voucherCoreApiKeySecret.grantRead(lookupCivilServantFn);
       voucherCoreApiKeySecret.grantRead(createPaymentIntentFn);
-      voucherCoreApiKeySecret.grantRead(confirmPaymentFn);
+      voucherCoreApiKeySecret.grantRead(ensureVoucherAllocationFn);
     }
     if (props.notificationsCoreApiKeySecretArn) {
       const notificationsCoreApiKeySecret = secretsmanager.Secret.fromSecretCompleteArn(
@@ -594,7 +760,7 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
         'NotificationsCoreApiKeySecret',
         props.notificationsCoreApiKeySecretArn
       );
-      notificationsCoreApiKeySecret.grantRead(confirmPaymentFn);
+      notificationsCoreApiKeySecret.grantRead(sendPaymentNotificationsFn);
     }
 
     const stage = api.defaultStage;
@@ -635,6 +801,9 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, 'CoreAdminApiKeySecretArn', {
       value: adminApiKeySecret.secretArn,
+    });
+    new cdk.CfnOutput(this, 'CorePaymentCompletionStateMachineArn', {
+      value: paymentCompletionStateMachine.stateMachineArn,
     });
   }
 }

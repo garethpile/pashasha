@@ -34,23 +34,24 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
     const returnState = event.queryStringParameters?.return;
     if (returnState) {
+      const normalizedReturnState = returnState.trim().toLowerCase();
       const title =
-        returnState === 'success'
+        normalizedReturnState === 'success'
           ? 'Payment submitted'
-          : returnState === 'cancelled'
+          : normalizedReturnState === 'cancelled'
             ? 'Payment cancelled'
             : 'Payment error';
       const message =
-        returnState === 'success'
+        normalizedReturnState === 'success'
           ? 'OZOW has redirected back. You can return to the Pashasha tab while we confirm the payment.'
-          : returnState === 'cancelled'
+          : normalizedReturnState === 'cancelled'
             ? 'The payment was cancelled. You can return to the Pashasha tab and try again.'
             : 'OZOW reported an error. You can return to the Pashasha tab and retry the payment.';
 
       return {
         statusCode: 200,
         headers: { 'content-type': 'text/html; charset=utf-8' },
-        body: `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title></head><body><main style="font-family: sans-serif; max-width: 32rem; margin: 3rem auto; padding: 1rem;"><h1>${title}</h1><p>${message}</p><p>This window will try to close automatically.</p><script>(function(){var payload={type:'pashasha-payment-return',paymentIntentId:${JSON.stringify(paymentIntentId)},status:${JSON.stringify(returnState)}};function notifyOpener(){try{if(window.opener&&!window.opener.closed){window.opener.postMessage(payload,'*');}}catch(e){}}try{localStorage.setItem('pashasha-payment-return',JSON.stringify(payload));}catch(e){}notifyOpener();setTimeout(notifyOpener,300);setTimeout(notifyOpener,900);setTimeout(function(){window.close();},1500);}());</script></main></body></html>`,
+        body: `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title></head><body><main style="font-family: sans-serif; max-width: 32rem; margin: 3rem auto; padding: 1rem;"><h1>${title}</h1><p>${message}</p><p>This window will try to close automatically.</p><script>(function(){var payload={type:'pashasha-payment-return',paymentIntentId:${JSON.stringify(paymentIntentId)},status:${JSON.stringify(normalizedReturnState)}};function notifyOpener(){try{if(window.opener&&!window.opener.closed){window.opener.postMessage(payload,'*');}}catch(e){}}try{localStorage.setItem('pashasha-payment-return',JSON.stringify(payload));}catch(e){}notifyOpener();setTimeout(notifyOpener,300);setTimeout(notifyOpener,900);setTimeout(function(){window.close();},1500);}());</script></main></body></html>`,
       };
     }
 
