@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { PashashaPayBackendStack } from '../lib/backend-stack';
+import { PashashaPayCoreBackendStack } from '../lib/core-backend-stack';
 import { PashashaPayFrontendStack } from '../lib/frontend-stack';
+import { PashashaPayNotificationsStack } from '../lib/notifications-stack';
+import { PashashaPayPaymentStack } from '../lib/payment-stack';
 import { PashashaPayVoucherStack } from '../lib/voucher-stack';
-import { PashashaPayFlashBackendStack } from '../lib/flash-backend-stack';
 import { applySolutionTags } from '../lib/tags';
 
 const app = new cdk.App();
@@ -17,28 +18,36 @@ const environment = process.env.APP_ENV ?? process.env.NODE_ENV ?? 'unknown';
 const costCenter = process.env.COST_CENTER;
 
 const context = app.node.tryGetContext('frontend') ?? {};
-const voucherContext = app.node.tryGetContext('voucher') ?? {};
-const flashContext = app.node.tryGetContext('flash') ?? {};
-const authUserPoolId = app.node.tryGetContext('authUserPoolId');
-const authUserPoolClientId = app.node.tryGetContext('authUserPoolClientId');
 
-const backendStack = new PashashaPayBackendStack(app, 'PashashaPayBackendStack', {
+const paymentStack = new PashashaPayPaymentStack(app, 'PashashaPayPaymentStack', {
   env,
 });
-applySolutionTags(backendStack, {
+applySolutionTags(paymentStack, {
   solution: 'Pashasha',
-  component: 'core-backend',
+  component: 'payment',
   environment,
   repo: 'pashasha',
   serviceGroup: 'payments',
   costCenter,
-  lifecycle: 'nonprod',
+  paymentEngine: 'ozow',
+  lifecycle: 'active',
+});
+
+const notificationsStack = new PashashaPayNotificationsStack(app, 'PashashaPayNotificationsStack', {
+  env,
+});
+applySolutionTags(notificationsStack, {
+  solution: 'Pashasha',
+  component: 'notifications',
+  environment,
+  repo: 'pashasha',
+  serviceGroup: 'comms',
+  costCenter,
+  lifecycle: 'active',
 });
 
 const voucherStack = new PashashaPayVoucherStack(app, 'PashashaPayVoucherStack', {
   env,
-  flashApiBaseUrl: voucherContext.flashApiBaseUrl,
-  flashSecretsArn: voucherContext.flashSecretsArn,
 });
 applySolutionTags(voucherStack, {
   solution: 'Pashasha',
@@ -47,40 +56,45 @@ applySolutionTags(voucherStack, {
   repo: 'pashasha',
   serviceGroup: 'payouts',
   costCenter,
-  lifecycle: 'nonprod',
+  lifecycle: 'active',
 });
 
-const flashStack = new PashashaPayFlashBackendStack(app, 'PashashaPayFlashBackendStack', {
+const coreBackendStack = new PashashaPayCoreBackendStack(app, 'PashashaPayCoreBackendStack', {
   env,
-  userPoolId: authUserPoolId ?? backendStack.userPoolId,
-  userPoolClientId: authUserPoolClientId ?? backendStack.userPoolClientId,
-  voucherApiBaseUrl: voucherStack.apiUrl,
-  guardPortalBaseUrl: flashContext.guardPortalBaseUrl,
+  paymentApiUrl: paymentStack.apiUrl,
+  voucherApiUrl: voucherStack.apiUrl,
+  notificationsApiUrl: notificationsStack.apiUrl,
+  paymentCoreApiKeySecretArn: paymentStack.coreApiKeySecretArn,
+  paymentToCoreApiKeySecretArn: paymentStack.paymentToCoreApiKeySecretArn,
+  voucherCoreApiKeySecretArn: voucherStack.coreApiKeySecretArn,
+  notificationsCoreApiKeySecretArn: notificationsStack.coreApiKeySecretArn,
 });
-applySolutionTags(flashStack, {
+applySolutionTags(coreBackendStack, {
   solution: 'Pashasha',
-  component: 'flash-legacy',
+  component: 'core-backend',
   environment,
   repo: 'pashasha',
-  serviceGroup: 'legacy-payouts',
+  serviceGroup: 'core',
   costCenter,
-  lifecycle: 'sunset-candidate',
-  paymentEngine: 'flash',
+  lifecycle: 'active',
 });
+coreBackendStack.addDependency(paymentStack);
+coreBackendStack.addDependency(voucherStack);
+coreBackendStack.addDependency(notificationsStack);
 
 const frontendStack = new PashashaPayFrontendStack(app, 'PashashaPayFrontendStack', {
   env,
-  backendEndpoint: flashStack.apiEndpoint,
-  backendSecureEndpoint: flashStack.apiEndpoint,
-  cognitoUserPoolId: authUserPoolId ?? backendStack.userPoolId,
-  cognitoUserPoolClientId: authUserPoolClientId ?? backendStack.userPoolClientId,
-  awsRegion: env.region ?? cdk.Stack.of(backendStack).region,
+  backendEndpoint: coreBackendStack.apiUrl,
+  backendSecureEndpoint: coreBackendStack.apiUrl,
+  cognitoUserPoolId: coreBackendStack.userPoolId,
+  cognitoUserPoolClientId: coreBackendStack.userPoolClientId,
+  awsRegion: env.region ?? cdk.Stack.of(coreBackendStack).region,
   repositoryOwner: context.repositoryOwner,
   repositoryName: context.repositoryName,
   githubTokenSecretArn: context.githubTokenSecretArn,
   branchName: context.branchName,
   enableSsrLoggingRolePatch: context.enableSsrLoggingRolePatch === true,
-  frontendSecretsArn: flashStack.frontendSecretsArn,
+  hostedZoneDomainName: context.hostedZoneDomainName,
 });
 applySolutionTags(frontendStack, {
   solution: 'Pashasha',

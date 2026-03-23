@@ -1,0 +1,241 @@
+(globalThis.TURBOPACK || (globalThis.TURBOPACK = [])).push([
+  'object' == typeof document ? document.currentScript : void 0,
+  18438,
+  (e) => {
+    'use strict';
+    var t = e.i(14983);
+    let s = (0, e.i(75863).resolveApiRoot)(),
+      a = async (e, a = {}) => {
+        let l = (0, t.getSession)(),
+          i = { 'Content-Type': 'application/json', ...a.headers };
+        if (!l) throw Error('No active session');
+        i.Authorization = `Bearer ${l.accessToken}`;
+        let r = await fetch(`${s}${e}`, { ...a, headers: i });
+        if (!r.ok)
+          throw (
+            401 === r.status && ((0, t.clearSession)(), (window.location.href = '/login')),
+            Error((await r.text()) || 'Request failed')
+          );
+        if (204 !== r.status) return await r.json();
+      };
+    e.s([
+      'auditApi',
+      0,
+      {
+        list: (e) => {
+          let t = new URLSearchParams();
+          (e?.userId && t.set('userId', e.userId),
+            e?.eventType && t.set('eventType', e.eventType),
+            e?.limit && t.set('limit', String(e.limit)));
+          let s = t.toString() ? `?${t.toString()}` : '';
+          return a(`/audit${s}`);
+        },
+      },
+    ]);
+  },
+  46342,
+  (e) => {
+    'use strict';
+    var t = e.i(43476),
+      s = e.i(71645),
+      a = e.i(18438);
+    function l() {
+      let [e, l] = (0, s.useState)([]),
+        [i, r] = (0, s.useState)(''),
+        [n, d] = (0, s.useState)(''),
+        [o, c] = (0, s.useState)(!1),
+        [x, p] = (0, s.useState)(null),
+        m = async () => {
+          (c(!0), p(null));
+          try {
+            let e = await a.auditApi.list({
+              userId: n.trim() || void 0,
+              eventType: i.trim() || void 0,
+              limit: 100,
+            });
+            l(e);
+          } catch (e) {
+            p(e?.message ?? 'Failed to load audit logs');
+          } finally {
+            c(!1);
+          }
+        };
+      return (
+        (0, s.useEffect)(() => {
+          m();
+        }, []),
+        (0, t.jsxs)('main', {
+          className: 'mx-auto flex max-w-5xl flex-col gap-4 px-4 py-6',
+          children: [
+            (0, t.jsxs)('header', {
+              className: 'flex items-center justify-between',
+              children: [
+                (0, t.jsxs)('div', {
+                  children: [
+                    (0, t.jsx)('h1', {
+                      className: 'text-2xl font-semibold text-slate-900',
+                      children: 'Audit Logs',
+                    }),
+                    (0, t.jsx)('p', {
+                      className: 'text-sm text-slate-600',
+                      children: 'Search by event type or user.',
+                    }),
+                  ],
+                }),
+                (0, t.jsx)('button', {
+                  type: 'button',
+                  onClick: m,
+                  className:
+                    'rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-slate-800',
+                  disabled: o,
+                  children: o ? 'Refreshing…' : 'Refresh',
+                }),
+              ],
+            }),
+            (0, t.jsxs)('section', {
+              className: 'grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm',
+              children: [
+                (0, t.jsxs)('div', {
+                  className: 'grid gap-3 sm:grid-cols-3',
+                  children: [
+                    (0, t.jsxs)('label', {
+                      className: 'flex flex-col text-sm font-semibold text-slate-700',
+                      children: [
+                        'Event type',
+                        (0, t.jsx)('input', {
+                          value: i,
+                          onChange: (e) => r(e.target.value),
+                          placeholder: 'guard.token.rotate',
+                          className: 'mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm',
+                        }),
+                      ],
+                    }),
+                    (0, t.jsxs)('label', {
+                      className: 'flex flex-col text-sm font-semibold text-slate-700',
+                      children: [
+                        'User ID (Cognito sub)',
+                        (0, t.jsx)('input', {
+                          value: n,
+                          onChange: (e) => d(e.target.value),
+                          placeholder: 'user-uuid',
+                          className: 'mt-1 rounded-lg border border-slate-300 px-3 py-2 text-sm',
+                        }),
+                      ],
+                    }),
+                    (0, t.jsx)('div', {
+                      className: 'flex items-end gap-2',
+                      children: (0, t.jsx)('button', {
+                        type: 'button',
+                        onClick: m,
+                        className:
+                          'w-full rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-orange-600',
+                        disabled: o,
+                        children: 'Apply Filters',
+                      }),
+                    }),
+                  ],
+                }),
+                x && (0, t.jsx)('p', { className: 'text-sm text-rose-600', children: x }),
+              ],
+            }),
+            (0, t.jsxs)('section', {
+              className: 'grid gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm',
+              children: [
+                (0, t.jsxs)('div', {
+                  className:
+                    'grid grid-cols-6 gap-3 text-xs font-semibold uppercase tracking-wide text-slate-500',
+                  children: [
+                    (0, t.jsx)('span', { className: 'col-span-2', children: 'Event' }),
+                    (0, t.jsx)('span', { children: 'User' }),
+                    (0, t.jsx)('span', { children: 'Actor' }),
+                    (0, t.jsx)('span', { children: 'When' }),
+                    (0, t.jsx)('span', { children: 'Details' }),
+                  ],
+                }),
+                (0, t.jsxs)('div', {
+                  className: 'divide-y divide-slate-100',
+                  children: [
+                    e.map((e) =>
+                      (0, t.jsxs)(
+                        'div',
+                        {
+                          className: 'grid grid-cols-6 gap-3 py-3 text-sm text-slate-800',
+                          children: [
+                            (0, t.jsxs)('div', {
+                              className: 'col-span-2',
+                              children: [
+                                (0, t.jsx)('p', {
+                                  className: 'font-semibold',
+                                  children: e.eventType,
+                                }),
+                                e.description &&
+                                  (0, t.jsx)('p', {
+                                    className: 'text-xs text-slate-600',
+                                    children: e.description,
+                                  }),
+                              ],
+                            }),
+                            (0, t.jsx)('div', {
+                              children: (0, t.jsx)('p', {
+                                className: 'font-mono text-xs text-slate-700',
+                                children: e.userId,
+                              }),
+                            }),
+                            (0, t.jsxs)('div', {
+                              children: [
+                                (0, t.jsx)('p', {
+                                  className: 'font-mono text-xs text-slate-700',
+                                  children: e.actorId ?? 'self',
+                                }),
+                                e.actorType &&
+                                  (0, t.jsx)('p', {
+                                    className: 'text-xs text-slate-500',
+                                    children: e.actorType,
+                                  }),
+                              ],
+                            }),
+                            (0, t.jsx)('div', {
+                              children: (0, t.jsx)('p', {
+                                className: 'text-xs text-slate-700',
+                                children: new Date(e.createdAt).toLocaleString(),
+                              }),
+                            }),
+                            (0, t.jsx)('div', {
+                              children: e.metadata
+                                ? (0, t.jsx)('pre', {
+                                    className:
+                                      'overflow-x-auto rounded bg-slate-50 p-2 text-[11px] leading-tight text-slate-700',
+                                    children: JSON.stringify(e.metadata, null, 2),
+                                  })
+                                : (0, t.jsx)('span', {
+                                    className: 'text-xs text-slate-500',
+                                    children: '—',
+                                  }),
+                            }),
+                          ],
+                        },
+                        e.auditId
+                      )
+                    ),
+                    0 === e.length &&
+                      !o &&
+                      (0, t.jsx)('p', {
+                        className: 'py-6 text-center text-sm text-slate-600',
+                        children: 'No audit entries found.',
+                      }),
+                    o &&
+                      (0, t.jsx)('p', {
+                        className: 'py-6 text-center text-sm text-slate-600',
+                        children: 'Loading…',
+                      }),
+                  ],
+                }),
+              ],
+            }),
+          ],
+        })
+      );
+    }
+    e.s(['default', () => l]);
+  },
+]);

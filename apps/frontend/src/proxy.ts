@@ -6,10 +6,10 @@ const ADMIN_GROUPS = ['administrators', 'admin'];
 const API_ORIGIN =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_BACKEND_API_ROOT ||
-  'https://d3513l2t9aq2xv.cloudfront.net';
+  'https://e59bfkkr5g.execute-api.af-south-1.amazonaws.com';
 const RAW_VOUCHER_ORIGIN =
   process.env.NEXT_PUBLIC_VOUCHER_API_BASE_URL ||
-  'https://2583b9v30b.execute-api.eu-west-1.amazonaws.com/v1';
+  'https://129mgsjpi6.execute-api.af-south-1.amazonaws.com';
 
 const normalizeOrigin = (value: string) => {
   try {

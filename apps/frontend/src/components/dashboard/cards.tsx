@@ -46,6 +46,9 @@ export function DashboardNameCard({
   extra?: ReactNode;
 }) {
   const statusIsInactive = (status ?? '').toLowerCase() === 'inactive';
+  const statusLabel = (status ?? '')
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase());
   return (
     <div className="w-full max-w-4xl self-center rounded-3xl border border-orange-100 bg-white p-6 shadow-sm">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -64,7 +67,7 @@ export function DashboardNameCard({
                 statusIsInactive ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
               }`}
             >
-              Status: {status}
+              Status: {statusLabel}
             </span>
           )}
           {extra}

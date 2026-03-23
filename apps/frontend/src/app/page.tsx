@@ -12,18 +12,20 @@ import {
 } from '../components/dashboard/cards';
 import { mapDashboardTransactions } from '../components/dashboard/transactions';
 import { guardApi } from '../lib/api/guard';
+import {
+  corePublicApi,
+  type PublicCivilServantRecipient,
+  type PublicPaymentIntentResponse,
+} from '../lib/api/core-public';
 import { customerApi } from '../lib/api/customer';
 import { voucherApi } from '../lib/api/voucher';
 import { isAdminGroup, isCivilServantGroup, isCustomerGroup } from '../lib/auth/groups';
 import { getSession, sessionEventName } from '../lib/auth/session';
-import { guardsClient } from '../lib/guards-client';
-import { resolveAppApiRoot } from '../lib/api/config';
 import { eclipseEnabled } from '../lib/feature-flags';
-import {
-  DashboardCivilServantKycCard,
-  DashboardCustomerKycCard,
-} from '../components/dashboard/kyc-card';
 import { CivilServantProfileCard } from '../components/dashboard/civil-servant-profile-card';
+
+const OZOW_FEE_AMOUNT = 1.5;
+const PLATFORM_FEE_AMOUNT = 1;
 
 type GuardProfile = {
   civilServantId: string;
@@ -584,11 +586,6 @@ function CivilServantDashboard() {
   return (
     <main className="min-h-screen bg-amber-50 px-4 pb-16 pt-24 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        {!eclipseActive && (
-          <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
-            Voucher mode is active. Reservation details are hidden during the pilot.
-          </section>
-        )}
         <DashboardNameCard
           name={`${profile.firstName} ${profile.familyName}`}
           status={profile.status ?? 'active'}
@@ -643,8 +640,6 @@ function CivilServantDashboard() {
           showWalletId={eclipseActive}
           onViewQr={() => setShowQrModal(true)}
         />
-
-        <DashboardCivilServantKycCard />
 
         <DashboardPaymentsCard
           title={
@@ -855,6 +850,51 @@ function CivilServantDashboard() {
   );
 }
 
+const PaymentSuccessModal = ({
+  civilServantName,
+  amount,
+  totalCharge,
+  onClose,
+}: {
+  civilServantName: string;
+  amount: number;
+  totalCharge: number;
+  onClose: () => void;
+}) => (
+  <div
+    className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 px-4"
+    role="dialog"
+    aria-modal="true"
+    onClick={onClose}
+    onKeyDown={(e) => e.key === 'Escape' && onClose()}
+    tabIndex={-1}
+  >
+    <div
+      className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h3 className="text-2xl font-semibold text-emerald-700">Payment Successful!</h3>
+      <p className="mt-3 text-sm text-slate-700">
+        PashashaPay has sent {civilServantName} a {formatCurrency(amount)} Shoprite Checkers
+        voucher.
+      </p>
+      <p className="mt-2 text-sm text-slate-600">
+        Total charged:{' '}
+        <span className="font-semibold text-slate-900">{formatCurrency(totalCharge)}</span>
+      </p>
+      <div className="mt-6 flex justify-end">
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-full bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 function CustomerDashboard() {
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
@@ -892,19 +932,25 @@ function CustomerDashboard() {
   const [payLoading, setPayLoading] = useState(false);
   const [selectedGuard, setSelectedGuard] = useState<{
     civilServantId: string;
-    guardToken: string;
     firstName: string;
     familyName: string;
     occupation: string;
     primarySite: string;
   } | null>(null);
-  const [guardProfile, setGuardProfile] = useState<any | null>(null);
+  const [selectedRecipient, setSelectedRecipient] = useState<PublicCivilServantRecipient | null>(
+    null
+  );
+  const [paymentIntent, setPaymentIntent] = useState<PublicPaymentIntentResponse | null>(null);
   const [payAmount, setPayAmount] = useState<number | null>(null);
-  const [customAmount, setCustomAmount] = useState('');
-  const [yourReference, setYourReference] = useState('');
-  const [theirReference, setTheirReference] = useState('');
   const [payFeedback, setPayFeedback] = useState<string | null>(null);
   const [payPending, setPayPending] = useState(false);
+  const [payCardOpen, setPayCardOpen] = useState(false);
+  const [paySuccessOpen, setPaySuccessOpen] = useState(false);
+  const [paySuccessSummary, setPaySuccessSummary] = useState<{
+    civilServantName: string;
+    amount: number;
+    totalCharge: number;
+  } | null>(null);
   const [profileForm, setProfileForm] = useState({
     firstName: '',
     familyName: '',
@@ -912,11 +958,13 @@ function CustomerDashboard() {
     phoneNumber: '',
     address: '',
   });
+  const [profileEditing, setProfileEditing] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileFeedback, setProfileFeedback] = useState<string | null>(null);
   const [sentStatusFilter, setSentStatusFilter] = useState('ALL');
   const [sentCivilServantFilter, setSentCivilServantFilter] = useState('');
   const eclipseActive = eclipseEnabled();
+  const availableVoucherType = 'Shoprite Checkers';
 
   const loadTransactions = async (offset = 0) => {
     setTxLoading(true);
@@ -979,135 +1027,229 @@ function CustomerDashboard() {
 
   const handleSelectGuard = async (guard: {
     civilServantId: string;
-    guardToken?: string;
     firstName: string;
     familyName: string;
     occupation: string;
     primarySite: string;
   }) => {
-    if (!guard.guardToken) {
-      setPayFeedback('This guard is not ready for payments yet.');
-      return;
-    }
-    const guardToken = `${guard.guardToken}`.trim();
-    if (!guardToken) {
-      setPayFeedback('This guard is not ready for payments yet.');
-      return;
-    }
     setSelectedGuard({
       civilServantId: guard.civilServantId,
-      guardToken,
       firstName: guard.firstName,
       familyName: guard.familyName,
       occupation: guard.occupation,
       primarySite: guard.primarySite,
     });
-    setYourReference(`${guard.firstName ?? ''} ${guard.occupation || 'Civil Servant'}`.trim());
-    setTheirReference(`${profile?.firstName ?? ''} ${profile?.familyName ?? ''}`.trim());
+    setSelectedRecipient(null);
+    setPaymentIntent(null);
+    setPayAmount(null);
     setPayFeedback(null);
     try {
-      const profile = await guardsClient.getGuard(guardToken);
-      setGuardProfile(profile);
-      if (profile.quickAmounts?.length) {
-        setPayAmount(profile.quickAmounts[0]);
+      const response = await corePublicApi.lookupCivilServantById(guard.civilServantId);
+      setSelectedRecipient(response.recipient);
+      if (response.recipient.availableVoucherDenominations?.length) {
+        setPayAmount(response.recipient.availableVoucherDenominations[0]);
       }
+      setPayCardOpen(true);
     } catch (err: any) {
-      setPayFeedback(err?.message ?? 'Unable to load guard profile.');
-      setGuardProfile(null);
+      setPayFeedback(err?.message ?? 'Unable to load civil servant payment profile.');
+      setSelectedRecipient(null);
+      setPayCardOpen(false);
     }
   };
 
-  const parsedCustomAmount = useMemo(() => {
-    if (!customAmount.trim()) return null;
-    const sanitized = customAmount.replace(/[^\d.,]/g, '').replace(',', '.');
-    const value = Number.parseFloat(sanitized);
-    if (Number.isNaN(value)) return Number.NaN;
-    return Math.round(value * 100) / 100;
-  }, [customAmount]);
+  const activeAmount = payAmount ?? null;
+  const feeSummary = useMemo(() => {
+    const voucherAmount = activeAmount ?? 0;
+    const totalCharge = Number((voucherAmount + OZOW_FEE_AMOUNT + PLATFORM_FEE_AMOUNT).toFixed(2));
+    return {
+      voucherAmount,
+      ozowFeeAmount: OZOW_FEE_AMOUNT,
+      platformFeeAmount: PLATFORM_FEE_AMOUNT,
+      totalCharge,
+    };
+  }, [activeAmount]);
 
-  const activeAmount = parsedCustomAmount ?? payAmount ?? null;
+  const closePaymentSuccessModal = () => {
+    setPaySuccessOpen(false);
+    setPaySuccessSummary(null);
+    setPaymentIntent(null);
+    setPayFeedback(null);
+  };
+
+  const handlePaymentCompleted = (latest?: PublicPaymentIntentResponse) => {
+    const finalVoucherAmount = latest?.voucherAmount ?? feeSummary.voucherAmount;
+    const finalTotalCharge = latest?.customerChargeAmount ?? feeSummary.totalCharge;
+    setPaymentIntent(latest ?? paymentIntent);
+    setPayFeedback('Payment Successful!');
+    setPayPending(false);
+    setPayCardOpen(false);
+    setPayModalOpen(false);
+    setPaySuccessSummary({
+      civilServantName:
+        `${selectedGuard?.firstName ?? ''} ${selectedGuard?.familyName ?? ''}`.trim() ||
+        'Civil Servant',
+      amount: finalVoucherAmount,
+      totalCharge: finalTotalCharge,
+    });
+    setPaySuccessOpen(true);
+    void loadSentTransactions(0);
+  };
+
+  useEffect(() => {
+    const paymentIntentId = paymentIntent?.paymentIntentId;
+    if (!paymentIntentId) return;
+
+    const poll = async () => {
+      try {
+        const latest = await corePublicApi.getPaymentIntent(paymentIntentId);
+        setPaymentIntent(latest);
+        const status = (latest.status ?? '').toLowerCase();
+        if (['paid', 'completed', 'successful'].includes(status)) {
+          handlePaymentCompleted(latest);
+        } else if (['failed', 'cancelled'].includes(status)) {
+          setPayFeedback(`Payment ${status}.`);
+        }
+      } catch {
+        // ignore transient polling failures
+      }
+    };
+
+    void poll();
+    const timer = setInterval(() => {
+      void poll();
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, [paymentIntent?.paymentIntentId]);
+
+  useEffect(() => {
+    const paymentIntentId = paymentIntent?.paymentIntentId;
+    if (!paymentIntentId) return;
+
+    const syncLatestPaymentIntent = async () => {
+      try {
+        const latest = await corePublicApi.getPaymentIntent(paymentIntentId);
+        setPaymentIntent(latest);
+        const status = (latest.status ?? '').toLowerCase();
+        if (['paid', 'completed', 'successful'].includes(status)) {
+          handlePaymentCompleted(latest);
+        } else if (['failed', 'cancelled'].includes(status)) {
+          setPayFeedback(`Payment ${status}.`);
+        }
+      } catch {
+        // ignore focus refresh failures
+      }
+    };
+
+    const onFocus = () => {
+      void syncLatestPaymentIntent();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void syncLatestPaymentIntent();
+      }
+    };
+
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
+  }, [paymentIntent?.paymentIntentId]);
+
+  useEffect(() => {
+    const handleReturn = (statusValue?: string, paymentIntentId?: string) => {
+      if (!paymentIntentId || paymentIntentId !== paymentIntent?.paymentIntentId) return;
+      const status = (statusValue ?? '').toLowerCase();
+      if (status === 'success') {
+        const latest =
+          paymentIntent && paymentIntent.paymentIntentId === paymentIntentId
+            ? { ...paymentIntent, status: 'successful' }
+            : null;
+        if (latest) {
+          handlePaymentCompleted(latest);
+        } else {
+          setPayFeedback('Payment Successful!');
+        }
+      } else if (status === 'cancelled') {
+        setPayFeedback('Payment cancelled.');
+      } else if (status === 'error') {
+        setPayFeedback('Payment error.');
+      }
+    };
+
+    const onMessage = (event: MessageEvent) => {
+      const data = event.data as
+        | { type?: string; paymentIntentId?: string; status?: string }
+        | undefined;
+      if (data?.type !== 'pashasha-payment-return') return;
+      handleReturn(data.status, data.paymentIntentId);
+    };
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== 'pashasha-payment-return' || !event.newValue) return;
+      try {
+        const data = JSON.parse(event.newValue) as {
+          paymentIntentId?: string;
+          status?: string;
+        };
+        handleReturn(data.status, data.paymentIntentId);
+      } catch {
+        // ignore malformed storage values
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('message', onMessage);
+      window.removeEventListener('storage', onStorage);
+    };
+  }, [paymentIntent?.paymentIntentId]);
 
   const handleSubmitPayment = async () => {
-    if (!selectedGuard?.guardToken) return;
+    if (!selectedGuard?.civilServantId || !selectedRecipient) return;
     setPayFeedback(null);
+    setPaymentIntent(null);
     const amount = activeAmount;
-    if (amount === null || Number.isNaN(amount) || amount <= 0) {
-      setPayFeedback('Choose or enter a valid amount.');
+    if (amount === null) {
+      setPayFeedback('Choose a voucher denomination.');
       return;
     }
-    if (amount < 5 || amount > 2000) {
-      setPayFeedback('Amount must be between R5 and R2000.');
+    if (!selectedRecipient.availableVoucherDenominations.includes(amount)) {
+      setPayFeedback('This voucher denomination is not available for the selected civil servant.');
       return;
     }
+    const checkoutWindow = typeof window !== 'undefined' ? window.open('', '_blank') : null;
     setPayPending(true);
     try {
-      const token = `${selectedGuard.guardToken}`.trim();
-      const apiRoot = resolveAppApiRoot();
-      const session = getSession();
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (session?.accessToken) {
-        headers.Authorization = `Bearer ${session.accessToken}`;
-      }
-      const response = await fetch(
-        `${apiRoot}/civil-servants/${encodeURIComponent(token)}/topup-ozow`,
-        {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            amount,
-            currency: 'ZAR',
-            yourReference: yourReference || undefined,
-            theirReference: theirReference || undefined,
-            customerId: profile?.customerId || undefined,
-            returnPath: '/?view=sent-payments',
-          }),
+      const result = await corePublicApi.createPaymentIntent({
+        civilServantId: selectedGuard.civilServantId,
+        voucherDenomination: amount,
+        paymentEngine: 'ozow',
+        customer: {
+          customerId: profile?.customerId,
+          firstName: profile?.firstName,
+          familyName: profile?.familyName,
+          email: profile?.email,
+          phoneNumber: profile?.phoneNumber,
+        },
+      });
+
+      setPaymentIntent(result);
+      setPayFeedback('Payment initiated. Opening OZOW in a new tab...');
+      if (result.redirectUrl) {
+        if (checkoutWindow) {
+          checkoutWindow.location.href = result.redirectUrl;
+        } else if (typeof window !== 'undefined') {
+          window.location.href = result.redirectUrl;
         }
-      );
-
-      const text = await response.text();
-      let payload: any = text;
-      try {
-        payload = text ? JSON.parse(text) : null;
-      } catch {
-        payload = text;
-      }
-
-      if (!response.ok) {
-        const message =
-          payload?.message || payload?.error || text || `Request failed (${response.status})`;
-        throw new Error(message);
-      }
-
-      const result = (payload || {}) as {
-        paymentId?: string;
-        status?: string;
-        formUrl?: string;
-        fields?: Record<string, string>;
-        authorizationUrl?: string | null;
-      };
-
-      setPayFeedback('Payment initiated. Opening payment page...');
-      if (result.formUrl && result.fields) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = result.formUrl;
-        form.target = '_blank';
-        Object.entries(result.fields).forEach(([key, value]) => {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = value;
-          form.appendChild(input);
-        });
-        document.body.appendChild(form);
-        form.submit();
-        form.remove();
-        return;
-      }
-      if (result.authorizationUrl) {
-        window.open(result.authorizationUrl, '_blank', 'noopener,noreferrer');
+      } else if (checkoutWindow) {
+        checkoutWindow.close();
       }
     } catch (err: any) {
+      if (checkoutWindow) checkoutWindow.close();
       setPayFeedback(err?.message ?? 'Unable to start payment.');
     } finally {
       setPayPending(false);
@@ -1155,6 +1297,12 @@ function CustomerDashboard() {
     const paidOut = 0;
     return { received, pending, paidOut };
   }, [transactions]);
+
+  const effectivePayFeedback =
+    payFeedback ??
+    (['paid', 'completed', 'successful'].includes((paymentIntent?.status ?? '').toLowerCase())
+      ? 'Payment Successful!'
+      : null);
 
   const filteredSentTransactions = useMemo(() => {
     const query = sentCivilServantFilter.trim().toLowerCase();
@@ -1211,11 +1359,6 @@ function CustomerDashboard() {
   return (
     <main className="min-h-screen bg-amber-50 px-4 pb-16 pt-24 sm:px-6 lg:px-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        {!eclipseActive && (
-          <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
-            Voucher mode is active. Eclipse wallet balances are hidden during the pilot.
-          </section>
-        )}
         <DashboardNameCard
           name={`${profile.firstName} ${profile.familyName}`}
           status={profile.status ?? 'active'}
@@ -1225,13 +1368,35 @@ function CustomerDashboard() {
         <section className="w-full max-w-4xl self-center rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
           <header className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
             <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Profile</p>
-            <button
-              type="button"
-              onClick={() => setProfileCollapsed((v) => !v)}
-              className="text-sm font-semibold text-orange-600"
-            >
-              {profileCollapsed ? '▼' : '▲'}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (profileEditing) {
+                    setProfileForm({
+                      firstName: profile.firstName,
+                      familyName: profile.familyName,
+                      email: profile.email,
+                      phoneNumber: profile.phoneNumber ?? '',
+                      address: profile.address ?? '',
+                    });
+                  }
+                  setProfileEditing((v) => !v);
+                }}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                aria-label="Edit profile"
+                title="Edit profile"
+              >
+                ✎
+              </button>
+              <button
+                type="button"
+                onClick={() => setProfileCollapsed((v) => !v)}
+                className="text-sm font-semibold text-orange-600"
+              >
+                {profileCollapsed ? '▼' : '▲'}
+              </button>
+            </div>
           </header>
           {!profileCollapsed && (
             <div className="mt-6 space-y-4">
@@ -1243,7 +1408,10 @@ function CustomerDashboard() {
                     onChange={(e) =>
                       setProfileForm((prev) => ({ ...prev, firstName: e.target.value }))
                     }
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+                    disabled={!profileEditing}
+                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
+                      profileEditing ? 'bg-white' : 'bg-slate-50'
+                    }`}
                   />
                 </label>
                 <label className="text-xs font-semibold text-slate-600">
@@ -1253,7 +1421,10 @@ function CustomerDashboard() {
                     onChange={(e) =>
                       setProfileForm((prev) => ({ ...prev, familyName: e.target.value }))
                     }
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+                    disabled={!profileEditing}
+                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
+                      profileEditing ? 'bg-white' : 'bg-slate-50'
+                    }`}
                   />
                 </label>
               </div>
@@ -1265,7 +1436,10 @@ function CustomerDashboard() {
                     type="email"
                     value={profileForm.email}
                     onChange={(e) => setProfileForm((prev) => ({ ...prev, email: e.target.value }))}
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+                    disabled={!profileEditing}
+                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
+                      profileEditing ? 'bg-white' : 'bg-slate-50'
+                    }`}
                   />
                 </label>
                 <label className="text-xs font-semibold text-slate-600">
@@ -1275,7 +1449,10 @@ function CustomerDashboard() {
                     onChange={(e) =>
                       setProfileForm((prev) => ({ ...prev, phoneNumber: e.target.value }))
                     }
-                    className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+                    disabled={!profileEditing}
+                    className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
+                      profileEditing ? 'bg-white' : 'bg-slate-50'
+                    }`}
                   />
                 </label>
               </div>
@@ -1285,7 +1462,10 @@ function CustomerDashboard() {
                 <input
                   value={profileForm.address}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, address: e.target.value }))}
-                  className="mt-1 w-full rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+                  disabled={!profileEditing}
+                  className={`mt-1 w-full rounded-2xl border border-slate-200 px-4 py-2 text-sm text-slate-700 ${
+                    profileEditing ? 'bg-white' : 'bg-slate-50'
+                  }`}
                 />
               </label>
 
@@ -1318,20 +1498,39 @@ function CustomerDashboard() {
                     {profileFeedback}
                   </p>
                 )}
-                <button
-                  type="button"
-                  onClick={handleProfileSave}
-                  disabled={profileSaving}
-                  className="btn-primary px-5 py-2 text-sm font-semibold text-white disabled:opacity-60"
-                >
-                  {profileSaving ? 'Saving...' : 'Save profile'}
-                </button>
+                {profileEditing && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileForm({
+                          firstName: profile.firstName,
+                          familyName: profile.familyName,
+                          email: profile.email,
+                          phoneNumber: profile.phoneNumber ?? '',
+                          address: profile.address ?? '',
+                        });
+                        setProfileEditing(false);
+                        setProfileFeedback(null);
+                      }}
+                      className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleProfileSave}
+                      disabled={profileSaving}
+                      className="btn-primary px-5 py-2 text-sm font-semibold text-white disabled:opacity-60"
+                    >
+                      {profileSaving ? 'Saving...' : 'Save profile'}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
         </section>
-
-        <DashboardCustomerKycCard />
 
         {!eclipseActive && (
           <section className="w-full max-w-4xl self-center rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -1339,7 +1538,7 @@ function CustomerDashboard() {
               <div>
                 <p className="text-xs uppercase tracking-[0.35em] text-slate-400">Payments</p>
                 <p className="mt-1 text-sm text-slate-600">
-                  Send a tip without showing wallet history in voucher mode.
+                  Send digital voucher to Civil Servant.
                 </p>
               </div>
               <button
@@ -1350,7 +1549,7 @@ function CustomerDashboard() {
                 }}
                 className="inline-flex items-center gap-2 rounded-full border border-orange-500 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-50"
               >
-                Pay Civil Servant
+                Send digital voucher to Civil Servant
               </button>
             </div>
           </section>
@@ -1374,7 +1573,7 @@ function CustomerDashboard() {
                 }}
                 className="inline-flex items-center gap-2 rounded-full border border-orange-500 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-50"
               >
-                Pay Civil Servant
+                Send digital voucher to Civil Servant
               </button>
             }
             pagination={{
@@ -1544,84 +1743,157 @@ function CustomerDashboard() {
                   )}
                 </div>
               </div>
-
-              <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-4">
-                <h4 className="text-sm font-semibold text-slate-900">Payment</h4>
-                {selectedGuard ? (
-                  <>
-                    <p className="text-sm font-semibold text-slate-800">
-                      {selectedGuard.firstName} {selectedGuard.familyName}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      {selectedGuard.occupation} · {selectedGuard.primarySite || 'Assigned site'}
-                    </p>
-                    <div className="grid gap-3 pt-2 md:grid-cols-2">
-                      <label className="text-xs font-semibold text-slate-600">
-                        Your reference
-                        <input
-                          value={yourReference}
-                          onChange={(e) => setYourReference(e.target.value)}
-                          className="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2"
-                          placeholder={`${selectedGuard.firstName} ${selectedGuard.occupation}`}
-                        />
-                      </label>
-                      <label className="text-xs font-semibold text-slate-600">
-                        Their reference
-                        <input
-                          value={theirReference}
-                          onChange={(e) => setTheirReference(e.target.value)}
-                          className="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2"
-                          placeholder={`${profile.firstName} ${profile.familyName}`}
-                        />
-                      </label>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {(guardProfile?.quickAmounts ?? [20, 50, 100, 150]).map((amt: number) => (
-                        <button
-                          key={amt}
-                          type="button"
-                          onClick={() => {
-                            setPayAmount(amt);
-                            setCustomAmount('');
-                          }}
-                          className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                            activeAmount === amt
-                              ? 'bg-orange-500 text-white'
-                              : 'border border-slate-200 bg-slate-50 text-slate-800 hover:border-orange-200'
-                          }`}
-                        >
-                          {formatCurrency(amt)}
-                        </button>
-                      ))}
-                    </div>
-                    <label className="text-xs font-semibold text-slate-600">
-                      Custom amount (ZAR)
-                      <input
-                        value={customAmount}
-                        onChange={(e) => setCustomAmount(e.target.value)}
-                        className="mt-1 w-full rounded-2xl border border-slate-200 px-3 py-2"
-                        placeholder="Enter amount"
-                      />
-                    </label>
-                    {payFeedback && <p className="text-xs text-rose-600">{payFeedback}</p>}
-                    <button
-                      type="button"
-                      onClick={handleSubmitPayment}
-                      disabled={payPending}
-                      className="btn-primary w-full px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
-                    >
-                      {payPending ? 'Processing...' : 'Pay now'}
-                    </button>
-                  </>
-                ) : (
-                  <p className="text-xs text-slate-500">
-                    Select a civil servant to start a payment.
-                  </p>
-                )}
-              </div>
             </div>
           </div>
         </div>
+      )}
+
+      {payModalOpen && payCardOpen && selectedGuard && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4"
+          role="button"
+          tabIndex={-1}
+          onClick={() => setPayCardOpen(false)}
+          onKeyDown={(e) => e.key === 'Escape' && setPayCardOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setPayCardOpen(false)}
+              className="absolute right-3 top-3 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Close
+            </button>
+            <div className="space-y-3 rounded-2xl border border-slate-200 bg-white p-1">
+              <h4 className="text-sm font-semibold text-slate-900">Payment</h4>
+              <p className="text-sm font-semibold text-slate-800">
+                {selectedGuard.firstName} {selectedGuard.familyName}
+              </p>
+              <p className="text-xs text-slate-500">
+                {selectedGuard.occupation} · {selectedGuard.primarySite || 'Assigned site pending'}
+              </p>
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Voucher type
+                </p>
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700 shadow-sm"
+                  >
+                    <Image
+                      src="/pashasha-checkers-logo.png"
+                      alt="Checkers"
+                      width={18}
+                      height={18}
+                      className="h-[18px] w-[18px] rounded-full object-contain"
+                    />
+                    {availableVoucherType}
+                  </button>
+                </div>
+                <p className="mt-3 text-sm text-slate-700">
+                  Choose a voucher denomination below. Once payment is confirmed, the voucher code
+                  is allocated securely and delivered to the civil servant by SMS.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(selectedRecipient?.availableVoucherDenominations ?? []).map((amt: number) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setPayAmount(amt)}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
+                      activeAmount === amt
+                        ? 'bg-orange-500 text-white'
+                        : 'border border-slate-200 bg-slate-50 text-slate-800 hover:border-orange-200'
+                    }`}
+                  >
+                    {formatCurrency(amt)}
+                  </button>
+                ))}
+              </div>
+              {activeAmount !== null && (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Payment summary
+                  </p>
+                  <div className="mt-3 space-y-2 text-sm text-slate-700">
+                    <div className="flex items-center justify-between gap-4">
+                      <span>Voucher amount</span>
+                      <span className="font-semibold text-slate-900">
+                        {formatCurrency(feeSummary.voucherAmount)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span>OZOW fee</span>
+                      <span className="font-semibold text-slate-900">
+                        {formatCurrency(feeSummary.ozowFeeAmount)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4">
+                      <span>Pashasha fee</span>
+                      <span className="font-semibold text-slate-900">
+                        {formatCurrency(feeSummary.platformFeeAmount)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 border-t border-slate-200 pt-2">
+                      <span className="font-semibold text-slate-900">Total charge</span>
+                      <span className="font-semibold text-slate-900">
+                        {formatCurrency(feeSummary.totalCharge)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {paymentIntent && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                  <p>
+                    Payment reference:{' '}
+                    <span className="font-semibold">{paymentIntent.paymentIntentId}</span>
+                  </p>
+                  <p className="mt-1">
+                    Status: <span className="font-semibold capitalize">{paymentIntent.status}</span>
+                  </p>
+                </div>
+              )}
+              {effectivePayFeedback && (
+                <p
+                  className={`text-xs font-semibold ${
+                    effectivePayFeedback === 'Payment Successful!'
+                      ? 'text-emerald-600'
+                      : effectivePayFeedback.toLowerCase().includes('cancelled') ||
+                          effectivePayFeedback.toLowerCase().includes('error') ||
+                          effectivePayFeedback.toLowerCase().includes('unable')
+                        ? 'text-rose-600'
+                        : 'text-slate-600'
+                  }`}
+                >
+                  {effectivePayFeedback}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={handleSubmitPayment}
+                disabled={payPending || !selectedRecipient?.availableVoucherDenominations?.length}
+                className="btn-primary w-full px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                {payPending ? 'Processing...' : 'Pay now'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {paySuccessOpen && paySuccessSummary && (
+        <PaymentSuccessModal
+          civilServantName={paySuccessSummary.civilServantName}
+          amount={paySuccessSummary.amount}
+          totalCharge={paySuccessSummary.totalCharge}
+          onClose={closePaymentSuccessModal}
+        />
       )}
     </main>
   );
@@ -1630,13 +1902,29 @@ function CustomerDashboard() {
 export default function DashboardPage() {
   const [session, setSession] = useState(() => getSession());
   const router = useRouter();
+  const [resolvedRole, setResolvedRole] = useState<
+    'admin' | 'civil-servant' | 'customer' | 'unknown'
+  >(() => {
+    const groups = getSession()?.groups;
+    if (isAdminGroup(groups)) return 'admin';
+    if (isCivilServantGroup(groups)) return 'civil-servant';
+    if (isCustomerGroup(groups)) return 'customer';
+    return 'unknown';
+  });
 
   const isCivilServant = isCivilServantGroup(session?.groups);
   const isCustomer = isCustomerGroup(session?.groups);
   const isAdmin = isAdminGroup(session?.groups);
 
   useEffect(() => {
-    const handleSessionChange = () => setSession(getSession());
+    const handleSessionChange = () => {
+      const nextSession = getSession();
+      setSession(nextSession);
+      if (isAdminGroup(nextSession?.groups)) setResolvedRole('admin');
+      else if (isCivilServantGroup(nextSession?.groups)) setResolvedRole('civil-servant');
+      else if (isCustomerGroup(nextSession?.groups)) setResolvedRole('customer');
+      else setResolvedRole('unknown');
+    };
     window.addEventListener(sessionEventName, handleSessionChange);
     return () => {
       window.removeEventListener(sessionEventName, handleSessionChange);
@@ -1649,22 +1937,73 @@ export default function DashboardPage() {
     }
   }, [isAdmin, router, session]);
 
+  useEffect(() => {
+    if (!session) {
+      setResolvedRole('unknown');
+      return;
+    }
+
+    if (isAdmin) {
+      setResolvedRole('admin');
+      return;
+    }
+
+    if (isCivilServant) {
+      setResolvedRole('civil-servant');
+      return;
+    }
+
+    if (isCustomer) {
+      setResolvedRole('customer');
+      return;
+    }
+
+    let cancelled = false;
+    const resolveFromProfile = async () => {
+      try {
+        await guardApi.getProfile();
+        if (!cancelled) {
+          setResolvedRole('civil-servant');
+        }
+        return;
+      } catch {
+        // Try customer next.
+      }
+
+      try {
+        await customerApi.getProfile();
+        if (!cancelled) {
+          setResolvedRole('customer');
+        }
+        return;
+      } catch {
+        if (!cancelled) {
+          setResolvedRole('unknown');
+        }
+      }
+    };
+
+    void resolveFromProfile();
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdmin, isCivilServant, isCustomer, session]);
+
   if (!session) {
     return <MarketingScreen />;
   }
 
-  if (isAdmin) {
+  if (resolvedRole === 'admin') {
     return null;
   }
 
-  if (isCivilServant) {
+  if (resolvedRole === 'civil-servant') {
     return <CivilServantDashboard />;
   }
 
-  if (isCustomer) {
+  if (resolvedRole === 'customer') {
     return <CustomerDashboard />;
   }
 
-  // Default to customer dashboard for ungrouped accounts.
-  return <CustomerDashboard />;
+  return <LoadingPanel text="Loading your dashboard…" />;
 }

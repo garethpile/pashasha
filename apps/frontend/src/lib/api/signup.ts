@@ -11,10 +11,21 @@ export type SignupRequest = {
   role: 'CUSTOMER' | 'CIVIL_SERVANT';
   occupation?: string;
   otherOccupation?: string;
+  primarySite?: string;
   password: string;
 };
 
-export type SignupResponse = { status: string; profileId?: string };
+export type DeliveryDetails = {
+  destination?: string;
+  medium?: string;
+};
+export type SignupResponse = {
+  status: string;
+  profileId?: string;
+  username?: string;
+  nextStep?: string;
+  codeDelivery?: DeliveryDetails;
+};
 
 const parseErrorMessage = async (response: Response) => {
   try {
@@ -46,8 +57,6 @@ export const checkEmailPublic = async (
 };
 
 export const signup = async (payload: SignupRequest): Promise<SignupResponse> => {
-  // Public signup just enqueues the provisioning workflow; Cognito is created
-  // by the backend step function, not by the client.
   const response = await fetch(`${API_ROOT}/auth/signup`, {
     method: 'POST',
     headers: {
@@ -62,4 +71,43 @@ export const signup = async (payload: SignupRequest): Promise<SignupResponse> =>
   }
 
   return (await response.json()) as SignupResponse;
+};
+
+export const confirmSignup = async (payload: {
+  username: string;
+  confirmationCode: string;
+}): Promise<{ status: string; nextStep?: string }> => {
+  const response = await fetch(`${API_ROOT}/auth/confirm-signup`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    const message = await parseErrorMessage(response);
+    throw new Error(message || 'Unable to confirm signup');
+  }
+
+  return (await response.json()) as { status: string; nextStep?: string };
+};
+
+export const resendSignupCode = async (
+  username: string
+): Promise<{ status: string; codeDelivery?: DeliveryDetails }> => {
+  const response = await fetch(`${API_ROOT}/auth/resend-signup-code`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ username }),
+  });
+
+  if (!response.ok) {
+    const message = await parseErrorMessage(response);
+    throw new Error(message || 'Unable to resend verification code');
+  }
+
+  return (await response.json()) as { status: string; codeDelivery?: DeliveryDetails };
 };

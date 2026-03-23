@@ -227,12 +227,6 @@ export default function CustomerManagementPage() {
 
   return (
     <div className="space-y-6">
-      {!eclipseActive && (
-        <section className="rounded-3xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 shadow-sm">
-          Voucher mode is active. Eclipse wallet balances and transaction history are hidden during
-          the pilot.
-        </section>
-      )}
       <div className="flex items-center justify-end">
         <button
           type="button"

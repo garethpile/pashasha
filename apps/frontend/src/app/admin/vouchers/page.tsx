@@ -75,7 +75,7 @@ export default function AdminVoucherPage() {
           </p>
           <p className="mt-3 text-lg font-semibold text-slate-900">PashashaPayBot → Vouchers</p>
           <p className="mt-2 text-sm text-slate-600">
-            MVP flow: /admin → vouchers → Shoprite Checkers → paste SMS → secure ingest.
+            Admin flow: /admin → vouchers → Shoprite Checkers → paste SMS → secure ingest.
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5">

@@ -1,0 +1,2692 @@
+{
+  "Resources": {
+    "VoucherInventoryTable0E242750": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "voucherId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "supplierStatusKey",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "createdAt",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "denominationStatusKey",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "DeletionProtectionEnabled": true,
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "bySupplierStatus",
+            "KeySchema": [
+              {
+                "AttributeName": "supplierStatusKey",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "createdAt",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          },
+          {
+            "IndexName": "byDenominationStatus",
+            "KeySchema": [
+              {
+                "AttributeName": "denominationStatusKey",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "createdAt",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "voucherId",
+            "KeyType": "HASH"
+          }
+        ],
+        "TableName": "PashashaPay-Voucher-Inventory",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherInventoryTable/Resource"
+      }
+    },
+    "VoucherAllocationsTable7B2B5E04": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "allocationId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "transactionId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "civilServantId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "createdAt",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "DeletionProtectionEnabled": true,
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "byTransaction",
+            "KeySchema": [
+              {
+                "AttributeName": "transactionId",
+                "KeyType": "HASH"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          },
+          {
+            "IndexName": "byCivilServant",
+            "KeySchema": [
+              {
+                "AttributeName": "civilServantId",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "createdAt",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "allocationId",
+            "KeyType": "HASH"
+          }
+        ],
+        "TableName": "PashashaPay-Voucher-Allocations",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherAllocationsTable/Resource"
+      }
+    },
+    "VoucherBarcodeRegistryTable141E1453": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "barcodeHash",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "DeletionProtectionEnabled": true,
+        "KeySchema": [
+          {
+            "AttributeName": "barcodeHash",
+            "KeyType": "HASH"
+          }
+        ],
+        "TableName": "PashashaPay-Voucher-Barcode-Registry",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherBarcodeRegistryTable/Resource"
+      }
+    },
+    "VoucherAuditTableE75066EE": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "voucherId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "createdAt",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "DeletionProtectionEnabled": true,
+        "KeySchema": [
+          {
+            "AttributeName": "voucherId",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "createdAt",
+            "KeyType": "RANGE"
+          }
+        ],
+        "TableName": "PashashaPay-Voucher-Audit",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherAuditTable/Resource"
+      }
+    },
+    "VoucherVaultSecretB4937580": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Application-layer encryption key and config for voucher vault records",
+        "Name": "pashasha/voucher/vault",
+        "SecretString": "{\"keyVersion\":\"v1\",\"masterKeyB64\":\"pending-initialization\"}",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherVaultSecret/Resource"
+      }
+    },
+    "VoucherVaultSecretInitializerFnServiceRole094A898B": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherVaultSecretInitializerFn/ServiceRole/Resource"
+      }
+    },
+    "VoucherVaultSecretInitializerFnServiceRoleDefaultPolicy84161E86": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherVaultSecretB4937580"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "VoucherVaultSecretInitializerFnServiceRoleDefaultPolicy84161E86",
+        "Roles": [
+          {
+            "Ref": "VoucherVaultSecretInitializerFnServiceRole094A898B"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherVaultSecretInitializerFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "VoucherVaultSecretInitializerFnD17EEE4A": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": "\nconst { randomBytes } = require('crypto');\nconst { SecretsManagerClient, GetSecretValueCommand, PutSecretValueCommand } = require('@aws-sdk/client-secrets-manager');\n\nconst client = new SecretsManagerClient({});\n\nconst isValidVaultSecret = (value) => {\n  if (!value || typeof value.masterKeyB64 !== 'string') {\n    return false;\n  }\n  try {\n    return Buffer.from(value.masterKeyB64, 'base64').length === 32;\n  } catch {\n    return false;\n  }\n};\n\nexports.handler = async (event, context) => {\n  const secretArn = event.ResourceProperties.SecretArn;\n\n  if (event.RequestType !== 'Delete') {\n    const current = await client.send(new GetSecretValueCommand({ SecretId: secretArn }));\n    const parsed = JSON.parse(current.SecretString || '{}');\n\n    if (!isValidVaultSecret(parsed)) {\n      const nextValue = {\n        keyVersion: 'v1',\n        masterKeyB64: randomBytes(32).toString('base64'),\n      };\n      await client.send(\n        new PutSecretValueCommand({\n          SecretId: secretArn,\n          SecretString: JSON.stringify(nextValue),\n        }),\n      );\n    }\n  }\n\n  return {\n    PhysicalResourceId: secretArn,\n    Data: { secretArn },\n  };\n};\n      "
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["VoucherVaultSecretInitializerFnServiceRole094A898B", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 30
+      },
+      "DependsOn": [
+        "VoucherVaultSecretInitializerFnServiceRoleDefaultPolicy84161E86",
+        "VoucherVaultSecretInitializerFnServiceRole094A898B"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherVaultSecretInitializerFn/Resource"
+      }
+    },
+    "VoucherVaultSecretInitializerProviderframeworkonEventServiceRole4EA27927": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherVaultSecretInitializerProvider/framework-onEvent/ServiceRole/Resource"
+      }
+    },
+    "VoucherVaultSecretInitializerProviderframeworkonEventServiceRoleDefaultPolicyD726CC96": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherVaultSecretInitializerFnD17EEE4A", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["VoucherVaultSecretInitializerFnD17EEE4A", "Arn"]
+                      },
+                      ":*"
+                    ]
+                  ]
+                }
+              ]
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "VoucherVaultSecretInitializerProviderframeworkonEventServiceRoleDefaultPolicyD726CC96",
+        "Roles": [
+          {
+            "Ref": "VoucherVaultSecretInitializerProviderframeworkonEventServiceRole4EA27927"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherVaultSecretInitializerProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "VoucherVaultSecretInitializerProviderframeworkonEvent673A599C": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "4dc48ffba382f93077a1e6824599bbd4ceb6f91eb3d9442eca3b85bdb1a20b1e.zip"
+        },
+        "Description": "AWS CDK resource provider framework - onEvent (PashashaPayVoucherStack/VoucherVaultSecretInitializerProvider)",
+        "Environment": {
+          "Variables": {
+            "USER_ON_EVENT_FUNCTION_ARN": {
+              "Fn::GetAtt": ["VoucherVaultSecretInitializerFnD17EEE4A", "Arn"]
+            }
+          }
+        },
+        "Handler": "framework.onEvent",
+        "Role": {
+          "Fn::GetAtt": [
+            "VoucherVaultSecretInitializerProviderframeworkonEventServiceRole4EA27927",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 900
+      },
+      "DependsOn": [
+        "VoucherVaultSecretInitializerProviderframeworkonEventServiceRoleDefaultPolicyD726CC96",
+        "VoucherVaultSecretInitializerProviderframeworkonEventServiceRole4EA27927"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherVaultSecretInitializerProvider/framework-onEvent/Resource",
+        "aws:asset:path": "asset.4dc48ffba382f93077a1e6824599bbd4ceb6f91eb3d9442eca3b85bdb1a20b1e",
+        "aws:asset:is-bundled": false,
+        "aws:asset:property": "Code"
+      }
+    },
+    "VoucherVaultSecretInitializer": {
+      "Type": "AWS::CloudFormation::CustomResource",
+      "Properties": {
+        "ServiceToken": {
+          "Fn::GetAtt": ["VoucherVaultSecretInitializerProviderframeworkonEvent673A599C", "Arn"]
+        },
+        "SecretArn": {
+          "Ref": "VoucherVaultSecretB4937580"
+        },
+        "SecretVersion": "v1"
+      },
+      "DependsOn": ["VoucherVaultSecretB4937580"],
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherVaultSecretInitializer/Default"
+      }
+    },
+    "VoucherAdminApiKeySecret1465ADF6": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Shared admin API key for voucher ingest and inventory endpoints",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "apiKey",
+          "PasswordLength": 40,
+          "SecretStringTemplate": "{}"
+        },
+        "Name": "pashasha/voucher/admin-api-key",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherAdminApiKeySecret/Resource"
+      }
+    },
+    "VoucherCoreApiKeySecret9A0EF0E4": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Shared API key used by core-backend to call voucher internal routes",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "apiKey",
+          "PasswordLength": 40,
+          "SecretStringTemplate": "{}"
+        },
+        "Name": "pashasha/voucher/core-api-key",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherCoreApiKeySecret/Resource"
+      }
+    },
+    "VoucherTelegramBotTokenSecret25359AE9": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Telegram bot token for voucher admin ingest integrations",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "botToken",
+          "PasswordLength": 48,
+          "SecretStringTemplate": "{}"
+        },
+        "Name": "pashasha/voucher/telegram-bot-token",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherTelegramBotTokenSecret/Resource"
+      }
+    },
+    "VoucherTelegramWebhookSecret74F2132D": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Secret token used to verify Telegram voucher webhook requests",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "secretToken",
+          "PasswordLength": 48,
+          "SecretStringTemplate": "{}"
+        },
+        "Name": "pashasha/voucher/telegram-webhook-secret",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherTelegramWebhookSecret/Resource"
+      }
+    },
+    "VoucherIngestFnServiceRoleBFF024E5": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherIngestFn/ServiceRole/Resource"
+      }
+    },
+    "VoucherIngestFnServiceRoleDefaultPolicyAE76A4E7": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherBarcodeRegistryTable141E1453", "Arn"]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherAuditTableE75066EE", "Arn"]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherVaultSecretB4937580"
+              }
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherAdminApiKeySecret1465ADF6"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "VoucherIngestFnServiceRoleDefaultPolicyAE76A4E7",
+        "Roles": [
+          {
+            "Ref": "VoucherIngestFnServiceRoleBFF024E5"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherIngestFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "VoucherIngestFn75931A8D": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "2f621bc181dc38137e92293043335b2d6dae88b394027183a47cfdaa3fe04451.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "VOUCHER_INVENTORY_TABLE_NAME": {
+              "Ref": "VoucherInventoryTable0E242750"
+            },
+            "VOUCHER_BARCODE_REGISTRY_TABLE_NAME": {
+              "Ref": "VoucherBarcodeRegistryTable141E1453"
+            },
+            "VOUCHER_ALLOCATIONS_TABLE_NAME": {
+              "Ref": "VoucherAllocationsTable7B2B5E04"
+            },
+            "VOUCHER_AUDIT_TABLE_NAME": {
+              "Ref": "VoucherAuditTableE75066EE"
+            },
+            "VOUCHER_VAULT_SECRET_ARN": {
+              "Ref": "VoucherVaultSecretB4937580"
+            },
+            "VOUCHER_ADMIN_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherAdminApiKeySecret1465ADF6"
+            },
+            "VOUCHER_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+            },
+            "VOUCHER_TELEGRAM_BOT_TOKEN_SECRET_ARN": {
+              "Ref": "VoucherTelegramBotTokenSecret25359AE9"
+            },
+            "VOUCHER_TELEGRAM_WEBHOOK_SECRET_ARN": {
+              "Ref": "VoucherTelegramWebhookSecret74F2132D"
+            }
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["VoucherIngestFnServiceRoleBFF024E5", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 15
+      },
+      "DependsOn": [
+        "VoucherIngestFnServiceRoleDefaultPolicyAE76A4E7",
+        "VoucherIngestFnServiceRoleBFF024E5"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherIngestFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "VoucherListInventoryFnServiceRole189F0E5D": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherListInventoryFn/ServiceRole/Resource"
+      }
+    },
+    "VoucherListInventoryFnServiceRoleDefaultPolicyF920FEDB": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherAdminApiKeySecret1465ADF6"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "VoucherListInventoryFnServiceRoleDefaultPolicyF920FEDB",
+        "Roles": [
+          {
+            "Ref": "VoucherListInventoryFnServiceRole189F0E5D"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherListInventoryFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "VoucherListInventoryFnC6F6B5C9": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "2fbe24ed009a0a9dbeff1a31e5ad91e4fdbb1aefa95e22725ea4b58420d299ce.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "VOUCHER_INVENTORY_TABLE_NAME": {
+              "Ref": "VoucherInventoryTable0E242750"
+            },
+            "VOUCHER_BARCODE_REGISTRY_TABLE_NAME": {
+              "Ref": "VoucherBarcodeRegistryTable141E1453"
+            },
+            "VOUCHER_ALLOCATIONS_TABLE_NAME": {
+              "Ref": "VoucherAllocationsTable7B2B5E04"
+            },
+            "VOUCHER_AUDIT_TABLE_NAME": {
+              "Ref": "VoucherAuditTableE75066EE"
+            },
+            "VOUCHER_VAULT_SECRET_ARN": {
+              "Ref": "VoucherVaultSecretB4937580"
+            },
+            "VOUCHER_ADMIN_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherAdminApiKeySecret1465ADF6"
+            },
+            "VOUCHER_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+            },
+            "VOUCHER_TELEGRAM_BOT_TOKEN_SECRET_ARN": {
+              "Ref": "VoucherTelegramBotTokenSecret25359AE9"
+            },
+            "VOUCHER_TELEGRAM_WEBHOOK_SECRET_ARN": {
+              "Ref": "VoucherTelegramWebhookSecret74F2132D"
+            }
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["VoucherListInventoryFnServiceRole189F0E5D", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 15
+      },
+      "DependsOn": [
+        "VoucherListInventoryFnServiceRoleDefaultPolicyF920FEDB",
+        "VoucherListInventoryFnServiceRole189F0E5D"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherListInventoryFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "VoucherAllocateFnServiceRole56216522": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherAllocateFn/ServiceRole/Resource"
+      }
+    },
+    "VoucherAllocateFnServiceRoleDefaultPolicy09C159DC": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherAllocationsTable7B2B5E04", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["VoucherAllocationsTable7B2B5E04", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherAuditTableE75066EE", "Arn"]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherVaultSecretB4937580"
+              }
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "VoucherAllocateFnServiceRoleDefaultPolicy09C159DC",
+        "Roles": [
+          {
+            "Ref": "VoucherAllocateFnServiceRole56216522"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherAllocateFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "VoucherAllocateFnDAF88923": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "b282b9bf4c11fa5659d0eac5518bfce0e7fcd3c5bc17e7a6ffb1c441082706c7.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "VOUCHER_INVENTORY_TABLE_NAME": {
+              "Ref": "VoucherInventoryTable0E242750"
+            },
+            "VOUCHER_BARCODE_REGISTRY_TABLE_NAME": {
+              "Ref": "VoucherBarcodeRegistryTable141E1453"
+            },
+            "VOUCHER_ALLOCATIONS_TABLE_NAME": {
+              "Ref": "VoucherAllocationsTable7B2B5E04"
+            },
+            "VOUCHER_AUDIT_TABLE_NAME": {
+              "Ref": "VoucherAuditTableE75066EE"
+            },
+            "VOUCHER_VAULT_SECRET_ARN": {
+              "Ref": "VoucherVaultSecretB4937580"
+            },
+            "VOUCHER_ADMIN_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherAdminApiKeySecret1465ADF6"
+            },
+            "VOUCHER_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+            },
+            "VOUCHER_TELEGRAM_BOT_TOKEN_SECRET_ARN": {
+              "Ref": "VoucherTelegramBotTokenSecret25359AE9"
+            },
+            "VOUCHER_TELEGRAM_WEBHOOK_SECRET_ARN": {
+              "Ref": "VoucherTelegramWebhookSecret74F2132D"
+            }
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["VoucherAllocateFnServiceRole56216522", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 20
+      },
+      "DependsOn": [
+        "VoucherAllocateFnServiceRoleDefaultPolicy09C159DC",
+        "VoucherAllocateFnServiceRole56216522"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherAllocateFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "VoucherGetAvailableDenominationsFnServiceRole4D10E6D8": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherGetAvailableDenominationsFn/ServiceRole/Resource"
+      }
+    },
+    "VoucherGetAvailableDenominationsFnServiceRoleDefaultPolicyA22B7103": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "VoucherGetAvailableDenominationsFnServiceRoleDefaultPolicyA22B7103",
+        "Roles": [
+          {
+            "Ref": "VoucherGetAvailableDenominationsFnServiceRole4D10E6D8"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherGetAvailableDenominationsFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "VoucherGetAvailableDenominationsFnB8ED0D8C": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "f5b88cf94c68f2945b84520fd29884684c6d93b145b6fa6bc993dfb716ac0c96.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "VOUCHER_INVENTORY_TABLE_NAME": {
+              "Ref": "VoucherInventoryTable0E242750"
+            },
+            "VOUCHER_BARCODE_REGISTRY_TABLE_NAME": {
+              "Ref": "VoucherBarcodeRegistryTable141E1453"
+            },
+            "VOUCHER_ALLOCATIONS_TABLE_NAME": {
+              "Ref": "VoucherAllocationsTable7B2B5E04"
+            },
+            "VOUCHER_AUDIT_TABLE_NAME": {
+              "Ref": "VoucherAuditTableE75066EE"
+            },
+            "VOUCHER_VAULT_SECRET_ARN": {
+              "Ref": "VoucherVaultSecretB4937580"
+            },
+            "VOUCHER_ADMIN_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherAdminApiKeySecret1465ADF6"
+            },
+            "VOUCHER_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+            },
+            "VOUCHER_TELEGRAM_BOT_TOKEN_SECRET_ARN": {
+              "Ref": "VoucherTelegramBotTokenSecret25359AE9"
+            },
+            "VOUCHER_TELEGRAM_WEBHOOK_SECRET_ARN": {
+              "Ref": "VoucherTelegramWebhookSecret74F2132D"
+            }
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["VoucherGetAvailableDenominationsFnServiceRole4D10E6D8", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 15
+      },
+      "DependsOn": [
+        "VoucherGetAvailableDenominationsFnServiceRoleDefaultPolicyA22B7103",
+        "VoucherGetAvailableDenominationsFnServiceRole4D10E6D8"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherGetAvailableDenominationsFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "VoucherTelegramWebhookFnServiceRole06A1C32D": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherTelegramWebhookFn/ServiceRole/Resource"
+      }
+    },
+    "VoucherTelegramWebhookFnServiceRoleDefaultPolicy0152A1DA": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["VoucherInventoryTable0E242750", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherBarcodeRegistryTable141E1453", "Arn"]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["VoucherAuditTableE75066EE", "Arn"]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherVaultSecretB4937580"
+              }
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherTelegramBotTokenSecret25359AE9"
+              }
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "VoucherTelegramWebhookSecret74F2132D"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "VoucherTelegramWebhookFnServiceRoleDefaultPolicy0152A1DA",
+        "Roles": [
+          {
+            "Ref": "VoucherTelegramWebhookFnServiceRole06A1C32D"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherTelegramWebhookFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "VoucherTelegramWebhookFnE036CBE4": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "18f2eb35dffdd31f3990825703036b0f8de9dbf261bea10baa7f28cff29bed61.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "VOUCHER_INVENTORY_TABLE_NAME": {
+              "Ref": "VoucherInventoryTable0E242750"
+            },
+            "VOUCHER_BARCODE_REGISTRY_TABLE_NAME": {
+              "Ref": "VoucherBarcodeRegistryTable141E1453"
+            },
+            "VOUCHER_ALLOCATIONS_TABLE_NAME": {
+              "Ref": "VoucherAllocationsTable7B2B5E04"
+            },
+            "VOUCHER_AUDIT_TABLE_NAME": {
+              "Ref": "VoucherAuditTableE75066EE"
+            },
+            "VOUCHER_VAULT_SECRET_ARN": {
+              "Ref": "VoucherVaultSecretB4937580"
+            },
+            "VOUCHER_ADMIN_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherAdminApiKeySecret1465ADF6"
+            },
+            "VOUCHER_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+            },
+            "VOUCHER_TELEGRAM_BOT_TOKEN_SECRET_ARN": {
+              "Ref": "VoucherTelegramBotTokenSecret25359AE9"
+            },
+            "VOUCHER_TELEGRAM_WEBHOOK_SECRET_ARN": {
+              "Ref": "VoucherTelegramWebhookSecret74F2132D"
+            }
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["VoucherTelegramWebhookFnServiceRole06A1C32D", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "voucher"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payouts"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 20
+      },
+      "DependsOn": [
+        "VoucherTelegramWebhookFnServiceRoleDefaultPolicy0152A1DA",
+        "VoucherTelegramWebhookFnServiceRole06A1C32D"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherTelegramWebhookFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "VoucherV2HttpApi3F8B6430": {
+      "Type": "AWS::ApiGatewayV2::Api",
+      "Properties": {
+        "Description": "Greenfield MVP voucher boundary",
+        "Name": "PashashaPay-VoucherApi",
+        "ProtocolType": "HTTP",
+        "Tags": {
+          "Component": "voucher",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "Repo": "pashasha",
+          "ServiceGroup": "payouts",
+          "Solution": "Pashasha"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/Resource"
+      }
+    },
+    "VoucherV2HttpApiDefaultStageF2761175": {
+      "Type": "AWS::ApiGatewayV2::Stage",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "AutoDeploy": true,
+        "StageName": "$default",
+        "Tags": {
+          "Component": "voucher",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "Repo": "pashasha",
+          "ServiceGroup": "payouts",
+          "Solution": "Pashasha"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/DefaultStage/Resource"
+      }
+    },
+    "VoucherV2HttpApiPOSTapiadminvoucherssuppliersshopritecheckersingestVoucherIngestIntegrationCBBADDC3": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["VoucherIngestFn75931A8D", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--api--admin--vouchers--suppliers--shoprite-checkers--ingest/VoucherIngestIntegration/Resource"
+      }
+    },
+    "VoucherV2HttpApiPOSTapiadminvoucherssuppliersshopritecheckersingestVoucherIngestIntegrationPermission507DB6B3": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["VoucherIngestFn75931A8D", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "VoucherV2HttpApi3F8B6430"
+              },
+              "/*/*/api/admin/vouchers/suppliers/shoprite-checkers/ingest"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--api--admin--vouchers--suppliers--shoprite-checkers--ingest/VoucherIngestIntegration-Permission"
+      }
+    },
+    "VoucherV2HttpApiPOSTapiadminvoucherssuppliersshopritecheckersingestD1AAC997": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "POST /api/admin/vouchers/suppliers/shoprite-checkers/ingest",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "VoucherV2HttpApiPOSTapiadminvoucherssuppliersshopritecheckersingestVoucherIngestIntegrationCBBADDC3"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--api--admin--vouchers--suppliers--shoprite-checkers--ingest/Resource"
+      }
+    },
+    "VoucherV2HttpApiGETapiadminvouchersinventoryVoucherListInventoryIntegrationF1930FB7": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["VoucherListInventoryFnC6F6B5C9", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/GET--api--admin--vouchers--inventory/VoucherListInventoryIntegration/Resource"
+      }
+    },
+    "VoucherV2HttpApiGETapiadminvouchersinventoryVoucherListInventoryIntegrationPermissionED2B0885": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["VoucherListInventoryFnC6F6B5C9", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "VoucherV2HttpApi3F8B6430"
+              },
+              "/*/*/api/admin/vouchers/inventory"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/GET--api--admin--vouchers--inventory/VoucherListInventoryIntegration-Permission"
+      }
+    },
+    "VoucherV2HttpApiGETapiadminvouchersinventory85EA3015": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "GET /api/admin/vouchers/inventory",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "VoucherV2HttpApiGETapiadminvouchersinventoryVoucherListInventoryIntegrationF1930FB7"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/GET--api--admin--vouchers--inventory/Resource"
+      }
+    },
+    "VoucherV2HttpApiPOSTinternalallocationsVoucherAllocateIntegration71ACD801": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["VoucherAllocateFnDAF88923", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--internal--allocations/VoucherAllocateIntegration/Resource"
+      }
+    },
+    "VoucherV2HttpApiPOSTinternalallocationsVoucherAllocateIntegrationPermission2C006FB2": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["VoucherAllocateFnDAF88923", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "VoucherV2HttpApi3F8B6430"
+              },
+              "/*/*/internal/allocations"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--internal--allocations/VoucherAllocateIntegration-Permission"
+      }
+    },
+    "VoucherV2HttpApiPOSTinternalallocations69F2CD59": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "POST /internal/allocations",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "VoucherV2HttpApiPOSTinternalallocationsVoucherAllocateIntegration71ACD801"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--internal--allocations/Resource"
+      }
+    },
+    "VoucherV2HttpApiGETinternalavailabilityVoucherGetAvailableDenominationsIntegrationDF59D828": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["VoucherGetAvailableDenominationsFnB8ED0D8C", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/GET--internal--availability/VoucherGetAvailableDenominationsIntegration/Resource"
+      }
+    },
+    "VoucherV2HttpApiGETinternalavailabilityVoucherGetAvailableDenominationsIntegrationPermission6191E599": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["VoucherGetAvailableDenominationsFnB8ED0D8C", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "VoucherV2HttpApi3F8B6430"
+              },
+              "/*/*/internal/availability"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/GET--internal--availability/VoucherGetAvailableDenominationsIntegration-Permission"
+      }
+    },
+    "VoucherV2HttpApiGETinternalavailability1ADB8E68": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "GET /internal/availability",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "VoucherV2HttpApiGETinternalavailabilityVoucherGetAvailableDenominationsIntegrationDF59D828"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/GET--internal--availability/Resource"
+      }
+    },
+    "VoucherV2HttpApiPOSTwebhookstelegramvouchersVoucherTelegramWebhookIntegration63FB2436": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["VoucherTelegramWebhookFnE036CBE4", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--webhooks--telegram--vouchers/VoucherTelegramWebhookIntegration/Resource"
+      }
+    },
+    "VoucherV2HttpApiPOSTwebhookstelegramvouchersVoucherTelegramWebhookIntegrationPermission4E2B7F7F": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["VoucherTelegramWebhookFnE036CBE4", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "VoucherV2HttpApi3F8B6430"
+              },
+              "/*/*/webhooks/telegram/vouchers"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--webhooks--telegram--vouchers/VoucherTelegramWebhookIntegration-Permission"
+      }
+    },
+    "VoucherV2HttpApiPOSTwebhookstelegramvouchers8E727323": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "VoucherV2HttpApi3F8B6430"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "POST /webhooks/telegram/vouchers",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "VoucherV2HttpApiPOSTwebhookstelegramvouchersVoucherTelegramWebhookIntegration63FB2436"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/VoucherV2HttpApi/POST--webhooks--telegram--vouchers/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/11RwU7DMAz9Fu6ZgQIS123SBBeYCvfKS0yVtkmqONk0Vf13knRME6f3nvPiZycVPL68wsMdnnglVb8a9AGmr4CyF6nUTOps0TiVit94GEhsf2whs2CSngIbtNiST5eKzoaFzWJAc1AI0y5aGbSz+eyW78kbzZzULDQamGq3JBTcu0HLc/EVlhKfGmROmbDOkDRsouwpbJDpktZYp6hj+ChwTcNRtxjohOdjBdNbCON61Ll3hizTym3JXkgu1S6Ghb3bQK3Hv7n/yeKbZ1ETu+glCRk5ONP4i2bYe3fUirwoc+cEbVuxLbbrrdzphn/GMMb0iHkf6Pj+WD1DlT6qY61XPtqgDUG94C8sCWl6xQEAAA=="
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayVoucherStack/CDKMetadata/Default"
+      }
+    }
+  },
+  "Outputs": {
+    "VoucherApiUrl": {
+      "Value": {
+        "Fn::GetAtt": ["VoucherV2HttpApi3F8B6430", "ApiEndpoint"]
+      }
+    },
+    "VoucherVaultSecretArn": {
+      "Value": {
+        "Ref": "VoucherVaultSecretB4937580"
+      }
+    },
+    "VoucherAdminApiKeySecretArn": {
+      "Value": {
+        "Ref": "VoucherAdminApiKeySecret1465ADF6"
+      }
+    },
+    "VoucherCoreApiKeySecretArn": {
+      "Value": {
+        "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+      }
+    },
+    "VoucherTelegramBotTokenSecretArn": {
+      "Value": {
+        "Ref": "VoucherTelegramBotTokenSecret25359AE9"
+      }
+    },
+    "VoucherTelegramWebhookSecretArn": {
+      "Value": {
+        "Ref": "VoucherTelegramWebhookSecret74F2132D"
+      }
+    },
+    "VoucherInventoryTableName": {
+      "Value": {
+        "Ref": "VoucherInventoryTable0E242750"
+      }
+    },
+    "VoucherBarcodeRegistryTableName": {
+      "Value": {
+        "Ref": "VoucherBarcodeRegistryTable141E1453"
+      }
+    },
+    "VoucherAllocationsTableName": {
+      "Value": {
+        "Ref": "VoucherAllocationsTable7B2B5E04"
+      }
+    },
+    "VoucherAuditTableName": {
+      "Value": {
+        "Ref": "VoucherAuditTableE75066EE"
+      }
+    },
+    "ExportsOutputFnGetAttVoucherV2HttpApi3F8B6430ApiEndpoint45B17604": {
+      "Value": {
+        "Fn::GetAtt": ["VoucherV2HttpApi3F8B6430", "ApiEndpoint"]
+      },
+      "Export": {
+        "Name": "PashashaPayVoucherStack:ExportsOutputFnGetAttVoucherV2HttpApi3F8B6430ApiEndpoint45B17604"
+      }
+    },
+    "ExportsOutputRefVoucherCoreApiKeySecret9A0EF0E472DD1614": {
+      "Value": {
+        "Ref": "VoucherCoreApiKeySecret9A0EF0E4"
+      },
+      "Export": {
+        "Name": "PashashaPayVoucherStack:ExportsOutputRefVoucherCoreApiKeySecret9A0EF0E472DD1614"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  ["1", "2", "3", "4", "5"],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

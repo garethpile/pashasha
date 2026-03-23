@@ -1,0 +1,76 @@
+{
+  "version": "36.3.0",
+  "files": {
+    "78d0e165b58909cc5d995b5bcab9b3ac9d8893f578538b5bec4f11055d235c44": {
+      "source": {
+        "path": "/Users/pileg/development/pashasha/infra/cdk",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "78d0e165b58909cc5d995b5bcab9b3ac9d8893f578538b5bec4f11055d235c44.zip",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    },
+    "3391b1f698ba83f41895cc8e9044baae8be0934e042066f86f5a1347b7116eb7": {
+      "source": {
+        "path": "/Users/pileg/development/pashasha/infra/cdk",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "3391b1f698ba83f41895cc8e9044baae8be0934e042066f86f5a1347b7116eb7.zip",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    },
+    "1c3835a0aea0f9a44cf88a40f54bb905b49b2d85e59caf672691a1065cb2b46d": {
+      "source": {
+        "path": "/Users/pileg/development/pashasha/infra/cdk",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "1c3835a0aea0f9a44cf88a40f54bb905b49b2d85e59caf672691a1065cb2b46d.zip",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    },
+    "703f4ff008c065c4c46792a19c94faddb7d1e88485154fcf431454507bf38192": {
+      "source": {
+        "path": "/Users/pileg/development/pashasha/infra/cdk",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "703f4ff008c065c4c46792a19c94faddb7d1e88485154fcf431454507bf38192.zip",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    },
+    "41ee514e4ed64c0aeff1b4dd6a17a1c3d0f7a93170bd22091d82734e2ffb6269": {
+      "source": {
+        "path": "PashashaPayPaymentStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "41ee514e4ed64c0aeff1b4dd6a17a1c3d0f7a93170bd22091d82734e2ffb6269.json",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

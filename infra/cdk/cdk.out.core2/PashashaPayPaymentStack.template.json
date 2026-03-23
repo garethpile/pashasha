@@ -1,0 +1,1630 @@
+{
+  "Resources": {
+    "PaymentIntentsTableEC266E5C": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "paymentIntentId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "transactionId",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "DeletionProtectionEnabled": true,
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "byTransaction",
+            "KeySchema": [
+              {
+                "AttributeName": "transactionId",
+                "KeyType": "HASH"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "paymentIntentId",
+            "KeyType": "HASH"
+          }
+        ],
+        "TableName": "PashashaPay-Payment-Intents",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentIntentsTable/Resource"
+      }
+    },
+    "PaymentEventsTable2DE21DDB": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "paymentIntentId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "createdAt",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "DeletionProtectionEnabled": true,
+        "KeySchema": [
+          {
+            "AttributeName": "paymentIntentId",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "createdAt",
+            "KeyType": "RANGE"
+          }
+        ],
+        "TableName": "PashashaPay-Payment-Events",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentEventsTable/Resource"
+      }
+    },
+    "OzowConfigSecret56FAC309": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "OZOW credentials and callback signing settings for the greenfield MVP",
+        "GenerateSecretString": {
+          "GenerateStringKey": "placeholder",
+          "SecretStringTemplate": "{\"siteCode\":\"\",\"privateKey\":\"\",\"apiKey\":\"\",\"callbackSecret\":\"\"}"
+        },
+        "Name": "pashasha/payment/ozow",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/OzowConfigSecret/Resource"
+      }
+    },
+    "PaymentCoreApiKeySecret080EEDAE": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Shared API key used by core-backend to call payment internal routes",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "apiKey",
+          "PasswordLength": 40,
+          "SecretStringTemplate": "{}"
+        },
+        "Name": "pashasha/payment/core-api-key",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentCoreApiKeySecret/Resource"
+      }
+    },
+    "PaymentToCoreApiKeySecret7D13DE0A": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Shared API key used by payment callback handlers to call core-backend",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "apiKey",
+          "PasswordLength": 40,
+          "SecretStringTemplate": "{}"
+        },
+        "Name": "pashasha/payment/to-core-api-key",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentToCoreApiKeySecret/Resource"
+      }
+    },
+    "CreatePaymentIntentFnServiceRoleE291D0F1": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/CreatePaymentIntentFn/ServiceRole/Resource"
+      }
+    },
+    "CreatePaymentIntentFnServiceRoleDefaultPolicyD5F1F24A": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["PaymentIntentsTableEC266E5C", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["PaymentIntentsTableEC266E5C", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "PaymentCoreApiKeySecret080EEDAE"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "CreatePaymentIntentFnServiceRoleDefaultPolicyD5F1F24A",
+        "Roles": [
+          {
+            "Ref": "CreatePaymentIntentFnServiceRoleE291D0F1"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/CreatePaymentIntentFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "CreatePaymentIntentFn1F02CB52": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "78d0e165b58909cc5d995b5bcab9b3ac9d8893f578538b5bec4f11055d235c44.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "PAYMENT_INTENTS_TABLE_NAME": {
+              "Ref": "PaymentIntentsTableEC266E5C"
+            },
+            "PAYMENT_EVENTS_TABLE_NAME": {
+              "Ref": "PaymentEventsTable2DE21DDB"
+            },
+            "PAYMENT_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "PaymentCoreApiKeySecret080EEDAE"
+            },
+            "OZOW_CONFIG_SECRET_ARN": {
+              "Ref": "OzowConfigSecret56FAC309"
+            },
+            "OZOW_PAYMENT_URL": "https://pay.ozow.com",
+            "OZOW_IS_TEST": "true",
+            "PAYMENT_PUBLIC_API_BASE_URL": {
+              "Fn::GetAtt": ["PaymentHttpApi7F446C8A", "ApiEndpoint"]
+            },
+            "PAYMENT_TO_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "PaymentToCoreApiKeySecret7D13DE0A"
+            },
+            "CORE_API_URL": "https://placeholder.invalid"
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["CreatePaymentIntentFnServiceRoleE291D0F1", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 15
+      },
+      "DependsOn": [
+        "CreatePaymentIntentFnServiceRoleDefaultPolicyD5F1F24A",
+        "CreatePaymentIntentFnServiceRoleE291D0F1"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/CreatePaymentIntentFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "GetPaymentIntentFnServiceRole46B1291B": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/GetPaymentIntentFn/ServiceRole/Resource"
+      }
+    },
+    "GetPaymentIntentFnServiceRoleDefaultPolicyA24B03E5": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["PaymentIntentsTableEC266E5C", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["PaymentIntentsTableEC266E5C", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "PaymentCoreApiKeySecret080EEDAE"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "GetPaymentIntentFnServiceRoleDefaultPolicyA24B03E5",
+        "Roles": [
+          {
+            "Ref": "GetPaymentIntentFnServiceRole46B1291B"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/GetPaymentIntentFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "GetPaymentIntentFn8B6B7280": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "3391b1f698ba83f41895cc8e9044baae8be0934e042066f86f5a1347b7116eb7.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "PAYMENT_INTENTS_TABLE_NAME": {
+              "Ref": "PaymentIntentsTableEC266E5C"
+            },
+            "PAYMENT_EVENTS_TABLE_NAME": {
+              "Ref": "PaymentEventsTable2DE21DDB"
+            },
+            "PAYMENT_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "PaymentCoreApiKeySecret080EEDAE"
+            },
+            "OZOW_CONFIG_SECRET_ARN": {
+              "Ref": "OzowConfigSecret56FAC309"
+            },
+            "OZOW_PAYMENT_URL": "https://pay.ozow.com",
+            "OZOW_IS_TEST": "true",
+            "PAYMENT_PUBLIC_API_BASE_URL": {
+              "Fn::GetAtt": ["PaymentHttpApi7F446C8A", "ApiEndpoint"]
+            },
+            "PAYMENT_TO_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "PaymentToCoreApiKeySecret7D13DE0A"
+            },
+            "CORE_API_URL": "https://placeholder.invalid"
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["GetPaymentIntentFnServiceRole46B1291B", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 15
+      },
+      "DependsOn": [
+        "GetPaymentIntentFnServiceRoleDefaultPolicyA24B03E5",
+        "GetPaymentIntentFnServiceRole46B1291B"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/GetPaymentIntentFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "CheckoutPlaceholderFnServiceRoleA394F0D3": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/CheckoutPlaceholderFn/ServiceRole/Resource"
+      }
+    },
+    "CheckoutPlaceholderFnServiceRoleDefaultPolicy61E8BAF7": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["PaymentIntentsTableEC266E5C", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["PaymentIntentsTableEC266E5C", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "OzowConfigSecret56FAC309"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "CheckoutPlaceholderFnServiceRoleDefaultPolicy61E8BAF7",
+        "Roles": [
+          {
+            "Ref": "CheckoutPlaceholderFnServiceRoleA394F0D3"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/CheckoutPlaceholderFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "CheckoutPlaceholderFnDD2F03C0": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "1c3835a0aea0f9a44cf88a40f54bb905b49b2d85e59caf672691a1065cb2b46d.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "PAYMENT_INTENTS_TABLE_NAME": {
+              "Ref": "PaymentIntentsTableEC266E5C"
+            },
+            "PAYMENT_EVENTS_TABLE_NAME": {
+              "Ref": "PaymentEventsTable2DE21DDB"
+            },
+            "PAYMENT_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "PaymentCoreApiKeySecret080EEDAE"
+            },
+            "OZOW_CONFIG_SECRET_ARN": {
+              "Ref": "OzowConfigSecret56FAC309"
+            },
+            "OZOW_PAYMENT_URL": "https://pay.ozow.com",
+            "OZOW_IS_TEST": "true",
+            "PAYMENT_PUBLIC_API_BASE_URL": {
+              "Fn::GetAtt": ["PaymentHttpApi7F446C8A", "ApiEndpoint"]
+            },
+            "PAYMENT_TO_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "PaymentToCoreApiKeySecret7D13DE0A"
+            },
+            "CORE_API_URL": "https://placeholder.invalid"
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["CheckoutPlaceholderFnServiceRoleA394F0D3", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 15
+      },
+      "DependsOn": [
+        "CheckoutPlaceholderFnServiceRoleDefaultPolicy61E8BAF7",
+        "CheckoutPlaceholderFnServiceRoleA394F0D3"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/CheckoutPlaceholderFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "OzowCallbackFnServiceRoleBAD308AE": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/OzowCallbackFn/ServiceRole/Resource"
+      }
+    },
+    "OzowCallbackFnServiceRoleDefaultPolicy23C56DF9": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["PaymentIntentsTableEC266E5C", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["PaymentIntentsTableEC266E5C", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["PaymentEventsTable2DE21DDB", "Arn"]
+                },
+                {
+                  "Ref": "AWS::NoValue"
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "PaymentToCoreApiKeySecret7D13DE0A"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "OzowCallbackFnServiceRoleDefaultPolicy23C56DF9",
+        "Roles": [
+          {
+            "Ref": "OzowCallbackFnServiceRoleBAD308AE"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/OzowCallbackFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "OzowCallbackFn05E41AED": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "703f4ff008c065c4c46792a19c94faddb7d1e88485154fcf431454507bf38192.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "PAYMENT_INTENTS_TABLE_NAME": {
+              "Ref": "PaymentIntentsTableEC266E5C"
+            },
+            "PAYMENT_EVENTS_TABLE_NAME": {
+              "Ref": "PaymentEventsTable2DE21DDB"
+            },
+            "PAYMENT_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "PaymentCoreApiKeySecret080EEDAE"
+            },
+            "OZOW_CONFIG_SECRET_ARN": {
+              "Ref": "OzowConfigSecret56FAC309"
+            },
+            "OZOW_PAYMENT_URL": "https://pay.ozow.com",
+            "OZOW_IS_TEST": "true",
+            "PAYMENT_PUBLIC_API_BASE_URL": {
+              "Fn::GetAtt": ["PaymentHttpApi7F446C8A", "ApiEndpoint"]
+            },
+            "PAYMENT_TO_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "PaymentToCoreApiKeySecret7D13DE0A"
+            },
+            "CORE_API_URL": "https://placeholder.invalid"
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["OzowCallbackFnServiceRoleBAD308AE", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "payment"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "PaymentEngine",
+            "Value": "ozow"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "payments"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 20
+      },
+      "DependsOn": [
+        "OzowCallbackFnServiceRoleDefaultPolicy23C56DF9",
+        "OzowCallbackFnServiceRoleBAD308AE"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/OzowCallbackFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "PaymentHttpApi7F446C8A": {
+      "Type": "AWS::ApiGatewayV2::Api",
+      "Properties": {
+        "Description": "Greenfield MVP payment engine boundary",
+        "Name": "PashashaPay-PaymentApi",
+        "ProtocolType": "HTTP",
+        "Tags": {
+          "Component": "payment",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "PaymentEngine": "ozow",
+          "Repo": "pashasha",
+          "ServiceGroup": "payments",
+          "Solution": "Pashasha"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/Resource"
+      }
+    },
+    "PaymentHttpApiDefaultStage678EF67C": {
+      "Type": "AWS::ApiGatewayV2::Stage",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "AutoDeploy": true,
+        "StageName": "$default",
+        "Tags": {
+          "Component": "payment",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "PaymentEngine": "ozow",
+          "Repo": "pashasha",
+          "ServiceGroup": "payments",
+          "Solution": "Pashasha"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/DefaultStage/Resource"
+      }
+    },
+    "PaymentHttpApiPOSTinternalpaymentintentsCreatePaymentIntentIntegrationC0360097": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["CreatePaymentIntentFn1F02CB52", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/POST--internal--payment-intents/CreatePaymentIntentIntegration/Resource"
+      }
+    },
+    "PaymentHttpApiPOSTinternalpaymentintentsCreatePaymentIntentIntegrationPermissionC9E8738B": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["CreatePaymentIntentFn1F02CB52", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "PaymentHttpApi7F446C8A"
+              },
+              "/*/*/internal/payment-intents"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/POST--internal--payment-intents/CreatePaymentIntentIntegration-Permission"
+      }
+    },
+    "PaymentHttpApiPOSTinternalpaymentintents4C7DE89E": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "POST /internal/payment-intents",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "PaymentHttpApiPOSTinternalpaymentintentsCreatePaymentIntentIntegrationC0360097"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/POST--internal--payment-intents/Resource"
+      }
+    },
+    "PaymentHttpApiGETinternalpaymentintentspaymentIntentIdGetPaymentIntentIntegrationA3FD2320": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["GetPaymentIntentFn8B6B7280", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/GET--internal--payment-intents--{paymentIntentId}/GetPaymentIntentIntegration/Resource"
+      }
+    },
+    "PaymentHttpApiGETinternalpaymentintentspaymentIntentIdGetPaymentIntentIntegrationPermissionB32745CB": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["GetPaymentIntentFn8B6B7280", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "PaymentHttpApi7F446C8A"
+              },
+              "/*/*/internal/payment-intents/{paymentIntentId}"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/GET--internal--payment-intents--{paymentIntentId}/GetPaymentIntentIntegration-Permission"
+      }
+    },
+    "PaymentHttpApiGETinternalpaymentintentspaymentIntentId3B9DF9DC": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "GET /internal/payment-intents/{paymentIntentId}",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "PaymentHttpApiGETinternalpaymentintentspaymentIntentIdGetPaymentIntentIntegrationA3FD2320"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/GET--internal--payment-intents--{paymentIntentId}/Resource"
+      }
+    },
+    "PaymentHttpApiGETcheckoutpaymentIntentIdCheckoutPlaceholderIntegration55E290E9": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["CheckoutPlaceholderFnDD2F03C0", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/GET--checkout--{paymentIntentId}/CheckoutPlaceholderIntegration/Resource"
+      }
+    },
+    "PaymentHttpApiGETcheckoutpaymentIntentIdCheckoutPlaceholderIntegrationPermissionC2884EDE": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["CheckoutPlaceholderFnDD2F03C0", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "PaymentHttpApi7F446C8A"
+              },
+              "/*/*/checkout/{paymentIntentId}"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/GET--checkout--{paymentIntentId}/CheckoutPlaceholderIntegration-Permission"
+      }
+    },
+    "PaymentHttpApiGETcheckoutpaymentIntentId5DC01068": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "GET /checkout/{paymentIntentId}",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "PaymentHttpApiGETcheckoutpaymentIntentIdCheckoutPlaceholderIntegration55E290E9"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/GET--checkout--{paymentIntentId}/Resource"
+      }
+    },
+    "PaymentHttpApiPOSTcallbacksozowOzowCallbackIntegration5D527107": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["OzowCallbackFn05E41AED", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/POST--callbacks--ozow/OzowCallbackIntegration/Resource"
+      }
+    },
+    "PaymentHttpApiPOSTcallbacksozowOzowCallbackIntegrationPermission1CAC32D9": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["OzowCallbackFn05E41AED", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "PaymentHttpApi7F446C8A"
+              },
+              "/*/*/callbacks/ozow"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/POST--callbacks--ozow/OzowCallbackIntegration-Permission"
+      }
+    },
+    "PaymentHttpApiPOSTcallbacksozow0B05634D": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "PaymentHttpApi7F446C8A"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "POST /callbacks/ozow",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "PaymentHttpApiPOSTcallbacksozowOzowCallbackIntegration5D527107"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/PaymentHttpApi/POST--callbacks--ozow/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Qy07EMAz8Fu6pgQIS110kBBdAhXvlpqZK2yRVnOyqqvLvJCnLgdPMWOPxo4bbh0e4ucIzV7Kfqll1sH16lJNIpXbrV4Pa9qn4hd1M4unbFBIFk3TkWaPBgVxqKjobdhbFjLrrsTW2p5HhrcBzMNIra4RCDVtj98iCH3ZWcs1yZ2nEXYvMaQgcMiQNxyAn8kdk+o2HLTX8peZmcloxJxUFLmpAT2dcTzVsL94vh0VlU4Ys06VD2WAnudTY4Hf2ajwNDi/B/2TxxSgaYhucJFF2zDnKDNnwHvwSykMulijyL2Dk61N9D3V6+8hKVS4YrzRBs+MPVoUvtJMBAAA="
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayPaymentStack/CDKMetadata/Default"
+      }
+    }
+  },
+  "Outputs": {
+    "PaymentApiUrl": {
+      "Value": {
+        "Fn::GetAtt": ["PaymentHttpApi7F446C8A", "ApiEndpoint"]
+      }
+    },
+    "OzowConfigSecretArn": {
+      "Value": {
+        "Ref": "OzowConfigSecret56FAC309"
+      }
+    },
+    "PaymentCoreApiKeySecretArn": {
+      "Value": {
+        "Ref": "PaymentCoreApiKeySecret080EEDAE"
+      }
+    },
+    "PaymentToCoreApiKeySecretArn": {
+      "Value": {
+        "Ref": "PaymentToCoreApiKeySecret7D13DE0A"
+      }
+    },
+    "PaymentIntentsTableName": {
+      "Value": {
+        "Ref": "PaymentIntentsTableEC266E5C"
+      }
+    },
+    "PaymentEventsTableName": {
+      "Value": {
+        "Ref": "PaymentEventsTable2DE21DDB"
+      }
+    },
+    "ExportsOutputFnGetAttPaymentHttpApi7F446C8AApiEndpointF637A7D2": {
+      "Value": {
+        "Fn::GetAtt": ["PaymentHttpApi7F446C8A", "ApiEndpoint"]
+      },
+      "Export": {
+        "Name": "PashashaPayPaymentStack:ExportsOutputFnGetAttPaymentHttpApi7F446C8AApiEndpointF637A7D2"
+      }
+    },
+    "ExportsOutputRefPaymentCoreApiKeySecret080EEDAEB7CF9979": {
+      "Value": {
+        "Ref": "PaymentCoreApiKeySecret080EEDAE"
+      },
+      "Export": {
+        "Name": "PashashaPayPaymentStack:ExportsOutputRefPaymentCoreApiKeySecret080EEDAEB7CF9979"
+      }
+    },
+    "ExportsOutputRefPaymentToCoreApiKeySecret7D13DE0AE2936DCC": {
+      "Value": {
+        "Ref": "PaymentToCoreApiKeySecret7D13DE0A"
+      },
+      "Export": {
+        "Name": "PashashaPayPaymentStack:ExportsOutputRefPaymentToCoreApiKeySecret7D13DE0AE2936DCC"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  ["1", "2", "3", "4", "5"],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 STACK_NAME="${AMPLIFY_STACK_NAME:-PashashaPayFrontendStack}"
-BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-PashashaPayBackendStack}"
+BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-PashashaPayCoreBackendStack}"
 REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-eu-west-1}}"
 APP_ID="${AMPLIFY_APP_ID:-}"
 BRANCH_NAME="${AMPLIFY_BRANCH:-main}"
@@ -35,7 +35,10 @@ if [[ -z "$APP_ID" || "$APP_ID" == "None" ]]; then
   fi
 fi
 
-BACKEND_API=$(aws cloudformation describe-stacks --region "$REGION" --stack-name "$BACKEND_STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='BackendSecureApiEndpoint'].OutputValue" --output text 2>/dev/null || true)
+BACKEND_API=$(aws cloudformation describe-stacks --region "$REGION" --stack-name "$BACKEND_STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='CoreApiUrl'].OutputValue" --output text 2>/dev/null || true)
+if [[ -z "$BACKEND_API" || "$BACKEND_API" == "None" ]]; then
+  BACKEND_API=$(aws cloudformation describe-stacks --region "$REGION" --stack-name "$BACKEND_STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='BackendSecureApiEndpoint'].OutputValue" --output text 2>/dev/null || true)
+fi
 if [[ -z "$BACKEND_API" || "$BACKEND_API" == "None" ]]; then
   BACKEND_API=$(aws cloudformation describe-stacks --region "$REGION" --stack-name "$BACKEND_STACK_NAME" --query "Stacks[0].Outputs[?OutputKey=='BackendApiEndpoint'].OutputValue" --output text 2>/dev/null || true)
 fi
@@ -50,8 +53,7 @@ STACK_NAME="$BACKEND_STACK_NAME" AWS_REGION="$REGION" "$ROOT_DIR/infra/scripts/b
 if [[ -n "${NEXT_PUBLIC_API_BASE_URL:-}" ]]; then
   BASE_URL="${NEXT_PUBLIC_API_BASE_URL%/}"
 else
-  # Default to the backend API /api path; no extra subpath.
-  BASE_URL="${BACKEND_API%/}/api"
+  BASE_URL="${BACKEND_API%/}"
 fi
 
 log "Building frontend (branch: $BRANCH_NAME, app: $APP_ID, api: $BASE_URL)"

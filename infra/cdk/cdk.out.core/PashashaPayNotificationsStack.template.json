@@ -1,0 +1,594 @@
+{
+  "Resources": {
+    "NotificationsTable76DCFC6C": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "notificationId",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "createdAt",
+            "AttributeType": "S"
+          },
+          {
+            "AttributeName": "recipient",
+            "AttributeType": "S"
+          }
+        ],
+        "BillingMode": "PAY_PER_REQUEST",
+        "DeletionProtectionEnabled": true,
+        "GlobalSecondaryIndexes": [
+          {
+            "IndexName": "byRecipient",
+            "KeySchema": [
+              {
+                "AttributeName": "recipient",
+                "KeyType": "HASH"
+              },
+              {
+                "AttributeName": "createdAt",
+                "KeyType": "RANGE"
+              }
+            ],
+            "Projection": {
+              "ProjectionType": "ALL"
+            }
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "notificationId",
+            "KeyType": "HASH"
+          },
+          {
+            "AttributeName": "createdAt",
+            "KeyType": "RANGE"
+          }
+        ],
+        "TableName": "PashashaPay-Notifications",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "notifications"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "comms"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/NotificationsTable/Resource"
+      }
+    },
+    "SmsProviderSecret885C9EAA": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "SMS provider credentials for voucher delivery and future notifications",
+        "GenerateSecretString": {
+          "GenerateStringKey": "bootstrap",
+          "SecretStringTemplate": "{\"provider\":\"aws-sns\",\"senderId\":\"Pashasha\",\"smsType\":\"Transactional\",\"maxPrice\":\"1.00\"}"
+        },
+        "Name": "pashasha/notifications/sms",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "notifications"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "comms"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/SmsProviderSecret/Resource"
+      }
+    },
+    "NotificationsCoreApiKeySecretCD37B093": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": "Shared API key used by core-backend to call notifications internal routes",
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "GenerateStringKey": "apiKey",
+          "PasswordLength": 40,
+          "SecretStringTemplate": "{}"
+        },
+        "Name": "pashasha/notifications/core-api-key",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "notifications"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "comms"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Delete",
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/NotificationsCoreApiKeySecret/Resource"
+      }
+    },
+    "SendNotificationFnServiceRole0F726917": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition"
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+              ]
+            ]
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "notifications"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "comms"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/SendNotificationFn/ServiceRole/Resource"
+      }
+    },
+    "SendNotificationFnServiceRoleDefaultPolicy28648AE6": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:DescribeTable"
+              ],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["NotificationsTable76DCFC6C", "Arn"]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": ["NotificationsTable76DCFC6C", "Arn"]
+                      },
+                      "/index/*"
+                    ]
+                  ]
+                }
+              ]
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "NotificationsCoreApiKeySecretCD37B093"
+              }
+            },
+            {
+              "Action": ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
+              "Effect": "Allow",
+              "Resource": {
+                "Ref": "SmsProviderSecret885C9EAA"
+              }
+            },
+            {
+              "Action": "sns:Publish",
+              "Effect": "Allow",
+              "Resource": "*"
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "PolicyName": "SendNotificationFnServiceRoleDefaultPolicy28648AE6",
+        "Roles": [
+          {
+            "Ref": "SendNotificationFnServiceRole0F726917"
+          }
+        ]
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/SendNotificationFn/ServiceRole/DefaultPolicy/Resource"
+      }
+    },
+    "SendNotificationFn66C7E1C6": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "S3Key": "9b228625fca4e0a8b698a2a60d4dcf7cefbc408a85312f57b32860482779d4d2.zip"
+        },
+        "Environment": {
+          "Variables": {
+            "NOTIFICATIONS_TABLE_NAME": {
+              "Ref": "NotificationsTable76DCFC6C"
+            },
+            "NOTIFICATIONS_CORE_API_KEY_SECRET_ARN": {
+              "Ref": "NotificationsCoreApiKeySecretCD37B093"
+            },
+            "SMS_PROVIDER_SECRET_ARN": {
+              "Ref": "SmsProviderSecret885C9EAA"
+            }
+          }
+        },
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": ["SendNotificationFnServiceRole0F726917", "Arn"]
+        },
+        "Runtime": "nodejs20.x",
+        "Tags": [
+          {
+            "Key": "Component",
+            "Value": "notifications"
+          },
+          {
+            "Key": "Environment",
+            "Value": "unknown"
+          },
+          {
+            "Key": "Lifecycle",
+            "Value": "active"
+          },
+          {
+            "Key": "ManagedBy",
+            "Value": "CDK"
+          },
+          {
+            "Key": "Owner",
+            "Value": "Gareth"
+          },
+          {
+            "Key": "Repo",
+            "Value": "pashasha"
+          },
+          {
+            "Key": "ServiceGroup",
+            "Value": "comms"
+          },
+          {
+            "Key": "Solution",
+            "Value": "Pashasha"
+          }
+        ],
+        "Timeout": 15
+      },
+      "DependsOn": [
+        "SendNotificationFnServiceRoleDefaultPolicy28648AE6",
+        "SendNotificationFnServiceRole0F726917"
+      ],
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/SendNotificationFn/Resource",
+        "aws:asset:path": "/Users/pileg/development/pashasha/infra/cdk",
+        "aws:asset:is-bundled": true,
+        "aws:asset:property": "Code"
+      }
+    },
+    "NotificationsHttpApiA8CC588B": {
+      "Type": "AWS::ApiGatewayV2::Api",
+      "Properties": {
+        "Description": "Greenfield MVP notifications boundary",
+        "Name": "PashashaPay-NotificationsApi",
+        "ProtocolType": "HTTP",
+        "Tags": {
+          "Component": "notifications",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "Repo": "pashasha",
+          "ServiceGroup": "comms",
+          "Solution": "Pashasha"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/NotificationsHttpApi/Resource"
+      }
+    },
+    "NotificationsHttpApiDefaultStageD3683FF0": {
+      "Type": "AWS::ApiGatewayV2::Stage",
+      "Properties": {
+        "ApiId": {
+          "Ref": "NotificationsHttpApiA8CC588B"
+        },
+        "AutoDeploy": true,
+        "StageName": "$default",
+        "Tags": {
+          "Component": "notifications",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "Repo": "pashasha",
+          "ServiceGroup": "comms",
+          "Solution": "Pashasha"
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/NotificationsHttpApi/DefaultStage/Resource"
+      }
+    },
+    "NotificationsHttpApiPOSTinternalnotificationssendSendNotificationIntegration9848EA71": {
+      "Type": "AWS::ApiGatewayV2::Integration",
+      "Properties": {
+        "ApiId": {
+          "Ref": "NotificationsHttpApiA8CC588B"
+        },
+        "IntegrationType": "AWS_PROXY",
+        "IntegrationUri": {
+          "Fn::GetAtt": ["SendNotificationFn66C7E1C6", "Arn"]
+        },
+        "PayloadFormatVersion": "2.0"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/NotificationsHttpApi/POST--internal--notifications--send/SendNotificationIntegration/Resource"
+      }
+    },
+    "NotificationsHttpApiPOSTinternalnotificationssendSendNotificationIntegrationPermission8307DCF5": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "Action": "lambda:InvokeFunction",
+        "FunctionName": {
+          "Fn::GetAtt": ["SendNotificationFn66C7E1C6", "Arn"]
+        },
+        "Principal": "apigateway.amazonaws.com",
+        "SourceArn": {
+          "Fn::Join": [
+            "",
+            [
+              "arn:",
+              {
+                "Ref": "AWS::Partition"
+              },
+              ":execute-api:af-south-1:701158128147:",
+              {
+                "Ref": "NotificationsHttpApiA8CC588B"
+              },
+              "/*/*/internal/notifications/send"
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/NotificationsHttpApi/POST--internal--notifications--send/SendNotificationIntegration-Permission"
+      }
+    },
+    "NotificationsHttpApiPOSTinternalnotificationssend2FF1DA8D": {
+      "Type": "AWS::ApiGatewayV2::Route",
+      "Properties": {
+        "ApiId": {
+          "Ref": "NotificationsHttpApiA8CC588B"
+        },
+        "AuthorizationType": "NONE",
+        "RouteKey": "POST /internal/notifications/send",
+        "Target": {
+          "Fn::Join": [
+            "",
+            [
+              "integrations/",
+              {
+                "Ref": "NotificationsHttpApiPOSTinternalnotificationssendSendNotificationIntegration9848EA71"
+              }
+            ]
+          ]
+        }
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/NotificationsHttpApi/POST--internal--notifications--send/Resource"
+      }
+    },
+    "CDKMetadata": {
+      "Type": "AWS::CDK::Metadata",
+      "Properties": {
+        "Analytics": "v2:deflate64:H4sIAAAAAAAA/11Qy07EMAz8Fu6pgQIS110kBBdAhXvlpqZK2yRVnOyqqvLvJCnLgdPMWOPxo4bbh0e4ucIzV7Kfqll1sH16lJNIpXbrV4Pa9qn4hd1M4unbFBIFk3TkWaPBgVxqKjobdhbFjLrrsTW2p5HhrcBzMNIra4RCDVtj98iCH3ZWcs1yZ2nEXYvMaQgcMiQNxyAn8kdk+o2HLTX8peZmcloxJxUFLmpAT2dcTzVsL94vh0VlU4Ys06VD2WAnudTY4Hf2ajwNDi/B/2TxxSgaYhucJFF2zDnKDNnwHvwSykMulijyL2Dk61N9D3V6+8hKVS4YrzRBs+MPVoUvtJMBAAA="
+      },
+      "Metadata": {
+        "aws:cdk:path": "PashashaPayNotificationsStack/CDKMetadata/Default"
+      }
+    }
+  },
+  "Outputs": {
+    "NotificationsApiUrl": {
+      "Value": {
+        "Fn::GetAtt": ["NotificationsHttpApiA8CC588B", "ApiEndpoint"]
+      }
+    },
+    "SmsProviderSecretArn": {
+      "Value": {
+        "Ref": "SmsProviderSecret885C9EAA"
+      }
+    },
+    "NotificationsCoreApiKeySecretArn": {
+      "Value": {
+        "Ref": "NotificationsCoreApiKeySecretCD37B093"
+      }
+    },
+    "NotificationsTableName": {
+      "Value": {
+        "Ref": "NotificationsTable76DCFC6C"
+      }
+    },
+    "ExportsOutputFnGetAttNotificationsHttpApiA8CC588BApiEndpointB242678E": {
+      "Value": {
+        "Fn::GetAtt": ["NotificationsHttpApiA8CC588B", "ApiEndpoint"]
+      },
+      "Export": {
+        "Name": "PashashaPayNotificationsStack:ExportsOutputFnGetAttNotificationsHttpApiA8CC588BApiEndpointB242678E"
+      }
+    },
+    "ExportsOutputRefNotificationsCoreApiKeySecretCD37B093BF2BCB37": {
+      "Value": {
+        "Ref": "NotificationsCoreApiKeySecretCD37B093"
+      },
+      "Export": {
+        "Name": "PashashaPayNotificationsStack:ExportsOutputRefNotificationsCoreApiKeySecretCD37B093BF2BCB37"
+      }
+    }
+  },
+  "Parameters": {
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Rules": {
+    "CheckBootstrapVersion": {
+      "Assertions": [
+        {
+          "Assert": {
+            "Fn::Not": [
+              {
+                "Fn::Contains": [
+                  ["1", "2", "3", "4", "5"],
+                  {
+                    "Ref": "BootstrapVersion"
+                  }
+                ]
+              }
+            ]
+          },
+          "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+        }
+      ]
+    }
+  }
+}

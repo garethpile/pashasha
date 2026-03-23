@@ -1,0 +1,2276 @@
+{
+  "version": "36.3.0",
+  "artifacts": {
+    "PashashaPayPaymentStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "PashashaPayPaymentStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "PashashaPayPaymentStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://701158128147/af-south-1",
+      "properties": {
+        "templateFile": "PashashaPayPaymentStack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Component": "payment",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "PaymentEngine": "ozow",
+          "Repo": "pashasha",
+          "ServiceGroup": "payments",
+          "Solution": "Pashasha"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-deploy-role-701158128147-af-south-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-cfn-exec-role-701158128147-af-south-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-701158128147-af-south-1/41ee514e4ed64c0aeff1b4dd6a17a1c3d0f7a93170bd22091d82734e2ffb6269.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": ["PashashaPayPaymentStack.assets"],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-lookup-role-701158128147-af-south-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": ["PashashaPayPaymentStack.assets"],
+      "metadata": {
+        "/PashashaPayPaymentStack": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Component",
+                "Value": "payment"
+              },
+              {
+                "Key": "Environment",
+                "Value": "unknown"
+              },
+              {
+                "Key": "Lifecycle",
+                "Value": "active"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Owner",
+                "Value": "Gareth"
+              },
+              {
+                "Key": "PaymentEngine",
+                "Value": "ozow"
+              },
+              {
+                "Key": "Repo",
+                "Value": "pashasha"
+              },
+              {
+                "Key": "ServiceGroup",
+                "Value": "payments"
+              },
+              {
+                "Key": "Solution",
+                "Value": "Pashasha"
+              }
+            ]
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentIntentsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "PaymentIntentsTableEC266E5C"
+            }
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentIntentsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentIntentsTableEC266E5C"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentEventsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "PaymentEventsTable2DE21DDB"
+            }
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentEventsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentEventsTable2DE21DDB"
+          }
+        ],
+        "/PashashaPayPaymentStack/OzowConfigSecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "OzowConfigSecret56FAC309"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentCoreApiKeySecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentCoreApiKeySecret080EEDAE"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentToCoreApiKeySecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentToCoreApiKeySecret7D13DE0A"
+          }
+        ],
+        "/PashashaPayPaymentStack/CreatePaymentIntentFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreatePaymentIntentFnServiceRoleE291D0F1"
+          }
+        ],
+        "/PashashaPayPaymentStack/CreatePaymentIntentFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreatePaymentIntentFnServiceRoleDefaultPolicyD5F1F24A"
+          }
+        ],
+        "/PashashaPayPaymentStack/CreatePaymentIntentFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreatePaymentIntentFn1F02CB52"
+          }
+        ],
+        "/PashashaPayPaymentStack/GetPaymentIntentFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetPaymentIntentFnServiceRole46B1291B"
+          }
+        ],
+        "/PashashaPayPaymentStack/GetPaymentIntentFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetPaymentIntentFnServiceRoleDefaultPolicyA24B03E5"
+          }
+        ],
+        "/PashashaPayPaymentStack/GetPaymentIntentFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetPaymentIntentFn8B6B7280"
+          }
+        ],
+        "/PashashaPayPaymentStack/CheckoutPlaceholderFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckoutPlaceholderFnServiceRoleA394F0D3"
+          }
+        ],
+        "/PashashaPayPaymentStack/CheckoutPlaceholderFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckoutPlaceholderFnServiceRoleDefaultPolicy61E8BAF7"
+          }
+        ],
+        "/PashashaPayPaymentStack/CheckoutPlaceholderFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckoutPlaceholderFnDD2F03C0"
+          }
+        ],
+        "/PashashaPayPaymentStack/OzowCallbackFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "OzowCallbackFnServiceRoleBAD308AE"
+          }
+        ],
+        "/PashashaPayPaymentStack/OzowCallbackFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "OzowCallbackFnServiceRoleDefaultPolicy23C56DF9"
+          }
+        ],
+        "/PashashaPayPaymentStack/OzowCallbackFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "OzowCallbackFn05E41AED"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApi7F446C8A"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/DefaultStage/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiDefaultStage678EF67C"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/POST--internal--payment-intents/CreatePaymentIntentIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiPOSTinternalpaymentintentsCreatePaymentIntentIntegrationC0360097"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/POST--internal--payment-intents/CreatePaymentIntentIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiPOSTinternalpaymentintentsCreatePaymentIntentIntegrationPermissionC9E8738B"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/POST--internal--payment-intents/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiPOSTinternalpaymentintents4C7DE89E"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/GET--internal--payment-intents--{paymentIntentId}/GetPaymentIntentIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiGETinternalpaymentintentspaymentIntentIdGetPaymentIntentIntegrationA3FD2320"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/GET--internal--payment-intents--{paymentIntentId}/GetPaymentIntentIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiGETinternalpaymentintentspaymentIntentIdGetPaymentIntentIntegrationPermissionB32745CB"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/GET--internal--payment-intents--{paymentIntentId}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiGETinternalpaymentintentspaymentIntentId3B9DF9DC"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/GET--checkout--{paymentIntentId}/CheckoutPlaceholderIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiGETcheckoutpaymentIntentIdCheckoutPlaceholderIntegration55E290E9"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/GET--checkout--{paymentIntentId}/CheckoutPlaceholderIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiGETcheckoutpaymentIntentIdCheckoutPlaceholderIntegrationPermissionC2884EDE"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/GET--checkout--{paymentIntentId}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiGETcheckoutpaymentIntentId5DC01068"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/POST--callbacks--ozow/OzowCallbackIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiPOSTcallbacksozowOzowCallbackIntegration5D527107"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/POST--callbacks--ozow/OzowCallbackIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiPOSTcallbacksozowOzowCallbackIntegrationPermission1CAC32D9"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentHttpApi/POST--callbacks--ozow/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentHttpApiPOSTcallbacksozow0B05634D"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentApiUrl"
+          }
+        ],
+        "/PashashaPayPaymentStack/OzowConfigSecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "OzowConfigSecretArn"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentCoreApiKeySecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentCoreApiKeySecretArn"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentToCoreApiKeySecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentToCoreApiKeySecretArn"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentIntentsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentIntentsTableName"
+          }
+        ],
+        "/PashashaPayPaymentStack/PaymentEventsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "PaymentEventsTableName"
+          }
+        ],
+        "/PashashaPayPaymentStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/PashashaPayPaymentStack/Exports/Output{\"Fn::GetAtt\":[\"PaymentHttpApi7F446C8A\",\"ApiEndpoint\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttPaymentHttpApi7F446C8AApiEndpointF637A7D2"
+          }
+        ],
+        "/PashashaPayPaymentStack/Exports/Output{\"Ref\":\"PaymentCoreApiKeySecret080EEDAE\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefPaymentCoreApiKeySecret080EEDAEB7CF9979"
+          }
+        ],
+        "/PashashaPayPaymentStack/Exports/Output{\"Ref\":\"PaymentToCoreApiKeySecret7D13DE0A\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefPaymentToCoreApiKeySecret7D13DE0AE2936DCC"
+          }
+        ],
+        "/PashashaPayPaymentStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/PashashaPayPaymentStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "PashashaPayPaymentStack"
+    },
+    "PashashaPayNotificationsStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "PashashaPayNotificationsStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "PashashaPayNotificationsStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://701158128147/af-south-1",
+      "properties": {
+        "templateFile": "PashashaPayNotificationsStack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Component": "notifications",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "Repo": "pashasha",
+          "ServiceGroup": "comms",
+          "Solution": "Pashasha"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-deploy-role-701158128147-af-south-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-cfn-exec-role-701158128147-af-south-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-701158128147-af-south-1/906d6fa1003581cdd3743178f502fd537acf054eab0a98fde152036ec404a67b.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": ["PashashaPayNotificationsStack.assets"],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-lookup-role-701158128147-af-south-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": ["PashashaPayNotificationsStack.assets"],
+      "metadata": {
+        "/PashashaPayNotificationsStack": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Component",
+                "Value": "notifications"
+              },
+              {
+                "Key": "Environment",
+                "Value": "unknown"
+              },
+              {
+                "Key": "Lifecycle",
+                "Value": "active"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Owner",
+                "Value": "Gareth"
+              },
+              {
+                "Key": "Repo",
+                "Value": "pashasha"
+              },
+              {
+                "Key": "ServiceGroup",
+                "Value": "comms"
+              },
+              {
+                "Key": "Solution",
+                "Value": "Pashasha"
+              }
+            ]
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "NotificationsTable76DCFC6C"
+            }
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsTable76DCFC6C"
+          }
+        ],
+        "/PashashaPayNotificationsStack/SmsProviderSecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SmsProviderSecret885C9EAA"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsCoreApiKeySecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsCoreApiKeySecretCD37B093"
+          }
+        ],
+        "/PashashaPayNotificationsStack/SendNotificationFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SendNotificationFnServiceRole0F726917"
+          }
+        ],
+        "/PashashaPayNotificationsStack/SendNotificationFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SendNotificationFnServiceRoleDefaultPolicy28648AE6"
+          }
+        ],
+        "/PashashaPayNotificationsStack/SendNotificationFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SendNotificationFn66C7E1C6"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsHttpApi/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsHttpApiA8CC588B"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsHttpApi/DefaultStage/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsHttpApiDefaultStageD3683FF0"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsHttpApi/POST--internal--notifications--send/SendNotificationIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsHttpApiPOSTinternalnotificationssendSendNotificationIntegration9848EA71"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsHttpApi/POST--internal--notifications--send/SendNotificationIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsHttpApiPOSTinternalnotificationssendSendNotificationIntegrationPermission8307DCF5"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsHttpApi/POST--internal--notifications--send/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsHttpApiPOSTinternalnotificationssend2FF1DA8D"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsApiUrl"
+          }
+        ],
+        "/PashashaPayNotificationsStack/SmsProviderSecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SmsProviderSecretArn"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsCoreApiKeySecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsCoreApiKeySecretArn"
+          }
+        ],
+        "/PashashaPayNotificationsStack/NotificationsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "NotificationsTableName"
+          }
+        ],
+        "/PashashaPayNotificationsStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/PashashaPayNotificationsStack/Exports/Output{\"Fn::GetAtt\":[\"NotificationsHttpApiA8CC588B\",\"ApiEndpoint\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttNotificationsHttpApiA8CC588BApiEndpointB242678E"
+          }
+        ],
+        "/PashashaPayNotificationsStack/Exports/Output{\"Ref\":\"NotificationsCoreApiKeySecretCD37B093\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefNotificationsCoreApiKeySecretCD37B093BF2BCB37"
+          }
+        ],
+        "/PashashaPayNotificationsStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/PashashaPayNotificationsStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "PashashaPayNotificationsStack"
+    },
+    "PashashaPayVoucherStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "PashashaPayVoucherStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "PashashaPayVoucherStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://701158128147/af-south-1",
+      "properties": {
+        "templateFile": "PashashaPayVoucherStack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Component": "voucher",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "Repo": "pashasha",
+          "ServiceGroup": "payouts",
+          "Solution": "Pashasha"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-deploy-role-701158128147-af-south-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-cfn-exec-role-701158128147-af-south-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-701158128147-af-south-1/d678e11fb3b94127a341c69947425646de10b8c15e98a5b80e765ea2953a44c1.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": ["PashashaPayVoucherStack.assets"],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-lookup-role-701158128147-af-south-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": ["PashashaPayVoucherStack.assets"],
+      "metadata": {
+        "/PashashaPayVoucherStack": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Component",
+                "Value": "voucher"
+              },
+              {
+                "Key": "Environment",
+                "Value": "unknown"
+              },
+              {
+                "Key": "Lifecycle",
+                "Value": "active"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Owner",
+                "Value": "Gareth"
+              },
+              {
+                "Key": "Repo",
+                "Value": "pashasha"
+              },
+              {
+                "Key": "ServiceGroup",
+                "Value": "payouts"
+              },
+              {
+                "Key": "Solution",
+                "Value": "Pashasha"
+              }
+            ]
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherInventoryTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "VoucherInventoryTable0E242750"
+            }
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherInventoryTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherInventoryTable0E242750"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAllocationsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "VoucherAllocationsTable7B2B5E04"
+            }
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAllocationsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAllocationsTable7B2B5E04"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherBarcodeRegistryTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "VoucherBarcodeRegistryTable141E1453"
+            }
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherBarcodeRegistryTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherBarcodeRegistryTable141E1453"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAuditTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "VoucherAuditTableE75066EE"
+            }
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAuditTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAuditTableE75066EE"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretB4937580"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecretInitializerFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretInitializerFnServiceRole094A898B"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecretInitializerFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretInitializerFnServiceRoleDefaultPolicy84161E86"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecretInitializerFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretInitializerFnD17EEE4A"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecretInitializerProvider/framework-onEvent/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretInitializerProviderframeworkonEventServiceRole4EA27927"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecretInitializerProvider/framework-onEvent/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretInitializerProviderframeworkonEventServiceRoleDefaultPolicyD726CC96"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecretInitializerProvider/framework-onEvent/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretInitializerProviderframeworkonEvent673A599C"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecretInitializer/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretInitializer"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAdminApiKeySecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAdminApiKeySecret1465ADF6"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherCoreApiKeySecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherCoreApiKeySecret9A0EF0E4"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherTelegramBotTokenSecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherTelegramBotTokenSecret25359AE9"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherTelegramWebhookSecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherTelegramWebhookSecret74F2132D"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherIngestFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherIngestFnServiceRoleBFF024E5"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherIngestFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherIngestFnServiceRoleDefaultPolicyAE76A4E7"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherIngestFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherIngestFn75931A8D"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherListInventoryFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherListInventoryFnServiceRole189F0E5D"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherListInventoryFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherListInventoryFnServiceRoleDefaultPolicyF920FEDB"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherListInventoryFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherListInventoryFnC6F6B5C9"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAllocateFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAllocateFnServiceRole56216522"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAllocateFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAllocateFnServiceRoleDefaultPolicy09C159DC"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAllocateFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAllocateFnDAF88923"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherGetAvailableDenominationsFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherGetAvailableDenominationsFnServiceRole4D10E6D8"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherGetAvailableDenominationsFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherGetAvailableDenominationsFnServiceRoleDefaultPolicyA22B7103"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherGetAvailableDenominationsFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherGetAvailableDenominationsFnB8ED0D8C"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherTelegramWebhookFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherTelegramWebhookFnServiceRole06A1C32D"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherTelegramWebhookFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherTelegramWebhookFnServiceRoleDefaultPolicy0152A1DA"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherTelegramWebhookFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherTelegramWebhookFnE036CBE4"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApi3F8B6430"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/DefaultStage/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiDefaultStageF2761175"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--api--admin--vouchers--suppliers--shoprite-checkers--ingest/VoucherIngestIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTapiadminvoucherssuppliersshopritecheckersingestVoucherIngestIntegrationCBBADDC3"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--api--admin--vouchers--suppliers--shoprite-checkers--ingest/VoucherIngestIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTapiadminvoucherssuppliersshopritecheckersingestVoucherIngestIntegrationPermission507DB6B3"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--api--admin--vouchers--suppliers--shoprite-checkers--ingest/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTapiadminvoucherssuppliersshopritecheckersingestD1AAC997"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/GET--api--admin--vouchers--inventory/VoucherListInventoryIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiGETapiadminvouchersinventoryVoucherListInventoryIntegrationF1930FB7"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/GET--api--admin--vouchers--inventory/VoucherListInventoryIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiGETapiadminvouchersinventoryVoucherListInventoryIntegrationPermissionED2B0885"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/GET--api--admin--vouchers--inventory/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiGETapiadminvouchersinventory85EA3015"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--internal--allocations/VoucherAllocateIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTinternalallocationsVoucherAllocateIntegration71ACD801"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--internal--allocations/VoucherAllocateIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTinternalallocationsVoucherAllocateIntegrationPermission2C006FB2"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--internal--allocations/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTinternalallocations69F2CD59"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/GET--internal--availability/VoucherGetAvailableDenominationsIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiGETinternalavailabilityVoucherGetAvailableDenominationsIntegrationDF59D828"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/GET--internal--availability/VoucherGetAvailableDenominationsIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiGETinternalavailabilityVoucherGetAvailableDenominationsIntegrationPermission6191E599"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/GET--internal--availability/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiGETinternalavailability1ADB8E68"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--webhooks--telegram--vouchers/VoucherTelegramWebhookIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTwebhookstelegramvouchersVoucherTelegramWebhookIntegration63FB2436"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--webhooks--telegram--vouchers/VoucherTelegramWebhookIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTwebhookstelegramvouchersVoucherTelegramWebhookIntegrationPermission4E2B7F7F"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherV2HttpApi/POST--webhooks--telegram--vouchers/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherV2HttpApiPOSTwebhookstelegramvouchers8E727323"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherApiUrl"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherVaultSecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherVaultSecretArn"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAdminApiKeySecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAdminApiKeySecretArn"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherCoreApiKeySecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherCoreApiKeySecretArn"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherTelegramBotTokenSecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherTelegramBotTokenSecretArn"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherTelegramWebhookSecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherTelegramWebhookSecretArn"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherInventoryTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherInventoryTableName"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherBarcodeRegistryTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherBarcodeRegistryTableName"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAllocationsTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAllocationsTableName"
+          }
+        ],
+        "/PashashaPayVoucherStack/VoucherAuditTableName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "VoucherAuditTableName"
+          }
+        ],
+        "/PashashaPayVoucherStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/PashashaPayVoucherStack/Exports/Output{\"Fn::GetAtt\":[\"VoucherV2HttpApi3F8B6430\",\"ApiEndpoint\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttVoucherV2HttpApi3F8B6430ApiEndpoint45B17604"
+          }
+        ],
+        "/PashashaPayVoucherStack/Exports/Output{\"Ref\":\"VoucherCoreApiKeySecret9A0EF0E4\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefVoucherCoreApiKeySecret9A0EF0E472DD1614"
+          }
+        ],
+        "/PashashaPayVoucherStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/PashashaPayVoucherStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "PashashaPayVoucherStack"
+    },
+    "PashashaPayCoreBackendStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "PashashaPayCoreBackendStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "PashashaPayCoreBackendStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://701158128147/af-south-1",
+      "properties": {
+        "templateFile": "PashashaPayCoreBackendStack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Component": "core-backend",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "Repo": "pashasha",
+          "ServiceGroup": "core",
+          "Solution": "Pashasha"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-deploy-role-701158128147-af-south-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-cfn-exec-role-701158128147-af-south-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-701158128147-af-south-1/e6c6cf1c9cfd74cedcdeb64a6e45e82cacdb8fe4cfa7623ed66641d791a138a6.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": ["PashashaPayCoreBackendStack.assets"],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-lookup-role-701158128147-af-south-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "PashashaPayPaymentStack",
+        "PashashaPayVoucherStack",
+        "PashashaPayNotificationsStack",
+        "PashashaPayCoreBackendStack.assets"
+      ],
+      "metadata": {
+        "/PashashaPayCoreBackendStack": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Component",
+                "Value": "core-backend"
+              },
+              {
+                "Key": "Environment",
+                "Value": "unknown"
+              },
+              {
+                "Key": "Lifecycle",
+                "Value": "active"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Owner",
+                "Value": "Gareth"
+              },
+              {
+                "Key": "Repo",
+                "Value": "pashasha"
+              },
+              {
+                "Key": "ServiceGroup",
+                "Value": "core"
+              },
+              {
+                "Key": "Solution",
+                "Value": "Pashasha"
+              }
+            ]
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreUserPool/smsRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreUserPoolsmsRoleFD39A2E7"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreUserPool/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreUserPoolD16FE657"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreUserPool/CoreWebClient/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreUserPoolCoreWebClient8008843D"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreAdministratorsGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreAdministratorsGroup"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreCustomersGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreCustomersGroup"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreCivilServantsGroup": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreCivilServantsGroup"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/TransactionsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "TransactionsTable0A011FCB"
+            }
+          }
+        ],
+        "/PashashaPayCoreBackendStack/TransactionsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TransactionsTable0A011FCB"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ProfilesTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "ProfilesTable3B48B4C6"
+            }
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ProfilesTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProfilesTable3B48B4C6"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/AuditTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "AuditTableB07F8EEB"
+            }
+          }
+        ],
+        "/PashashaPayCoreBackendStack/AuditTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AuditTableB07F8EEB"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/AccountSequencesTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "AccountSequencesTable68E4543C"
+            }
+          }
+        ],
+        "/PashashaPayCoreBackendStack/AccountSequencesTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AccountSequencesTable68E4543C"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreApiAccessLogs/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreApiAccessLogsFFFC469D"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApi55AAB9AA"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/DefaultStage/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiDefaultStage0855BBC3"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--health/CoreHealthIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapihealthCoreHealthIntegration0A806CC1"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--health/CoreHealthIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapihealthCoreHealthIntegrationPermissionD98CF234"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--health/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapihealth0113938D"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--api--admin--civil-servants/CreateCivilServantIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTapiadmincivilservantsCreateCivilServantIntegrationE3C2D23C"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--api--admin--civil-servants/CreateCivilServantIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTapiadmincivilservantsCreateCivilServantIntegrationPermission3F672C00"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--api--admin--civil-servants/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTapiadmincivilservantsBE5AA9DF"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--public--civil-servants--lookup/LookupCivilServantIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapipubliccivilservantslookupLookupCivilServantIntegration6871F661"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--public--civil-servants--lookup/LookupCivilServantIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapipubliccivilservantslookupLookupCivilServantIntegrationPermissionF306AA4A"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--public--civil-servants--lookup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapipubliccivilservantslookupAF29A3D6"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--lookup/SearchCivilServantsIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantslookupSearchCivilServantsIntegration9A1BF487"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--lookup/SearchCivilServantsIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantslookupSearchCivilServantsIntegrationPermission17709EB7"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--lookup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantslookup6B0CA859"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--auth--check-email/CheckEmailIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETauthcheckemailCheckEmailIntegration16B9C322"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--auth--check-email/CheckEmailIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETauthcheckemailCheckEmailIntegrationPermissionEAE7A403"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--auth--check-email/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETauthcheckemailE56318D9"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--signup/SignupIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthsignupSignupIntegrationCB998036"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--signup/SignupIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthsignupSignupIntegrationPermissionCEFDDEF7"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--signup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthsignup2243824A"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--confirm-signup/ConfirmSignupIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthconfirmsignupConfirmSignupIntegrationF0E91F47"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--confirm-signup/ConfirmSignupIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthconfirmsignupConfirmSignupIntegrationPermission80DFC1A1"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--confirm-signup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthconfirmsignup40BAFF62"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--resend-signup-code/ResendSignupCodeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthresendsignupcodeResendSignupCodeIntegration78D83AFD"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--resend-signup-code/ResendSignupCodeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthresendsignupcodeResendSignupCodeIntegrationPermission21E8F538"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--auth--resend-signup-code/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTauthresendsignupcode6B943CCF"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me/GetCustomerMeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmeGetCustomerMeIntegrationB655CBDF"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me/GetCustomerMeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmeGetCustomerMeIntegrationPermission4A8E8D7D"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersme173C52E1"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/PUT--customers--me/UpdateCustomerMeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPUTcustomersmeUpdateCustomerMeIntegration1D36B769"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/PUT--customers--me/UpdateCustomerMeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPUTcustomersmeUpdateCustomerMeIntegrationPermission9E0F67D1"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/PUT--customers--me/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPUTcustomersme2A7BC033"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--transactions/ListCustomerTransactionsMeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmetransactionsListCustomerTransactionsMeIntegration0918FCF2"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--transactions/ListCustomerTransactionsMeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmetransactionsListCustomerTransactionsMeIntegrationPermissionC478C946"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--transactions/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmetransactionsA26C628F"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--transactions--sent/ListCustomerSentTransactionsMeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmetransactionssentListCustomerSentTransactionsMeIntegration854941E8"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--transactions--sent/ListCustomerSentTransactionsMeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmetransactionssentListCustomerSentTransactionsMeIntegrationPermission1AD0A8BB"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--transactions--sent/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmetransactionssentEDED1AE2"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--kyc/GetCustomerKycIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmekycGetCustomerKycIntegrationF7FD56F0"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--kyc/GetCustomerKycIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmekycGetCustomerKycIntegrationPermissionC359C805"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--customers--me--kyc/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcustomersmekycFF4DBEB6"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me/GetCivilServantMeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmeGetCivilServantMeIntegration9DC1FA19"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me/GetCivilServantMeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmeGetCivilServantMeIntegrationPermission0D3FD6D6"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsme5E30B8E1"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/PUT--civil-servants--me/UpdateCivilServantMeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPUTcivilservantsmeUpdateCivilServantMeIntegration12046D53"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/PUT--civil-servants--me/UpdateCivilServantMeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPUTcivilservantsmeUpdateCivilServantMeIntegrationPermission4AB4D5D5"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/PUT--civil-servants--me/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPUTcivilservantsmeF259137E"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--qr-code/GetCivilServantQrCodeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmeqrcodeGetCivilServantQrCodeIntegrationD10022F1"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--qr-code/GetCivilServantQrCodeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmeqrcodeGetCivilServantQrCodeIntegrationPermission71FC77D1"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--qr-code/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmeqrcode5AA27C52"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--kyc/GetCivilServantKycIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmekycGetCivilServantKycIntegration51794108"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--kyc/GetCivilServantKycIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmekycGetCivilServantKycIntegrationPermissionE9A88EBE"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--kyc/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmekyc455813D2"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--transactions/ListCivilServantTransactionsMeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmetransactionsListCivilServantTransactionsMeIntegrationA70A50C8"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--transactions/ListCivilServantTransactionsMeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmetransactionsListCivilServantTransactionsMeIntegrationPermission3E305831"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--transactions/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmetransactions8ABDAFD4"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--transactions--pending/ListCivilServantPendingTransactionsMeIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmetransactionspendingListCivilServantPendingTransactionsMeIntegration1712D710"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--transactions--pending/ListCivilServantPendingTransactionsMeIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmetransactionspendingListCivilServantPendingTransactionsMeIntegrationPermission0504C65F"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--civil-servants--me--transactions--pending/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETcivilservantsmetransactionspendingDA2277F6"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--api--public--payment-intents/CoreCreatePaymentIntentIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTapipublicpaymentintentsCoreCreatePaymentIntentIntegration3D251FD2"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--api--public--payment-intents/CoreCreatePaymentIntentIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTapipublicpaymentintentsCoreCreatePaymentIntentIntegrationPermissionA4A1B32E"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--api--public--payment-intents/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTapipublicpaymentintentsA1E23C49"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--public--payment-intents--{paymentIntentId}/CoreGetPaymentIntentIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapipublicpaymentintentspaymentIntentIdCoreGetPaymentIntentIntegration2303E3D7"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--public--payment-intents--{paymentIntentId}/CoreGetPaymentIntentIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapipublicpaymentintentspaymentIntentIdCoreGetPaymentIntentIntegrationPermissionBA0C1781"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/GET--api--public--payment-intents--{paymentIntentId}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiGETapipublicpaymentintentspaymentIntentId77C5341D"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--internal--payments--{paymentIntentId}--confirm/CoreConfirmPaymentIntegration/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTinternalpaymentspaymentIntentIdconfirmCoreConfirmPaymentIntegrationB5E4CADC"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--internal--payments--{paymentIntentId}--confirm/CoreConfirmPaymentIntegration-Permission": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTinternalpaymentspaymentIntentIdconfirmCoreConfirmPaymentIntegrationPermission10F4E6D9"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHttpApi/POST--internal--payments--{paymentIntentId}--confirm/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHttpApiPOSTinternalpaymentspaymentIntentIdconfirm7A1F0279"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreAdminApiKeySecret/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreAdminApiKeySecretD7774FB8"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHealthFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHealthFnServiceRole3BD77445"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreHealthFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreHealthFnCD515502"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CreateCivilServantFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreateCivilServantFnServiceRoleD3508CAA"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CreateCivilServantFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreateCivilServantFnServiceRoleDefaultPolicyB2FD07A0"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CreateCivilServantFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CreateCivilServantFn9B954893"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/LookupCivilServantFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LookupCivilServantFnServiceRole6038F9E9"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/LookupCivilServantFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LookupCivilServantFnServiceRoleDefaultPolicyCA3AB0B6"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/LookupCivilServantFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "LookupCivilServantFn7000F607"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/SearchCivilServantsFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SearchCivilServantsFnServiceRoleCBBC88EB"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/SearchCivilServantsFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SearchCivilServantsFnServiceRoleDefaultPolicyEC70C6D2"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/SearchCivilServantsFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SearchCivilServantsFn3A2CA9C9"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CheckEmailFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckEmailFnServiceRoleF22EE4AA"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CheckEmailFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckEmailFnServiceRoleDefaultPolicy880CD4F7"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CheckEmailFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckEmailFn97850348"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/SignupFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SignupFnServiceRoleB51FBFF1"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/SignupFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SignupFnServiceRoleDefaultPolicyB45D8679"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/SignupFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SignupFn336C4F73"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ConfirmSignupFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ConfirmSignupFnServiceRoleB1622259"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ConfirmSignupFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ConfirmSignupFnServiceRoleDefaultPolicyB726336A"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ConfirmSignupFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ConfirmSignupFnDA5DE501"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ResendSignupCodeFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ResendSignupCodeFnServiceRole873A211F"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ResendSignupCodeFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ResendSignupCodeFnServiceRoleDefaultPolicyA07AC044"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ResendSignupCodeFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ResendSignupCodeFnB5847F35"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreCreatePaymentIntentFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreCreatePaymentIntentFnServiceRole7BF89D22"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreCreatePaymentIntentFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreCreatePaymentIntentFnServiceRoleDefaultPolicyA2C81323"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreCreatePaymentIntentFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreCreatePaymentIntentFn84BD66FB"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreGetPaymentIntentFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreGetPaymentIntentFnServiceRoleBB9EEF24"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreGetPaymentIntentFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreGetPaymentIntentFnServiceRoleDefaultPolicy8AF9852C"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreGetPaymentIntentFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreGetPaymentIntentFn3AA1958F"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreConfirmPaymentFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreConfirmPaymentFnServiceRoleF9737C66"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreConfirmPaymentFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreConfirmPaymentFnServiceRoleDefaultPolicyC6212E7D"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreConfirmPaymentFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreConfirmPaymentFnB13EA666"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCustomerMeFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCustomerMeFnServiceRoleDCADE203"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCustomerMeFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCustomerMeFnServiceRoleDefaultPolicy10175E7C"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCustomerMeFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCustomerMeFn83D767B3"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/UpdateCustomerMeFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UpdateCustomerMeFnServiceRole97F17E23"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/UpdateCustomerMeFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UpdateCustomerMeFnServiceRoleDefaultPolicy7CAB3FB3"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/UpdateCustomerMeFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UpdateCustomerMeFn5F195467"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCustomerKycFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCustomerKycFnServiceRole20225F9C"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCustomerKycFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCustomerKycFnServiceRoleDefaultPolicy2FBE5DCE"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCustomerKycFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCustomerKycFnB9D5D848"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantMeFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantMeFnServiceRoleDF72AA22"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantMeFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantMeFnServiceRoleDefaultPolicy73A4BF26"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantMeFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantMeFn1F2F7D11"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/UpdateCivilServantMeFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UpdateCivilServantMeFnServiceRole6131D10E"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/UpdateCivilServantMeFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UpdateCivilServantMeFnServiceRoleDefaultPolicy17F88A9D"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/UpdateCivilServantMeFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "UpdateCivilServantMeFn108C95B7"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantQrCodeFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantQrCodeFnServiceRole13D9A47D"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantQrCodeFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantQrCodeFnServiceRoleDefaultPolicy25FEE0BE"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantQrCodeFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantQrCodeFn29BD491A"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantKycFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantKycFnServiceRole0C3B1DAC"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantKycFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantKycFnServiceRoleDefaultPolicy813AA086"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/GetCivilServantKycFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "GetCivilServantKycFnA0C566A4"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ListCustomerTransactionsMeFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListCustomerTransactionsMeFnServiceRole5E69B683"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ListCustomerTransactionsMeFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListCustomerTransactionsMeFnServiceRoleDefaultPolicy1083E62B"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ListCustomerTransactionsMeFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListCustomerTransactionsMeFn5B1A3049"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ListCivilServantTransactionsMeFn/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListCivilServantTransactionsMeFnServiceRole1C2DC3D5"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ListCivilServantTransactionsMeFn/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListCivilServantTransactionsMeFnServiceRoleDefaultPolicy19B4DC14"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/ListCivilServantTransactionsMeFn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ListCivilServantTransactionsMeFnB3C1AFED"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreApiUrl"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreUserPoolId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreUserPoolId"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreUserPoolClientId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreUserPoolClientId"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CorePaymentApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CorePaymentApiUrl"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreVoucherApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreVoucherApiUrl"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreNotificationsApiUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreNotificationsApiUrl"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CoreAdminApiKeySecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CoreAdminApiKeySecretArn"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/PashashaPayCoreBackendStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "PashashaPayCoreBackendStack"
+    },
+    "PashashaPayFrontendStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "PashashaPayFrontendStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "PashashaPayFrontendStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://701158128147/af-south-1",
+      "properties": {
+        "templateFile": "PashashaPayFrontendStack.template.json",
+        "terminationProtection": false,
+        "tags": {
+          "Component": "frontend",
+          "Environment": "unknown",
+          "Lifecycle": "active",
+          "ManagedBy": "CDK",
+          "Owner": "Gareth",
+          "Repo": "pashasha",
+          "ServiceGroup": "ui",
+          "Solution": "Pashasha"
+        },
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-deploy-role-701158128147-af-south-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-cfn-exec-role-701158128147-af-south-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-701158128147-af-south-1/64171d49a0735f6e5d17a88a452fd79f8a0cfaf140b3181145728c36c1a37a8a.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": ["PashashaPayFrontendStack.assets"],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-lookup-role-701158128147-af-south-1",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": ["PashashaPayFrontendStack.assets"],
+      "metadata": {
+        "/PashashaPayFrontendStack": [
+          {
+            "type": "aws:cdk:stack-tags",
+            "data": [
+              {
+                "Key": "Component",
+                "Value": "frontend"
+              },
+              {
+                "Key": "Environment",
+                "Value": "unknown"
+              },
+              {
+                "Key": "Lifecycle",
+                "Value": "active"
+              },
+              {
+                "Key": "ManagedBy",
+                "Value": "CDK"
+              },
+              {
+                "Key": "Owner",
+                "Value": "Gareth"
+              },
+              {
+                "Key": "Repo",
+                "Value": "pashasha"
+              },
+              {
+                "Key": "ServiceGroup",
+                "Value": "ui"
+              },
+              {
+                "Key": "Solution",
+                "Value": "Pashasha"
+              }
+            ]
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendSiteBucket/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendSiteBucket127F9FA2"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendSiteBucket/Policy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendSiteBucketPolicy31FDEF56"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendUrlRewriteFunction/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendUrlRewriteFunctionFC454CC9"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendDistribution/Origin1/S3Origin/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendDistributionOrigin1S3OriginC94250A2"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendDistribution/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendDistributionE6EAF405"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendDeployment/AwsCliLayer/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendDeploymentAwsCliLayer77737BA0"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendDeployment/CustomResource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendDeploymentCustomResource068A52DB"
+          }
+        ],
+        "/PashashaPayFrontendStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C": [
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 2
+          }
+        ],
+        "/PashashaPayFrontendStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265"
+          }
+        ],
+        "/PashashaPayFrontendStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/ServiceRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF"
+          }
+        ],
+        "/PashashaPayFrontendStack/Custom::CDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendBucketName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendBucketName"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendDistributionId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendDistributionId"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendDistributionDomainName": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendDistributionDomainName"
+          }
+        ],
+        "/PashashaPayFrontendStack/FrontendUrl": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "FrontendUrl"
+          }
+        ],
+        "/PashashaPayFrontendStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/PashashaPayFrontendStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/PashashaPayFrontendStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "PashashaPayFrontendStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

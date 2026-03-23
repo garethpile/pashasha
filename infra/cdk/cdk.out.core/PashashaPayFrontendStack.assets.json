@@ -1,0 +1,62 @@
+{
+  "version": "36.3.0",
+  "files": {
+    "d3adb8f8245549682ed42bc738adfed018ab3d9442ade840a7f42553830499d4": {
+      "source": {
+        "path": "asset.d3adb8f8245549682ed42bc738adfed018ab3d9442ade840a7f42553830499d4.zip",
+        "packaging": "file"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "d3adb8f8245549682ed42bc738adfed018ab3d9442ade840a7f42553830499d4.zip",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    },
+    "0158f40002a8c211635388a87874fd4dcc3d68f525fe08a0fe0f014069ae539c": {
+      "source": {
+        "path": "asset.0158f40002a8c211635388a87874fd4dcc3d68f525fe08a0fe0f014069ae539c",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "0158f40002a8c211635388a87874fd4dcc3d68f525fe08a0fe0f014069ae539c.zip",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    },
+    "19448588feb6cf1b364d1c3a7adfaf9c736efb92ea3b95faec06f56aa83bc40c": {
+      "source": {
+        "path": "asset.19448588feb6cf1b364d1c3a7adfaf9c736efb92ea3b95faec06f56aa83bc40c",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "19448588feb6cf1b364d1c3a7adfaf9c736efb92ea3b95faec06f56aa83bc40c.zip",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    },
+    "64171d49a0735f6e5d17a88a452fd79f8a0cfaf140b3181145728c36c1a37a8a": {
+      "source": {
+        "path": "PashashaPayFrontendStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "701158128147-af-south-1": {
+          "bucketName": "cdk-hnb659fds-assets-701158128147-af-south-1",
+          "objectKey": "64171d49a0735f6e5d17a88a452fd79f8a0cfaf140b3181145728c36c1a37a8a.json",
+          "region": "af-south-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::701158128147:role/cdk-hnb659fds-file-publishing-role-701158128147-af-south-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

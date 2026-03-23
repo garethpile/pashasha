@@ -8,6 +8,14 @@ import { persistSession } from '../../lib/auth/session';
 
 type Stage = 'login' | 'forceChange' | 'forgotRequest' | 'forgotConfirm';
 
+function normalizeChallengeAttributes(attributes: Record<string, string>) {
+  const next = { ...attributes };
+  delete next.email_verified;
+  delete next.phone_number_verified;
+  delete next.sub;
+  return next;
+}
+
 export default function LoginPage() {
   const userPoolId = process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || '';
   const clientId = process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || '';
@@ -24,8 +32,12 @@ export default function LoginPage() {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [challengeUser, setChallengeUser] = useState<CognitoUser | null>(null);
+  const [challengeAttributes, setChallengeAttributes] = useState<Record<string, string>>({});
+  const [requiredChallengeAttributes, setRequiredChallengeAttributes] = useState<string[]>([]);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [forceGivenName, setForceGivenName] = useState('');
+  const [forceFamilyName, setForceFamilyName] = useState('');
   const [forgotUser, setForgotUser] = useState<CognitoUser | null>(null);
   const [resetCode, setResetCode] = useState('');
   const [resetPassword, setResetPassword] = useState('');
@@ -80,8 +92,13 @@ export default function LoginPage() {
         onSuccess: (result) => {
           handleAuthSuccess(result);
         },
-        newPasswordRequired: () => {
+        newPasswordRequired: (userAttributes, requiredAttributes) => {
+          const normalizedAttributes = normalizeChallengeAttributes(userAttributes ?? {});
           setChallengeUser(user);
+          setChallengeAttributes(normalizedAttributes);
+          setRequiredChallengeAttributes(requiredAttributes ?? []);
+          setForceGivenName(normalizedAttributes.given_name ?? '');
+          setForceFamilyName(normalizedAttributes.family_name ?? '');
           setStage('forceChange');
           setPending(false);
           setFeedback('Please set a new password before continuing.');
@@ -104,22 +121,39 @@ export default function LoginPage() {
       setFeedback('Passwords do not match.');
       return;
     }
+    const nextAttributes = {
+      ...challengeAttributes,
+      ...(requiredChallengeAttributes.includes('given_name') || forceGivenName
+        ? { given_name: forceGivenName.trim() }
+        : {}),
+      ...(requiredChallengeAttributes.includes('family_name') || forceFamilyName
+        ? { family_name: forceFamilyName.trim() }
+        : {}),
+    };
+    if (requiredChallengeAttributes.includes('given_name') && !nextAttributes.given_name) {
+      setFeedback('First name is required.');
+      return;
+    }
+    if (requiredChallengeAttributes.includes('family_name') && !nextAttributes.family_name) {
+      setFeedback('Last name is required.');
+      return;
+    }
     setPending(true);
-    challengeUser.completeNewPasswordChallenge(
-      newPassword,
-      {},
-      {
-        onSuccess: (result) => {
-          setNewPassword('');
-          setConfirmPassword('');
-          handleAuthSuccess(result);
-        },
-        onFailure: (err) => {
-          setPending(false);
-          setFeedback(err.message ?? 'Unable to update password.');
-        },
-      }
-    );
+    challengeUser.completeNewPasswordChallenge(newPassword, nextAttributes, {
+      onSuccess: (result) => {
+        setNewPassword('');
+        setConfirmPassword('');
+        setChallengeAttributes({});
+        setRequiredChallengeAttributes([]);
+        setForceGivenName('');
+        setForceFamilyName('');
+        handleAuthSuccess(result);
+      },
+      onFailure: (err) => {
+        setPending(false);
+        setFeedback(err.message ?? 'Unable to update password.');
+      },
+    });
   };
 
   const handleForgotRequest = (event: FormEvent) => {
@@ -183,13 +217,13 @@ export default function LoginPage() {
       className="space-y-6 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
     >
       <label className="text-sm font-semibold text-slate-600">
-        Username or email
+        Username, email or phone
         <input
           required
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-base shadow-inner focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-200"
-          placeholder="you@example.com"
+          placeholder="you@example.com or +27..."
         />
       </label>
       <label className="text-sm font-semibold text-slate-600">
@@ -232,6 +266,29 @@ export default function LoginPage() {
       <p className="text-sm text-slate-600">
         Enter a new password to complete your first-time sign-in.
       </p>
+      {(requiredChallengeAttributes.includes('given_name') ||
+        requiredChallengeAttributes.includes('family_name')) && (
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="text-sm font-semibold text-slate-600">
+            First name
+            <input
+              required={requiredChallengeAttributes.includes('given_name')}
+              value={forceGivenName}
+              onChange={(e) => setForceGivenName(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+            />
+          </label>
+          <label className="text-sm font-semibold text-slate-600">
+            Last name
+            <input
+              required={requiredChallengeAttributes.includes('family_name')}
+              value={forceFamilyName}
+              onChange={(e) => setForceFamilyName(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+            />
+          </label>
+        </div>
+      )}
       <label className="text-sm font-semibold text-slate-600">
         New password
         <input

@@ -25,5 +25,14 @@
   "hosted-zone:account=701158128147:domainName=pashasha.com:region=eu-west-1": {
     "Id": "/hostedzone/Z07482111XTU7482PPQXE",
     "Name": "pashasha.com."
+  },
+  "availability-zones:account=701158128147:region=af-south-1": [
+    "af-south-1a",
+    "af-south-1b",
+    "af-south-1c"
+  ],
+  "hosted-zone:account=701158128147:domainName=pashasha.com:region=af-south-1": {
+    "Id": "/hostedzone/Z07482111XTU7482PPQXE",
+    "Name": "pashasha.com."
   }
 }

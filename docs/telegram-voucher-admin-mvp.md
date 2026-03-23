@@ -2,9 +2,9 @@
 
 ## What exists in this repo
 
-- **Backend**: NestJS API in `apps/backend`
+- **Backend**: archived NestJS API in `.archive/apps/backend`
 - **Web admin**: Next.js admin console in `apps/frontend`
-- **Voucher payout service**: separate service in `apps/voucher-service`
+- **Voucher payout service**: archived legacy service in `.archive/apps/voucher-service`
 - **Telegram bot**: **not present in this repo**
 
 That means the clean MVP is to keep the Telegram bot dumb and let the backend do the sensitive work.

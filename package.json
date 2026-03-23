@@ -5,18 +5,13 @@
   "description": "QR-based tipping platform for security guards",
   "workspaces": [
     "apps/frontend",
-    "apps/backend",
-    "apps/flash-backend",
-    "apps/voucher-service",
     "packages/contracts"
   ],
   "scripts": {
-    "dev": "npm-run-all --parallel dev:backend dev:frontend",
+    "dev": "npm-run-all --parallel dev:frontend",
     "dev:frontend": "npm run dev --workspace frontend",
-    "dev:backend": "npm run start:dev --workspace backend",
-    "build": "npm-run-all build:backend build:frontend",
+    "build": "npm-run-all build:frontend",
     "build:frontend": "npm run build --workspace frontend",
-    "build:backend": "npm run build --workspace backend",
     "smoke:backend": "./infra/scripts/backend-smoke-test.sh",
     "lint": "npm run lint --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
