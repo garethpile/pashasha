@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '../../lib/auth/session';
@@ -17,25 +17,21 @@ const resolveProfileDestination = () => {
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [destination, setDestination] = useState<string | null>(null);
+  const destination = resolveProfileDestination();
 
   useEffect(() => {
-    const next = resolveProfileDestination();
-    setDestination(next);
-    router.replace(next);
-  }, [router]);
+    router.replace(destination);
+  }, [destination, router]);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-4xl flex-col items-center justify-center gap-4 px-4 pb-16 pt-20 sm:px-6 lg:px-8">
       <p className="text-sm text-slate-600">Redirecting to your profile…</p>
-      {destination && (
-        <Link
-          href={destination}
-          className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700"
-        >
-          Continue
-        </Link>
-      )}
+      <Link
+        href={destination}
+        className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700"
+      >
+        Continue
+      </Link>
     </main>
   );
 }

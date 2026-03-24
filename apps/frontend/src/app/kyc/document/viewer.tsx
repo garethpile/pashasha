@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SESSION_STORAGE_KEY, getSession, sessionEventName } from '../../../lib/auth/session';
 import { resolveApiRoot } from '../../../lib/api/config';
@@ -159,7 +160,14 @@ export default function KycDocumentViewer() {
         {!loading && !error && objectUrl && (
           <div className="flex-1 overflow-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
             {isImage ? (
-              <img src={objectUrl} alt={fileName ?? 'KYC document'} className="h-auto w-full" />
+              <Image
+                src={objectUrl}
+                alt={fileName ?? 'KYC document'}
+                width={1600}
+                height={1200}
+                unoptimized
+                className="h-auto w-full"
+              />
             ) : (
               <embed
                 src={objectUrl}

@@ -1054,7 +1054,7 @@ function CustomerDashboard() {
     }
   };
 
-  const loadSentTransactions = async (offset = 0) => {
+  const loadSentTransactions = useCallback(async (offset = 0) => {
     setSentLoading(true);
     try {
       const tx = await customerApi.getSentTransactions({ offset, limit: 20 });
@@ -1067,7 +1067,7 @@ function CustomerDashboard() {
     } finally {
       setSentLoading(false);
     }
-  };
+  }, []);
 
   const loadWallet = async () => {
     try {
@@ -1149,24 +1149,34 @@ function CustomerDashboard() {
     setPayFeedback(null);
   };
 
-  const handlePaymentCompleted = (latest?: PublicPaymentIntentResponse) => {
-    const finalVoucherAmount = latest?.voucherAmount ?? feeSummary.voucherAmount;
-    const finalTotalCharge = latest?.customerChargeAmount ?? feeSummary.totalCharge;
-    setPaymentIntent(latest ?? paymentIntent);
-    setPayFeedback('Payment Successful!');
-    setPayPending(false);
-    setPayCardOpen(false);
-    setPayModalOpen(false);
-    setPaySuccessSummary({
-      civilServantName:
-        `${selectedGuard?.firstName ?? ''} ${selectedGuard?.familyName ?? ''}`.trim() ||
-        'Civil Servant',
-      amount: finalVoucherAmount,
-      totalCharge: finalTotalCharge,
-    });
-    setPaySuccessOpen(true);
-    void loadSentTransactions(0);
-  };
+  const handlePaymentCompleted = useCallback(
+    (latest?: PublicPaymentIntentResponse) => {
+      const finalVoucherAmount = latest?.voucherAmount ?? feeSummary.voucherAmount;
+      const finalTotalCharge = latest?.customerChargeAmount ?? feeSummary.totalCharge;
+      setPaymentIntent(latest ?? paymentIntent);
+      setPayFeedback('Payment Successful!');
+      setPayPending(false);
+      setPayCardOpen(false);
+      setPayModalOpen(false);
+      setPaySuccessSummary({
+        civilServantName:
+          `${selectedGuard?.firstName ?? ''} ${selectedGuard?.familyName ?? ''}`.trim() ||
+          'Civil Servant',
+        amount: finalVoucherAmount,
+        totalCharge: finalTotalCharge,
+      });
+      setPaySuccessOpen(true);
+      void loadSentTransactions(0);
+    },
+    [
+      feeSummary.totalCharge,
+      feeSummary.voucherAmount,
+      loadSentTransactions,
+      paymentIntent,
+      selectedGuard?.familyName,
+      selectedGuard?.firstName,
+    ]
+  );
 
   useEffect(() => {
     const paymentIntentId = paymentIntent?.paymentIntentId;
@@ -1193,7 +1203,7 @@ function CustomerDashboard() {
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [paymentIntent?.paymentIntentId]);
+  }, [handlePaymentCompleted, paymentIntent?.paymentIntentId]);
 
   useEffect(() => {
     const paymentIntentId = paymentIntent?.paymentIntentId;
@@ -1229,7 +1239,7 @@ function CustomerDashboard() {
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [paymentIntent?.paymentIntentId]);
+  }, [handlePaymentCompleted, paymentIntent?.paymentIntentId]);
 
   useEffect(() => {
     const handleReturn = (statusValue?: string, paymentIntentId?: string) => {
@@ -1277,7 +1287,7 @@ function CustomerDashboard() {
       window.removeEventListener('message', onMessage);
       window.removeEventListener('storage', onStorage);
     };
-  }, [paymentIntent?.paymentIntentId]);
+  }, [handlePaymentCompleted, paymentIntent, paymentIntent?.paymentIntentId]);
 
   const handleSubmitPayment = async () => {
     if (!selectedGuard?.civilServantId || !selectedRecipient) return;
@@ -1356,7 +1366,7 @@ function CustomerDashboard() {
       }
     };
     void load();
-  }, [eclipseActive]);
+  }, [eclipseActive, loadSentTransactions]);
 
   const totals = useMemo(() => {
     const received = transactions
@@ -1974,31 +1984,29 @@ export default function DashboardPage() {
   const [session, setSession] = useState(() => getSession());
   const router = useRouter();
   const [hadActiveSession, setHadActiveSession] = useState(() => Boolean(getSession()));
-  const [resolvedRole, setResolvedRole] = useState<
-    'admin' | 'civil-servant' | 'customer' | 'unknown'
-  >(() => {
-    const groups = getSession()?.groups;
-    if (isAdminGroup(groups)) return 'admin';
-    if (isCivilServantGroup(groups)) return 'civil-servant';
-    if (isCustomerGroup(groups)) return 'customer';
-    return 'unknown';
-  });
+  const [fallbackResolvedRole, setFallbackResolvedRole] = useState<
+    'civil-servant' | 'customer' | 'unknown' | null
+  >(null);
 
   const isCivilServant = isCivilServantGroup(session?.groups);
   const isCustomer = isCustomerGroup(session?.groups);
   const isAdmin = isAdminGroup(session?.groups);
+  const resolvedRole: 'admin' | 'civil-servant' | 'customer' | 'unknown' = (() => {
+    if (!session) return 'unknown';
+    if (isAdmin) return 'admin';
+    if (isCivilServant) return 'civil-servant';
+    if (isCustomer) return 'customer';
+    return fallbackResolvedRole ?? 'unknown';
+  })();
 
   useEffect(() => {
     const handleSessionChange = () => {
       const nextSession = getSession();
       setSession(nextSession);
+      setFallbackResolvedRole(null);
       if (nextSession) {
         setHadActiveSession(true);
       }
-      if (isAdminGroup(nextSession?.groups)) setResolvedRole('admin');
-      else if (isCivilServantGroup(nextSession?.groups)) setResolvedRole('civil-servant');
-      else if (isCustomerGroup(nextSession?.groups)) setResolvedRole('customer');
-      else setResolvedRole('unknown');
     };
     window.addEventListener(sessionEventName, handleSessionChange);
     return () => {
@@ -2019,32 +2027,14 @@ export default function DashboardPage() {
   }, [isAdmin, router, session]);
 
   useEffect(() => {
-    if (!session) {
-      setResolvedRole('unknown');
-      return;
-    }
-
-    if (isAdmin) {
-      setResolvedRole('admin');
-      return;
-    }
-
-    if (isCivilServant) {
-      setResolvedRole('civil-servant');
-      return;
-    }
-
-    if (isCustomer) {
-      setResolvedRole('customer');
-      return;
-    }
+    if (!session || isAdmin || isCivilServant || isCustomer) return;
 
     let cancelled = false;
     const resolveFromProfile = async () => {
       try {
         await guardApi.getProfile();
         if (!cancelled) {
-          setResolvedRole('civil-servant');
+          setFallbackResolvedRole('civil-servant');
         }
         return;
       } catch {
@@ -2054,12 +2044,12 @@ export default function DashboardPage() {
       try {
         await customerApi.getProfile();
         if (!cancelled) {
-          setResolvedRole('customer');
+          setFallbackResolvedRole('customer');
         }
         return;
       } catch {
         if (!cancelled) {
-          setResolvedRole('unknown');
+          setFallbackResolvedRole('unknown');
         }
       }
     };
