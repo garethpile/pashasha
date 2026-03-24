@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
+import { PashashaPayCicdStack } from '../lib/cicd-stack';
 import { PashashaPayCoreBackendStack } from '../lib/core-backend-stack';
 import { PashashaPayFrontendStack } from '../lib/frontend-stack';
 import { PashashaPayNotificationsStack } from '../lib/notifications-stack';
@@ -12,12 +13,44 @@ const app = new cdk.App();
 
 const env = {
   account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION ?? 'eu-west-1',
+  region: process.env.CDK_DEFAULT_REGION ?? 'af-south-1',
 };
 const environment = process.env.APP_ENV ?? process.env.NODE_ENV ?? 'unknown';
 const costCenter = process.env.COST_CENTER;
+const githubOwner = process.env.CICD_GITHUB_OWNER ?? 'garethpile';
+const githubRepo = process.env.CICD_GITHUB_REPO ?? 'pashasha';
 
-const context = app.node.tryGetContext('frontend') ?? {};
+const frontendContext = app.node.tryGetContext('frontend') ?? {};
+const frontendConfig = {
+  ...frontendContext,
+  repositoryOwner: process.env.FRONTEND_REPOSITORY_OWNER ?? frontendContext.repositoryOwner,
+  repositoryName: process.env.FRONTEND_REPOSITORY_NAME ?? frontendContext.repositoryName,
+  githubTokenSecretArn:
+    process.env.FRONTEND_GITHUB_TOKEN_SECRET_ARN ?? frontendContext.githubTokenSecretArn,
+  branchName: process.env.FRONTEND_BRANCH_NAME ?? frontendContext.branchName,
+  hostedZoneDomainName:
+    process.env.FRONTEND_HOSTED_ZONE_DOMAIN_NAME ?? frontendContext.hostedZoneDomainName,
+  enableSsrLoggingRolePatch:
+    process.env.FRONTEND_ENABLE_SSR_LOGGING_ROLE_PATCH === 'true'
+      ? true
+      : frontendContext.enableSsrLoggingRolePatch,
+};
+
+const cicdStack = new PashashaPayCicdStack(app, 'PashashaPayCicdStack', {
+  env,
+  deploymentEnvironment: environment,
+  githubOwner,
+  githubRepo,
+});
+applySolutionTags(cicdStack, {
+  solution: 'Pashasha',
+  component: 'cicd',
+  environment,
+  repo: 'pashasha',
+  serviceGroup: 'platform',
+  costCenter,
+  lifecycle: 'active',
+});
 
 const paymentStack = new PashashaPayPaymentStack(app, 'PashashaPayPaymentStack', {
   env,
@@ -86,15 +119,16 @@ const frontendStack = new PashashaPayFrontendStack(app, 'PashashaPayFrontendStac
   env,
   backendEndpoint: coreBackendStack.apiUrl,
   backendSecureEndpoint: coreBackendStack.apiUrl,
+  deploymentEnvironment: environment,
   cognitoUserPoolId: coreBackendStack.userPoolId,
   cognitoUserPoolClientId: coreBackendStack.userPoolClientId,
   awsRegion: env.region ?? cdk.Stack.of(coreBackendStack).region,
-  repositoryOwner: context.repositoryOwner,
-  repositoryName: context.repositoryName,
-  githubTokenSecretArn: context.githubTokenSecretArn,
-  branchName: context.branchName,
-  enableSsrLoggingRolePatch: context.enableSsrLoggingRolePatch === true,
-  hostedZoneDomainName: context.hostedZoneDomainName,
+  repositoryOwner: frontendConfig.repositoryOwner,
+  repositoryName: frontendConfig.repositoryName,
+  githubTokenSecretArn: frontendConfig.githubTokenSecretArn,
+  branchName: frontendConfig.branchName,
+  enableSsrLoggingRolePatch: frontendConfig.enableSsrLoggingRolePatch === true,
+  hostedZoneDomainName: frontendConfig.hostedZoneDomainName,
 });
 applySolutionTags(frontendStack, {
   solution: 'Pashasha',

@@ -12,6 +12,12 @@ export const SESSION_ID_TOKEN_COOKIE = 'pp-id-token';
 export const SESSION_GROUPS_COOKIE = 'pp-groups';
 
 const SESSION_EVENT = 'pashashapay-auth-changed';
+const SESSION_EXPIRED_PATTERNS = [
+  'access token has expired',
+  'token has expired',
+  'jwt expired',
+  'token expired',
+];
 
 const emitSessionChange = () => {
   if (typeof window === 'undefined') return;
@@ -84,3 +90,17 @@ export const clearSession = () => {
 };
 
 export const sessionEventName = SESSION_EVENT;
+
+export const isExpiredSessionMessage = (message?: string | null) => {
+  const normalized = String(message ?? '')
+    .trim()
+    .toLowerCase();
+  return SESSION_EXPIRED_PATTERNS.some((pattern) => normalized.includes(pattern));
+};
+
+export const invalidateSessionAndRedirectToLogin = () => {
+  clearSession();
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
+  }
+};

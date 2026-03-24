@@ -10,6 +10,7 @@ import { Construct } from 'constructs';
 export interface PashashaPayFrontendStackProps extends cdk.StackProps {
   readonly backendEndpoint: string;
   readonly backendSecureEndpoint?: string;
+  readonly deploymentEnvironment: string;
   readonly cognitoUserPoolId: string;
   readonly cognitoUserPoolClientId: string;
   readonly awsRegion: string;
@@ -28,6 +29,7 @@ export class PashashaPayFrontendStack extends cdk.Stack {
 
   constructor(scope: Construct, id: string, props: PashashaPayFrontendStackProps) {
     super(scope, id, props);
+    const deploymentEnvironment = (props.deploymentEnvironment || 'dev').toLowerCase();
 
     const siteBucket = new s3.Bucket(this, 'FrontendSiteBucket', {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
@@ -105,17 +107,27 @@ function handler(event) {
       const hostedZone = route53.HostedZone.fromLookup(this, 'PashashaHostedZone', {
         domainName: props.hostedZoneDomainName,
       });
+      const domainName = props.hostedZoneDomainName;
+      const isProduction =
+        deploymentEnvironment === 'prod' || deploymentEnvironment === 'production';
+      const prefix = isProduction ? '' : `${deploymentEnvironment}.`;
+      const rootRecordName = isProduction ? domainName : `${prefix}${domainName}`;
+      const wwwRecordName = isProduction ? `www.${domainName}` : `www.${prefix}${domainName}`;
 
-      new route53.ARecord(this, 'DevRootAlias', {
+      new route53.ARecord(this, 'FrontendRootAlias', {
         zone: hostedZone,
-        recordName: `dev.${props.hostedZoneDomainName}`,
+        recordName: rootRecordName,
         target: route53.RecordTarget.fromAlias(new route53Targets.CloudFrontTarget(distribution)),
       });
 
-      new route53.ARecord(this, 'WwwDevAlias', {
+      new route53.ARecord(this, 'FrontendWwwAlias', {
         zone: hostedZone,
-        recordName: `www.dev.${props.hostedZoneDomainName}`,
+        recordName: wwwRecordName,
         target: route53.RecordTarget.fromAlias(new route53Targets.CloudFrontTarget(distribution)),
+      });
+
+      new cdk.CfnOutput(this, 'FrontendFriendlyUrl', {
+        value: `https://${rootRecordName}`,
       });
     }
 

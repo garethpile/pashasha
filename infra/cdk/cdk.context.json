@@ -1,31 +1,9 @@
 {
-  "availability-zones:account=732439976770:region=us-east-1": [
-    "us-east-1a",
-    "us-east-1b",
-    "us-east-1c",
-    "us-east-1d",
-    "us-east-1e",
-    "us-east-1f"
-  ],
-  "availability-zones:account=732439976770:region=eu-west-1": [
-    "eu-west-1a",
-    "eu-west-1b",
-    "eu-west-1c"
-  ],
   "availability-zones:account=732439976770:region=af-south-1": [
     "af-south-1a",
     "af-south-1b",
     "af-south-1c"
   ],
-  "availability-zones:account=701158128147:region=eu-west-1": [
-    "eu-west-1a",
-    "eu-west-1b",
-    "eu-west-1c"
-  ],
-  "hosted-zone:account=701158128147:domainName=pashasha.com:region=eu-west-1": {
-    "Id": "/hostedzone/Z07482111XTU7482PPQXE",
-    "Name": "pashasha.com."
-  },
   "availability-zones:account=701158128147:region=af-south-1": [
     "af-south-1a",
     "af-south-1b",

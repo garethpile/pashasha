@@ -1,4 +1,8 @@
-import { getSession } from '../auth/session';
+import {
+  getSession,
+  invalidateSessionAndRedirectToLogin,
+  isExpiredSessionMessage,
+} from '../auth/session';
 import { resolveVoucherApiRoot } from './config';
 
 const API_ROOT = resolveVoucherApiRoot();
@@ -26,6 +30,9 @@ const request = async <T>(path: string, options: RequestInit = {}): Promise<T> =
       message = parsed.error || parsed.message || message;
     } catch {
       // leave message as-is when response isn't JSON
+    }
+    if (response.status === 401 || isExpiredSessionMessage(message)) {
+      invalidateSessionAndRedirectToLogin();
     }
     if (response.status === 409) {
       message = 'Insufficient balance.';

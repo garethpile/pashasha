@@ -1,0 +1,84 @@
+name: Deploy Dev
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    environment: dev
+    env:
+      AWS_REGION: af-south-1
+      AWS_DEFAULT_REGION: af-south-1
+      CDK_DEFAULT_REGION: af-south-1
+      APP_ENV: dev
+      FRONTEND_HOSTED_ZONE_DOMAIN_NAME: ${{ vars.FRONTEND_HOSTED_ZONE_DOMAIN_NAME }}
+      FRONTEND_BRANCH_NAME: ${{ vars.FRONTEND_BRANCH_NAME }}
+      FRONTEND_REPOSITORY_OWNER: ${{ vars.FRONTEND_REPOSITORY_OWNER }}
+      FRONTEND_REPOSITORY_NAME: ${{ vars.FRONTEND_REPOSITORY_NAME }}
+      FRONTEND_GITHUB_TOKEN_SECRET_ARN: ${{ vars.FRONTEND_GITHUB_TOKEN_SECRET_ARN }}
+      FRONTEND_ENABLE_SSR_LOGGING_ROLE_PATCH: ${{ vars.FRONTEND_ENABLE_SSR_LOGGING_ROLE_PATCH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup infra Node.js cache
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: infra/cdk/package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install infra dependencies
+        run: npm ci
+        working-directory: infra/cdk
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: af-south-1
+
+      - name: Deploy dev
+        run: ./scripts/deploy-dev.sh
+
+      - name: Smoke test core backend
+        run: ./infra/scripts/backend-smoke-test.sh
+        env:
+          STACK_NAME: PashashaPayCoreBackendStack
+          AWS_REGION: af-south-1
+          AWS_DEFAULT_REGION: af-south-1
+
+      - name: Smoke test frontend root
+        run: |
+          FRONTEND_URL=$(aws cloudformation describe-stacks \
+            --region af-south-1 \
+            --stack-name PashashaPayFrontendStack \
+            --query "Stacks[0].Outputs[?OutputKey=='FrontendUrl'].OutputValue" \
+            --output text)
+          curl -fsSL "${FRONTEND_URL%/}" >/dev/null

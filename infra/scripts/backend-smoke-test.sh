@@ -2,7 +2,7 @@
 set -euo pipefail
 
 STACK_NAME="${STACK_NAME:-PashashaPayCoreBackendStack}"
-REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-eu-west-1}}"
+REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-af-south-1}}"
 ENDPOINT="${BACKEND_ENDPOINT:-}"
 HEALTH_PATH="${HEALTH_PATH:-}"
 

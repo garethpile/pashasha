@@ -7,24 +7,208 @@
 | 2026-03-23 | Renamed the architecture rebuild plan into the current-state as-is architecture document and rewrote the content to describe the active platform shape. | Codex  |
 | 2026-03-23 | Added a deployments section listing the currently identifiable environment locations from the repository.                                               | Codex  |
 | 2026-03-23 | Added CloudFront URLs to the deployments section where a concrete value could be verified from repository artifacts.                                    | Codex  |
+| 2026-03-23 | Declared `af-south-1` as the required deployment region for the full active solution.                                                                   | Codex  |
+| 2026-03-24 | Added the repository dev deployment script and documented the standard `af-south-1` deployment flow.                                                    | Codex  |
+| 2026-03-24 | Added matching test and prod deployment scripts and documented the environment script pattern.                                                          | Codex  |
+| 2026-03-24 | Added the target Git-based CI/CD approach for promoting changes from dev to production in `af-south-1`.                                                 | Codex  |
+| 2026-03-24 | Added the actual GitHub Actions deployment workflows for dev and production promotion.                                                                  | Codex  |
+| 2026-03-24 | Made frontend Route53 aliases environment-aware for dev, test, and production deployments.                                                              | Codex  |
+| 2026-03-24 | Updated the deployment and CI/CD sections to reflect the exact repo implementation and current test-environment status.                                 | Codex  |
+| 2026-03-24 | Added `PashashaPayCicdStack` to provision GitHub OIDC and the environment-specific deployment role in `af-south-1`.                                     | Codex  |
+| 2026-03-24 | Recorded the deployed GitHub Actions role ARNs and added a concrete GitHub environment setup checklist.                                                 | Codex  |
 
 ## DEPLOYMENTS
 
 This section lists the currently identifiable deployment locations so users can quickly check the live environment footprint.
 
-| Environment | Friendly URL                                                  | CloudFront URL                                          | Current Repo Evidence                                                                                                                                 |
-| ----------- | ------------------------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dev         | `https://dev.pashasha.com` and `https://www.dev.pashasha.com` | `https://d1kvaujkmnaiu3.cloudfront.net`                 | Frontend Route53 aliases are created for the `dev` hostnames; the active synthesized stacks target AWS account `701158128147` in region `af-south-1`. |
-| Test        | Not currently defined in the active repo configuration.       | Not currently defined in the active repo configuration. | No `test` hostname, stack alias, or dedicated environment mapping was found in the active CDK stack definitions.                                      |
-| Prod        | Not currently defined in the active repo configuration.       | Not currently defined in the active repo configuration. | No `prod` hostname, stack alias, or dedicated environment mapping was found in the active CDK stack definitions.                                      |
+Required deployment region for the full active solution:
+
+- AWS region: `af-south-1`
+- Rule: frontend, core backend, payment, voucher, and notifications stacks must all be deployed in `af-south-1`
+
+| Environment | Friendly URL                                                  | CloudFront URL                                      | Current Repo Evidence                                                                                                                                                       |
+| ----------- | ------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dev         | `https://dev.pashasha.com` and `https://www.dev.pashasha.com` | `https://d1kvaujkmnaiu3.cloudfront.net`             | Frontend Route53 aliases are created as `dev.<domain>` and `www.dev.<domain>` when `APP_ENV=dev` and `FRONTEND_HOSTED_ZONE_DOMAIN_NAME` is configured.                      |
+| Test        | `https://test.<domain>` and `https://www.test.<domain>`       | Environment-specific CloudFront distribution output | The frontend stack supports `test.<domain>` and `www.test.<domain>` when `APP_ENV=test`, but no dedicated GitHub Actions test deployment workflow is currently implemented. |
+| Prod        | `https://<domain>` and `https://www.<domain>`                 | Environment-specific CloudFront distribution output | Frontend Route53 aliases are created at the apex domain and `www` when `APP_ENV=prod` and `FRONTEND_HOSTED_ZONE_DOMAIN_NAME` is configured.                                 |
 
 Active stack names to check in AWS CloudFormation for the synthesized environment:
 
+- `PashashaPayCicdStack`
 - `PashashaPayFrontendStack`
 - `PashashaPayCoreBackendStack`
 - `PashashaPayPaymentStack`
 - `PashashaPayVoucherStack`
 - `PashashaPayNotificationsStack`
+
+AWS account mapping currently in use:
+
+- `dev`: `701158128147`
+- `test`: `119045522978`
+- `production`: `732439976770`
+
+Deployed CI/CD bootstrap outputs currently in place:
+
+- Dev account `701158128147`
+  - `GitHubDeployRoleArn`: `arn:aws:iam::701158128147:role/GitHubActionsPashashaDevDeployRole`
+  - `GitHubOidcProviderArn`: `arn:aws:iam::701158128147:oidc-provider/token.actions.githubusercontent.com`
+- Production account `732439976770`
+  - `GitHubDeployRoleArn`: `arn:aws:iam::732439976770:role/GitHubActionsPashashaProdDeployRole`
+  - `GitHubOidcProviderArn`: `arn:aws:iam::732439976770:oidc-provider/token.actions.githubusercontent.com`
+
+### Environment Deployment Scripts
+
+Use the repo-level environment deployment scripts to deploy the active stack shape into `af-south-1`:
+
+- [scripts/deploy-dev.sh](/Users/pileg/development/pashasha/scripts/deploy-dev.sh)
+- [scripts/deploy-test.sh](/Users/pileg/development/pashasha/scripts/deploy-test.sh)
+- [scripts/deploy-prod.sh](/Users/pileg/development/pashasha/scripts/deploy-prod.sh)
+
+Current implementation status:
+
+- `dev` script is wired into GitHub Actions
+- `prod` script is wired into GitHub Actions behind the `production` environment gate
+- `test` script exists for manual use, but no dedicated `deploy-test.yml` workflow is currently present
+- `PashashaPayCicdStack` can now be deployed into each target account to create the GitHub OIDC provider and the environment-specific GitHub Actions deployment role
+
+Default environment mapping:
+
+- `deploy-dev.sh` uses `AWS_PROFILE=aws-af-south-1-dev` and `APP_ENV=dev`
+- `deploy-test.sh` uses `AWS_PROFILE=aws-af-south-1-test` and `APP_ENV=test`
+- `deploy-prod.sh` uses `AWS_PROFILE=aws-af-south-1-prod` and `APP_ENV=prod`
+
+Each script does the following:
+
+- sets `AWS_REGION`, `AWS_DEFAULT_REGION`, and `CDK_DEFAULT_REGION` to `af-south-1`
+- defaults `AWS_PROFILE` to the script's environment-specific profile
+- builds the contracts workspace and CDK app
+- deploys `PashashaPayPaymentStack`, `PashashaPayNotificationsStack`, `PashashaPayVoucherStack`, and `PashashaPayCoreBackendStack`
+- reads the deployed core and voucher endpoints plus Cognito outputs from CloudFormation
+- builds the frontend against those deployed values
+- deploys `PashashaPayFrontendStack`
+
+Run them with:
+
+```bash
+./scripts/deploy-dev.sh
+./scripts/deploy-test.sh
+./scripts/deploy-prod.sh
+```
+
+Optional environment variables:
+
+- `AWS_PROFILE` to override the default AWS CLI profile
+- `FRONTEND_HOSTED_ZONE_DOMAIN_NAME` to create environment-specific DNS aliases during frontend deployment
+- `FRONTEND_BRANCH_NAME`, `FRONTEND_REPOSITORY_OWNER`, `FRONTEND_REPOSITORY_NAME`, and `FRONTEND_GITHUB_TOKEN_SECRET_ARN` if frontend deployment metadata needs to be injected through environment variables
+
+### Target Git CI/CD Pipeline
+
+The recommended deployment model for this repository is GitHub Actions with environment promotion gates.
+
+Current repo baseline:
+
+- GitHub Actions is already in use through [`.github/workflows/ci.yml`](/Users/pileg/development/pashasha/.github/workflows/ci.yml)
+- the current CI workflow already installs dependencies, builds contracts, runs linting, type checks, and attempts backend tests
+
+Recommended target pipeline:
+
+1. Developer opens a pull request from a feature branch.
+2. CI runs validation only:
+   - install dependencies
+   - build contracts
+   - lint
+   - typecheck
+   - unit and integration tests
+   - CDK synth for `af-south-1`
+3. After merge to `main`, a deployment workflow deploys the full stack to the `dev` environment in `af-south-1`.
+4. After the dev deployment completes, the workflow runs smoke tests and any targeted integration checks against the deployed dev stack.
+5. Production deployment is blocked behind a manual approval gate.
+6. After approval, the pipeline deploys the same stack set to the `production` environment in `af-south-1`.
+
+Recommended GitHub Actions structure:
+
+- `ci.yml`
+  - trigger: pull requests and pushes to `main`
+  - purpose: validation only
+- `deploy-dev.yml`
+  - trigger: successful `CI` completion for pushes to `main`
+  - purpose: deploy `dev` with [scripts/deploy-dev.sh](/Users/pileg/development/pashasha/scripts/deploy-dev.sh)
+  - follow-up: smoke tests against dev endpoints
+- `deploy-prod.yml`
+  - trigger: successful `Deploy Dev` completion
+  - environment: `production`
+  - protection: required reviewers in GitHub Environments
+  - purpose: deploy production with [scripts/deploy-prod.sh](/Users/pileg/development/pashasha/scripts/deploy-prod.sh)
+
+Implemented workflow files in this repository:
+
+- [`.github/workflows/ci.yml`](/Users/pileg/development/pashasha/.github/workflows/ci.yml)
+- [`.github/workflows/deploy-dev.yml`](/Users/pileg/development/pashasha/.github/workflows/deploy-dev.yml)
+- [`.github/workflows/deploy-prod.yml`](/Users/pileg/development/pashasha/.github/workflows/deploy-prod.yml)
+
+Implemented promotion behavior:
+
+- `deploy-dev.yml` runs after successful `CI` completion on pushes to `main`
+- `deploy-prod.yml` runs after successful `Deploy Dev` completion
+- the `production` GitHub Environment should require manual approval reviewers so the production workflow pauses until approved
+- there is currently no automated `test` promotion stage between `dev` and `production`
+
+AWS authentication model:
+
+- use GitHub Actions OIDC, not long-lived AWS access keys
+- `PashashaPayCicdStack` now provisions the GitHub OIDC provider and the environment-specific deployment role in the target account
+- role names created by the stack:
+  - `GitHubActionsPashashaDevDeployRole`
+  - `GitHubActionsPashashaTestDeployRole`
+  - `GitHubActionsPashashaProdDeployRole`
+- trust the GitHub repository and selected branches or workflows only
+- keep both roles scoped to `af-south-1`
+- default GitHub repository trust target:
+  - `garethpile/pashasha`
+
+Bootstrap rule:
+
+- deploy `PashashaPayCicdStack` manually once per target account before enabling GitHub Actions deployments for that environment
+- after deployment, copy the `GitHubDeployRoleArn` stack output into the matching GitHub Environment variable `AWS_DEPLOY_ROLE_ARN`
+- a concrete setup checklist is available at [docs/github-environment-setup-checklist.md](/Users/pileg/development/pashasha/docs/github-environment-setup-checklist.md)
+
+Recommended GitHub environments:
+
+- `dev`
+  - no manual approval required
+  - environment variables and secrets for dev DNS and frontend metadata
+- `test`
+  - optional future environment if a staged pre-production lane is introduced
+  - not currently wired to a GitHub Actions deployment workflow
+- `production`
+  - required reviewers enabled
+  - production DNS and any production-only configuration
+
+Recommended pipeline inputs and secrets:
+
+- `AWS_DEPLOY_ROLE_ARN`
+- `FRONTEND_HOSTED_ZONE_DOMAIN_NAME`
+- `FRONTEND_BRANCH_NAME`
+- `FRONTEND_REPOSITORY_OWNER`
+- `FRONTEND_REPOSITORY_NAME`
+- `FRONTEND_GITHUB_TOKEN_SECRET_ARN` if frontend metadata requires it
+
+Current GitHub Environment values to use:
+
+- `dev`
+  - `AWS_DEPLOY_ROLE_ARN=arn:aws:iam::701158128147:role/GitHubActionsPashashaDevDeployRole`
+- `production`
+  - `AWS_DEPLOY_ROLE_ARN=arn:aws:iam::732439976770:role/GitHubActionsPashashaProdDeployRole`
+
+Deployment rule:
+
+- every automated deployment must set `AWS_REGION`, `AWS_DEFAULT_REGION`, and `CDK_DEFAULT_REGION` to `af-south-1`
+- every automated deployment must use the environment-specific script rather than ad hoc shell commands
+
+Promotion rule:
+
+- do not deploy directly from feature branches to production
+- only deploy production from code that has already passed CI and been promoted through the dev deployment path
 
 ## Purpose
 

@@ -1973,6 +1973,7 @@ function CustomerDashboard() {
 export default function DashboardPage() {
   const [session, setSession] = useState(() => getSession());
   const router = useRouter();
+  const [hadActiveSession, setHadActiveSession] = useState(() => Boolean(getSession()));
   const [resolvedRole, setResolvedRole] = useState<
     'admin' | 'civil-servant' | 'customer' | 'unknown'
   >(() => {
@@ -1991,6 +1992,9 @@ export default function DashboardPage() {
     const handleSessionChange = () => {
       const nextSession = getSession();
       setSession(nextSession);
+      if (nextSession) {
+        setHadActiveSession(true);
+      }
       if (isAdminGroup(nextSession?.groups)) setResolvedRole('admin');
       else if (isCivilServantGroup(nextSession?.groups)) setResolvedRole('civil-servant');
       else if (isCustomerGroup(nextSession?.groups)) setResolvedRole('customer');
@@ -2001,6 +2005,12 @@ export default function DashboardPage() {
       window.removeEventListener(sessionEventName, handleSessionChange);
     };
   }, []);
+
+  useEffect(() => {
+    if (!session && hadActiveSession) {
+      router.replace('/login');
+    }
+  }, [hadActiveSession, router, session]);
 
   useEffect(() => {
     if (session && isAdmin) {
@@ -2061,6 +2071,9 @@ export default function DashboardPage() {
   }, [isAdmin, isCivilServant, isCustomer, session]);
 
   if (!session) {
+    if (hadActiveSession) {
+      return <LoadingPanel text="Redirecting to login…" />;
+    }
     return <MarketingScreen />;
   }
 

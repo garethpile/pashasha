@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 STACK_NAME="${AMPLIFY_STACK_NAME:-PashashaPayFrontendStack}"
 BACKEND_STACK_NAME="${BACKEND_STACK_NAME:-PashashaPayCoreBackendStack}"
-REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-eu-west-1}}"
+REGION="${AWS_REGION:-${AWS_DEFAULT_REGION:-af-south-1}}"
 APP_ID="${AMPLIFY_APP_ID:-}"
 BRANCH_NAME="${AMPLIFY_BRANCH:-main}"
 ZIP_PATH="$ROOT_DIR/infra/cdk/frontend-artifact.zip"

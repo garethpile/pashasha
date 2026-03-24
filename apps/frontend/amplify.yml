@@ -10,7 +10,7 @@ applications:
             - node -v && npm -v
             - npm ci --workspaces --prefer-offline=false --no-audit --progress=false
             - npm run build --workspace @pashashapay/contracts
-            - export AWS_REGION=${AWS_REGION:-$AWS_DEFAULT_REGION}
+            - export AWS_REGION=${AWS_REGION:-${AWS_DEFAULT_REGION:-af-south-1}}
             - aws sts get-caller-identity
             # Install jq in user space if not present
             - |

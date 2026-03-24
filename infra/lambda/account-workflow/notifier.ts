@@ -5,7 +5,7 @@ const REGION_FROM_ARN = TOPIC_ARN ? TOPIC_ARN.split(':')[3] : undefined;
 
 const sns = new SNSClient({
   region:
-    REGION_FROM_ARN || process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'eu-west-1',
+    REGION_FROM_ARN || process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'af-south-1',
 });
 
 interface NotificationPayload {

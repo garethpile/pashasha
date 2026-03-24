@@ -1,6 +1,10 @@
 'use client';
 
-import { clearSession, getSession } from '../auth/session';
+import {
+  getSession,
+  invalidateSessionAndRedirectToLogin,
+  isExpiredSessionMessage,
+} from '../auth/session';
 import { resolveApiRoot } from './config';
 
 const API_ROOT = resolveApiRoot();
@@ -22,13 +26,10 @@ const request = async <T>(path: string, options: RequestInit = {}): Promise<T> =
   });
 
   if (!response.ok) {
-    if (response.status === 401) {
-      clearSession();
-      if (typeof window !== 'undefined') {
-        window.location.href = '/login';
-      }
-    }
     const text = await response.text();
+    if (response.status === 401 || isExpiredSessionMessage(text)) {
+      invalidateSessionAndRedirectToLogin();
+    }
     throw new Error(text || 'Request failed');
   }
 
