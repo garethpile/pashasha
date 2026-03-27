@@ -30,6 +30,12 @@ const frontendConfig = {
   branchName: process.env.FRONTEND_BRANCH_NAME ?? frontendContext.branchName,
   hostedZoneDomainName:
     process.env.FRONTEND_HOSTED_ZONE_DOMAIN_NAME ?? frontendContext.hostedZoneDomainName,
+  manageDnsRecords:
+    process.env.FRONTEND_MANAGE_DNS_RECORDS === 'true'
+      ? true
+      : process.env.FRONTEND_MANAGE_DNS_RECORDS === 'false'
+        ? false
+        : frontendContext.manageDnsRecords,
   enableSsrLoggingRolePatch:
     process.env.FRONTEND_ENABLE_SSR_LOGGING_ROLE_PATCH === 'true'
       ? true
@@ -127,6 +133,7 @@ const frontendStack = new PashashaPayFrontendStack(app, 'PashashaPayFrontendStac
   repositoryName: frontendConfig.repositoryName,
   githubTokenSecretArn: frontendConfig.githubTokenSecretArn,
   branchName: frontendConfig.branchName,
+  manageDnsRecords: frontendConfig.manageDnsRecords === true,
   enableSsrLoggingRolePatch: frontendConfig.enableSsrLoggingRolePatch === true,
   hostedZoneDomainName: frontendConfig.hostedZoneDomainName,
 });

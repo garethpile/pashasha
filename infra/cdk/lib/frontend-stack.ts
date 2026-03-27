@@ -21,6 +21,7 @@ export interface PashashaPayFrontendStackProps extends cdk.StackProps {
   readonly enableSsrLoggingRolePatch?: boolean;
   readonly frontendSecretsArn?: string;
   readonly hostedZoneDomainName?: string;
+  readonly manageDnsRecords?: boolean;
 }
 
 export class PashashaPayFrontendStack extends cdk.Stack {
@@ -103,7 +104,7 @@ function handler(event) {
       prune: true,
     });
 
-    if (props.hostedZoneDomainName) {
+    if (props.hostedZoneDomainName && props.manageDnsRecords) {
       const hostedZone = route53.HostedZone.fromLookup(this, 'PashashaHostedZone', {
         domainName: props.hostedZoneDomainName,
       });
