@@ -49,11 +49,22 @@ require_cmd aws
 require_cmd npm
 require_cmd npx
 
+ensure_frontend_export() {
+  log "Preparing frontend export for CDK asset packaging"
+  (
+    cd "$ROOT_DIR"
+    NEXT_PUBLIC_AWS_REGION="$AWS_REGION" \
+    npm run build --workspace frontend
+  )
+}
+
 log "Using $ACTIVE_AWS_AUTH in region $AWS_REGION"
 aws sts get-caller-identity >/dev/null
 
 log "Building contracts workspace"
 (cd "$ROOT_DIR" && npm run build --workspace @pashashapay/contracts)
+
+ensure_frontend_export
 
 log "Building CDK app"
 (cd "$CDK_DIR" && npm run build)
