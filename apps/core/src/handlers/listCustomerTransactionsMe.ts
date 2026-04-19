@@ -49,11 +49,14 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
           item.voucherDenomination ?? item.voucherAmount ?? item.amount ?? 0
         );
         const chargeAmount = Number(item.customerChargeAmount ?? voucherAmount);
+        const feeAmount = Number((chargeAmount - voucherAmount).toFixed(2));
+        const supplierName = String(item.supplierName ?? 'Shoprite Checkers');
         const civilServantName =
           String(item.civilServantName ?? 'Civil Servant').trim() || 'Civil Servant';
+        const description = `Sent ${formatCurrency(voucherAmount)} ${supplierName} voucher to ${civilServantName}. Fees ${formatCurrency(feeAmount)}. Total charged ${formatCurrency(chargeAmount)}.`;
         return {
           paymentId: item.transactionId ?? item.paymentIntentId,
-          amount: voucherAmount,
+          amount: chargeAmount,
           status: toDashboardStatus(String(item.status ?? '')),
           createdAt: item.createdAt,
           paymentType: 'DIGITAL_VOUCHER',
@@ -62,12 +65,18 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
           metadata: {
             civilServantId: item.civilServantId,
             civilServantName,
-            description: `Sent ${formatCurrency(voucherAmount)} ${String(item.supplierName ?? 'Shoprite Checkers')} voucher to ${civilServantName}. Total charged ${formatCurrency(chargeAmount)}.`,
+            voucherAmount,
+            feeAmount,
+            chargeAmount,
+            description,
           },
           raw: {
-            description: `Sent ${formatCurrency(voucherAmount)} ${String(item.supplierName ?? 'Shoprite Checkers')} voucher to ${civilServantName}. Total charged ${formatCurrency(chargeAmount)}.`,
+            description,
             paymentReference: item.paymentIntentId ?? item.transactionId,
             civilServantId: item.civilServantId,
+            voucherAmount,
+            feeAmount,
+            customerChargeAmount: chargeAmount,
           },
         };
       })
