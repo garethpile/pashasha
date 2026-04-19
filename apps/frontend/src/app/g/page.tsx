@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import QRCode from 'qrcode';
 import {
@@ -29,6 +29,12 @@ const formatMoney = (amount: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+
+const normalizePaymentStatus = (status?: string | null) => (status ?? '').trim().toLowerCase();
+const isTerminalPaymentStatus = (status?: string | null) =>
+  ['paid', 'completed', 'successful', 'failed', 'cancelled', 'abandoned', 'error'].includes(
+    normalizePaymentStatus(status)
+  );
 
 const getStatusTone = (status: string | null) => {
   switch ((status ?? '').toLowerCase()) {
@@ -92,7 +98,7 @@ export default function CivilServantPublicPage() {
   useEffect(() => {
     if (!token) return;
     const origin =
-      typeof window === 'undefined' ? 'https://dev.pashasha.com' : window.location.origin;
+      typeof window === 'undefined' ? 'https://www.dev.pashasha.com' : window.location.origin;
     const url = `${origin}/g?token=${encodeURIComponent(token)}`;
     QRCode.toDataURL(url, { width: 160, margin: 1 })
       .then((dataUrl) => setQrDataUrl(dataUrl))
@@ -171,18 +177,20 @@ export default function CivilServantPublicPage() {
     }
   };
 
+  const shouldPollPaymentIntent = useMemo(
+    () => Boolean(paymentIntent?.paymentIntentId) && !isTerminalPaymentStatus(paymentStatus),
+    [paymentIntent?.paymentIntentId, paymentStatus]
+  );
+
   useEffect(() => {
     const paymentIntentId = paymentIntent?.paymentIntentId;
-    if (!paymentIntentId) return;
-    const timer = setInterval(async () => {
-      await pollPaymentStatus(paymentIntentId);
-      if (['paid', 'completed', 'successful'].includes((paymentStatus ?? '').toLowerCase())) {
-        clearInterval(timer);
-      }
+    if (!paymentIntentId || !shouldPollPaymentIntent) return;
+    const timer = setInterval(() => {
+      void pollPaymentStatus(paymentIntentId);
     }, 5000);
     void pollPaymentStatus(paymentIntentId);
     return () => clearInterval(timer);
-  }, [paymentIntent?.paymentIntentId, paymentStatus]);
+  }, [paymentIntent?.paymentIntentId, shouldPollPaymentIntent]);
 
   if (!tokenLoaded) {
     return (

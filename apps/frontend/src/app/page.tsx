@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   DashboardNameCard,
@@ -1024,6 +1024,7 @@ function CustomerDashboard() {
     amount: number;
     totalCharge: number;
   } | null>(null);
+  const completedPaymentIntentIdsRef = useRef<Set<string>>(new Set());
   const [profileForm, setProfileForm] = useState({
     firstName: '',
     familyName: '',
@@ -1149,11 +1150,20 @@ function CustomerDashboard() {
     setPayFeedback(null);
   };
 
+  const markPaymentIntentCompleted = useCallback((paymentIntentId?: string | null) => {
+    if (!paymentIntentId) return false;
+    if (completedPaymentIntentIdsRef.current.has(paymentIntentId)) return true;
+    completedPaymentIntentIdsRef.current.add(paymentIntentId);
+    return false;
+  }, []);
+
   const handlePaymentCompleted = useCallback(
     (latest?: PublicPaymentIntentResponse) => {
+      const paymentIntentId = latest?.paymentIntentId;
+      if (markPaymentIntentCompleted(paymentIntentId)) return;
       const finalVoucherAmount = latest?.voucherAmount ?? feeSummary.voucherAmount;
       const finalTotalCharge = latest?.customerChargeAmount ?? feeSummary.totalCharge;
-      setPaymentIntent(latest ?? paymentIntent);
+      setPaymentIntent((prev) => latest ?? prev);
       setPayFeedback('Payment Successful!');
       setPayPending(false);
       setPayCardOpen(false);
@@ -1172,15 +1182,22 @@ function CustomerDashboard() {
       feeSummary.totalCharge,
       feeSummary.voucherAmount,
       loadSentTransactions,
-      paymentIntent,
+      markPaymentIntentCompleted,
       selectedGuard?.familyName,
       selectedGuard?.firstName,
     ]
   );
 
+  const paymentIntentStatus = normalizePaymentOutcome(paymentIntent?.status);
+  const shouldPollPaymentIntent =
+    Boolean(paymentIntent?.paymentIntentId) &&
+    !['paid', 'completed', 'successful', 'cancelled', 'failed', 'error', 'abandoned'].includes(
+      paymentIntentStatus
+    );
+
   useEffect(() => {
     const paymentIntentId = paymentIntent?.paymentIntentId;
-    if (!paymentIntentId) return;
+    if (!paymentIntentId || !shouldPollPaymentIntent) return;
 
     const poll = async () => {
       try {
@@ -1203,11 +1220,11 @@ function CustomerDashboard() {
     }, 5000);
 
     return () => clearInterval(timer);
-  }, [handlePaymentCompleted, paymentIntent?.paymentIntentId]);
+  }, [handlePaymentCompleted, paymentIntent?.paymentIntentId, shouldPollPaymentIntent]);
 
   useEffect(() => {
     const paymentIntentId = paymentIntent?.paymentIntentId;
-    if (!paymentIntentId) return;
+    if (!paymentIntentId || !shouldPollPaymentIntent) return;
 
     const syncLatestPaymentIntent = async () => {
       try {
@@ -1239,7 +1256,7 @@ function CustomerDashboard() {
       window.removeEventListener('focus', onFocus);
       document.removeEventListener('visibilitychange', onVisibilityChange);
     };
-  }, [handlePaymentCompleted, paymentIntent?.paymentIntentId]);
+  }, [handlePaymentCompleted, paymentIntent?.paymentIntentId, shouldPollPaymentIntent]);
 
   useEffect(() => {
     const handleReturn = (statusValue?: string, paymentIntentId?: string) => {
@@ -1252,7 +1269,7 @@ function CustomerDashboard() {
             : null;
         if (latest) {
           handlePaymentCompleted(latest);
-        } else {
+        } else if (!markPaymentIntentCompleted(paymentIntentId)) {
           setPayFeedback('Payment Successful!');
         }
       } else {
@@ -1287,12 +1304,18 @@ function CustomerDashboard() {
       window.removeEventListener('message', onMessage);
       window.removeEventListener('storage', onStorage);
     };
-  }, [handlePaymentCompleted, paymentIntent, paymentIntent?.paymentIntentId]);
+  }, [
+    handlePaymentCompleted,
+    markPaymentIntentCompleted,
+    paymentIntent,
+    paymentIntent?.paymentIntentId,
+  ]);
 
   const handleSubmitPayment = async () => {
     if (!selectedGuard?.civilServantId || !selectedRecipient) return;
     setPayFeedback(null);
     setPaymentIntent(null);
+    completedPaymentIntentIdsRef.current.clear();
     const amount = activeAmount;
     if (amount === null) {
       setPayFeedback('Choose a voucher denomination.');
