@@ -16,6 +16,13 @@ const env = {
   region: process.env.CDK_DEFAULT_REGION ?? 'af-south-1',
 };
 const environment = process.env.APP_ENV ?? process.env.NODE_ENV ?? 'unknown';
+const normalizedEnvironment = environment.toLowerCase();
+const frontendStackName =
+  normalizedEnvironment === 'prod' || normalizedEnvironment === 'production'
+    ? 'PashashaPayFrontendProdStack'
+    : normalizedEnvironment === 'dev' || normalizedEnvironment === 'development'
+      ? 'PashashaPayFrontendDevStack'
+      : `PashashaPayFrontend${normalizedEnvironment.charAt(0).toUpperCase()}${normalizedEnvironment.slice(1)}Stack`;
 const costCenter = process.env.COST_CENTER;
 const githubOwner = process.env.CICD_GITHUB_OWNER ?? 'garethpile';
 const githubRepo = process.env.CICD_GITHUB_REPO ?? 'pashasha';
@@ -40,6 +47,17 @@ const frontendConfig = {
     process.env.FRONTEND_ENABLE_SSR_LOGGING_ROLE_PATCH === 'true'
       ? true
       : frontendContext.enableSsrLoggingRolePatch,
+  certificateArn: process.env.FRONTEND_CERTIFICATE_ARN ?? frontendContext.certificateArn,
+  domainNames: (() => {
+    const raw = process.env.FRONTEND_DOMAIN_NAMES;
+    if (raw) {
+      return raw
+        .split(',')
+        .map((value) => value.trim())
+        .filter(Boolean);
+    }
+    return Array.isArray(frontendContext.domainNames) ? frontendContext.domainNames : [];
+  })(),
 };
 
 const cicdStack = new PashashaPayCicdStack(app, 'PashashaPayCicdStack', {
@@ -121,7 +139,7 @@ coreBackendStack.addDependency(paymentStack);
 coreBackendStack.addDependency(voucherStack);
 coreBackendStack.addDependency(notificationsStack);
 
-const frontendStack = new PashashaPayFrontendStack(app, 'PashashaPayFrontendStack', {
+const frontendStack = new PashashaPayFrontendStack(app, frontendStackName, {
   env,
   backendEndpoint: coreBackendStack.apiUrl,
   backendSecureEndpoint: coreBackendStack.apiUrl,
@@ -136,6 +154,8 @@ const frontendStack = new PashashaPayFrontendStack(app, 'PashashaPayFrontendStac
   manageDnsRecords: frontendConfig.manageDnsRecords === true,
   enableSsrLoggingRolePatch: frontendConfig.enableSsrLoggingRolePatch === true,
   hostedZoneDomainName: frontendConfig.hostedZoneDomainName,
+  certificateArn: frontendConfig.certificateArn,
+  domainNames: frontendConfig.domainNames,
 });
 applySolutionTags(frontendStack, {
   solution: 'Pashasha',

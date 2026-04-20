@@ -85,7 +85,7 @@ export default function AdministratorManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
+      <div className="flex flex-wrap items-center justify-end gap-3">
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
@@ -109,7 +109,7 @@ export default function AdministratorManagementPage() {
           {admins.map((admin) => (
             <li
               key={admin.username}
-              className="flex items-center justify-between border-b border-slate-100 px-6 py-4 last:border-b-0"
+              className="flex flex-col gap-3 border-b border-slate-100 px-6 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
                 <p className="text-base font-semibold text-slate-900">
@@ -120,7 +120,7 @@ export default function AdministratorManagementPage() {
               <button
                 type="button"
                 onClick={() => handleDelete(admin.username)}
-                className="btn-primary px-4 py-2 text-sm font-semibold text-white"
+                className="btn-primary self-start px-4 py-2 text-sm font-semibold text-white sm:self-auto"
               >
                 Delete
               </button>
@@ -134,7 +134,7 @@ export default function AdministratorManagementPage() {
 
       {showCreateModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="w-full max-w-2xl rounded-3xl bg-white p-6 shadow-2xl">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-xl font-semibold text-slate-900">Create administrator</h3>
               <button

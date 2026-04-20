@@ -172,6 +172,7 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
       TRANSACTIONS_TABLE_NAME: transactionsTable.tableName,
       AUDIT_TABLE_NAME: auditTable.tableName,
       ACCOUNT_SEQUENCES_TABLE_NAME: accountSequencesTable.tableName,
+      USER_POOL_ID: userPool.userPoolId,
       PAYMENT_API_URL: props.paymentApiUrl ?? '',
       VOUCHER_API_URL: props.voucherApiUrl ?? '',
       NOTIFICATIONS_API_URL: props.notificationsApiUrl ?? '',
@@ -221,6 +222,27 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
         ...runtimeEnv,
         COGNITO_USER_POOL_ID: userPool.userPoolId,
       },
+    });
+    const listAdministratorsFn = new lambdaNodejs.NodejsFunction(this, 'ListAdministratorsFn', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(handlersRoot, 'listAdministrators.ts'),
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(20),
+      environment: runtimeEnv,
+    });
+    const createAdministratorFn = new lambdaNodejs.NodejsFunction(this, 'CreateAdministratorFn', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(handlersRoot, 'createAdministrator.ts'),
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(20),
+      environment: runtimeEnv,
+    });
+    const deleteAdministratorFn = new lambdaNodejs.NodejsFunction(this, 'DeleteAdministratorFn', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      entry: path.join(handlersRoot, 'deleteAdministrator.ts'),
+      handler: 'handler',
+      timeout: cdk.Duration.seconds(20),
+      environment: runtimeEnv,
     });
     const signupFn = new lambdaNodejs.NodejsFunction(this, 'SignupFn', {
       runtime: lambda.Runtime.NODEJS_20_X,
@@ -539,6 +561,30 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
       integration: new integrations.HttpLambdaIntegration('CheckEmailIntegration', checkEmailFn),
     });
     api.addRoutes({
+      path: '/admin/users/administrators',
+      methods: [apigwv2.HttpMethod.GET],
+      integration: new integrations.HttpLambdaIntegration(
+        'ListAdministratorsIntegration',
+        listAdministratorsFn
+      ),
+    });
+    api.addRoutes({
+      path: '/admin/users/administrators',
+      methods: [apigwv2.HttpMethod.POST],
+      integration: new integrations.HttpLambdaIntegration(
+        'CreateAdministratorIntegration',
+        createAdministratorFn
+      ),
+    });
+    api.addRoutes({
+      path: '/admin/users/administrators/{username}',
+      methods: [apigwv2.HttpMethod.DELETE],
+      integration: new integrations.HttpLambdaIntegration(
+        'DeleteAdministratorIntegration',
+        deleteAdministratorFn
+      ),
+    });
+    api.addRoutes({
       path: '/auth/signup',
       methods: [apigwv2.HttpMethod.POST],
       integration: new integrations.HttpLambdaIntegration('SignupIntegration', signupFn),
@@ -713,6 +759,13 @@ export class PashashaPayCoreBackendStack extends cdk.Stack {
     transactionsTable.grantReadWriteData(markPaymentCompletionFailedFn);
     adminApiKeySecret.grantRead(createCivilServantFn);
     userPool.grant(checkEmailFn, 'cognito-idp:ListUsers');
+    userPool.grant(listAdministratorsFn, 'cognito-idp:ListUsersInGroup');
+    userPool.grant(listAdministratorsFn, 'cognito-idp:GetUser');
+    userPool.grant(createAdministratorFn, 'cognito-idp:AdminCreateUser');
+    userPool.grant(createAdministratorFn, 'cognito-idp:AdminAddUserToGroup');
+    userPool.grant(createAdministratorFn, 'cognito-idp:GetUser');
+    userPool.grant(deleteAdministratorFn, 'cognito-idp:AdminDeleteUser');
+    userPool.grant(deleteAdministratorFn, 'cognito-idp:GetUser');
     userPool.grant(signupFn, 'cognito-idp:SignUp');
     userPool.grant(signupFn, 'cognito-idp:AdminAddUserToGroup');
     userPool.grant(confirmSignupFn, 'cognito-idp:ConfirmSignUp');

@@ -15,6 +15,8 @@ export AWS_DEFAULT_REGION
 export CDK_DEFAULT_REGION
 export APP_ENV
 
+FRONTEND_STACK_NAME="${FRONTEND_STACK_NAME:-PashashaPayFrontendTestStack}"
+
 ACTIVE_AWS_AUTH="ambient credentials"
 if [[ -n "${AWS_PROFILE:-}" ]]; then
   export AWS_PROFILE
@@ -92,11 +94,11 @@ log "Building frontend against deployed af-south-1 endpoints"
   npm run build --workspace frontend
 )
 
-log "Deploying frontend stack"
-(cd "$CDK_DIR" && npx cdk deploy --require-approval never PashashaPayFrontendStack)
+log "Deploying frontend stack $FRONTEND_STACK_NAME"
+(cd "$CDK_DIR" && npx cdk deploy --require-approval never "$FRONTEND_STACK_NAME")
 
-FRONTEND_URL="$(stack_output PashashaPayFrontendStack FrontendUrl)"
-FRONTEND_DISTRIBUTION_DOMAIN_NAME="$(stack_output PashashaPayFrontendStack FrontendDistributionDomainName)"
+FRONTEND_URL="$(stack_output "$FRONTEND_STACK_NAME" FrontendUrl)"
+FRONTEND_DISTRIBUTION_DOMAIN_NAME="$(stack_output "$FRONTEND_STACK_NAME" FrontendDistributionDomainName)"
 
 log "Deployment complete"
 printf "\nCore API: %s\n" "$CORE_API_URL"

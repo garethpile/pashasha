@@ -27,26 +27,43 @@ import { CivilServantProfileCard } from '../components/dashboard/civil-servant-p
 const OZOW_FEE_AMOUNT = 1.5;
 const PLATFORM_FEE_AMOUNT = 1;
 
-const normalizePaymentOutcome = (status?: string | null) => (status ?? '').trim().toLowerCase();
+const normalizePaymentOutcome = (status?: string | null) => {
+  const normalized = (status ?? '').trim().toLowerCase();
+  if (['success', 'successful', 'paid', 'completed'].includes(normalized)) return 'successful';
+  if (['cancelled', 'canceled'].includes(normalized)) return 'cancelled';
+  if (['failed', 'failure', 'error'].includes(normalized)) return 'failed';
+  if (normalized === 'abandoned') return 'abandoned';
+  if (
+    ['pending-investigation', 'pending investigation', 'pending_investigation'].includes(normalized)
+  ) {
+    return 'pending-investigation';
+  }
+  if (['pending', 'pending-payment'].includes(normalized)) return 'pending';
+  return normalized;
+};
+
+const isSuccessfulPaymentOutcome = (status?: string | null) =>
+  normalizePaymentOutcome(status) === 'successful';
+
+const isTerminalPaymentOutcome = (status?: string | null) =>
+  ['successful', 'cancelled', 'failed', 'abandoned', 'pending-investigation'].includes(
+    normalizePaymentOutcome(status)
+  );
 
 const getPaymentFeedback = (status?: string | null) => {
   switch (normalizePaymentOutcome(status)) {
-    case 'paid':
-    case 'completed':
     case 'successful':
       return 'Payment Successful!';
     case 'cancelled':
       return 'Payment cancelled.';
     case 'failed':
-    case 'error':
       return 'Payment failed.';
     case 'abandoned':
       return 'Payment abandoned.';
     case 'pending-investigation':
-      return 'Payment pending investigation.';
+      return 'Payment pending investigation. We will only complete the voucher once OZOW clears it.';
     case 'pending':
-    case 'pending-payment':
-      return 'Awaiting payment.';
+      return 'Awaiting payment confirmation from OZOW.';
     default:
       return null;
   }
@@ -935,7 +952,7 @@ const PaymentSuccessModal = ({
   onClose: () => void;
 }) => (
   <div
-    className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 px-4"
+    className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 sm:px-6"
     role="dialog"
     aria-modal="true"
     onClick={onClose}
@@ -943,23 +960,25 @@ const PaymentSuccessModal = ({
     tabIndex={-1}
   >
     <div
-      className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+      className="mx-auto w-full max-w-md rounded-[2rem] bg-white p-5 shadow-2xl sm:p-6"
       onClick={(e) => e.stopPropagation()}
     >
-      <h3 className="text-2xl font-semibold text-emerald-700">Payment Successful!</h3>
-      <p className="mt-3 text-sm text-slate-700">
+      <h3 className="text-xl font-semibold leading-tight text-emerald-700 sm:text-2xl">
+        Payment Successful!
+      </h3>
+      <p className="mt-3 break-words text-sm leading-6 text-slate-700">
         PashashaPay has sent {civilServantName} a {formatCurrency(amount)} Shoprite Checkers
         voucher.
       </p>
-      <p className="mt-2 text-sm text-slate-600">
+      <p className="mt-2 text-sm leading-6 text-slate-600">
         Total charged:{' '}
         <span className="font-semibold text-slate-900">{formatCurrency(totalCharge)}</span>
       </p>
-      <div className="mt-6 flex justify-end">
+      <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onClose}
-          className="rounded-full bg-orange-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600"
+          className="w-full rounded-full bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 sm:w-auto sm:min-w-28"
         >
           Close
         </button>
@@ -1190,10 +1209,7 @@ function CustomerDashboard() {
 
   const paymentIntentStatus = normalizePaymentOutcome(paymentIntent?.status);
   const shouldPollPaymentIntent =
-    Boolean(paymentIntent?.paymentIntentId) &&
-    !['paid', 'completed', 'successful', 'cancelled', 'failed', 'error', 'abandoned'].includes(
-      paymentIntentStatus
-    );
+    Boolean(paymentIntent?.paymentIntentId) && !isTerminalPaymentOutcome(paymentIntentStatus);
 
   useEffect(() => {
     const paymentIntentId = paymentIntent?.paymentIntentId;
@@ -1204,7 +1220,7 @@ function CustomerDashboard() {
         const latest = await corePublicApi.getPaymentIntent(paymentIntentId);
         setPaymentIntent(latest);
         const status = normalizePaymentOutcome(latest.status);
-        if (['paid', 'completed', 'successful'].includes(status)) {
+        if (isSuccessfulPaymentOutcome(status)) {
           handlePaymentCompleted(latest);
         } else {
           setPayFeedback(getPaymentFeedback(status));
@@ -1231,7 +1247,7 @@ function CustomerDashboard() {
         const latest = await corePublicApi.getPaymentIntent(paymentIntentId);
         setPaymentIntent(latest);
         const status = normalizePaymentOutcome(latest.status);
-        if (['paid', 'completed', 'successful'].includes(status)) {
+        if (isSuccessfulPaymentOutcome(status)) {
           handlePaymentCompleted(latest);
         } else {
           setPayFeedback(getPaymentFeedback(status));
@@ -1261,8 +1277,8 @@ function CustomerDashboard() {
   useEffect(() => {
     const handleReturn = (statusValue?: string, paymentIntentId?: string) => {
       if (!paymentIntentId || paymentIntentId !== paymentIntent?.paymentIntentId) return;
-      const status = (statusValue ?? '').toLowerCase();
-      if (status === 'success') {
+      const status = normalizePaymentOutcome(statusValue);
+      if (isSuccessfulPaymentOutcome(status)) {
         const latest =
           paymentIntent && paymentIntent.paymentIntentId === paymentIntentId
             ? { ...paymentIntent, status: 'successful' }

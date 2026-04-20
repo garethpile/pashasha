@@ -14,13 +14,13 @@
     "deploy:payment": "AWS_PROFILE=aws-af-south-1-dev cdk deploy PashashaPayPaymentStack",
     "deploy:notifications": "AWS_PROFILE=aws-af-south-1-dev cdk deploy PashashaPayNotificationsStack",
     "deploy:voucher": "AWS_PROFILE=aws-af-south-1-dev cdk deploy PashashaPayVoucherStack",
-    "deploy:frontend": "AWS_PROFILE=aws-af-south-1-dev cdk deploy PashashaPayFrontendStack",
+    "deploy:frontend": "AWS_PROFILE=aws-af-south-1-dev cdk deploy PashashaPayFrontendDevStack",
     "destroy:cicd": "AWS_PROFILE=aws-af-south-1-dev cdk destroy PashashaPayCicdStack",
     "destroy:core": "AWS_PROFILE=aws-af-south-1-dev cdk destroy PashashaPayCoreBackendStack",
     "destroy:payment": "AWS_PROFILE=aws-af-south-1-dev cdk destroy PashashaPayPaymentStack",
     "destroy:notifications": "AWS_PROFILE=aws-af-south-1-dev cdk destroy PashashaPayNotificationsStack",
     "destroy:voucher": "AWS_PROFILE=aws-af-south-1-dev cdk destroy PashashaPayVoucherStack",
-    "destroy:frontend": "AWS_PROFILE=aws-af-south-1-dev cdk destroy PashashaPayFrontendStack"
+    "destroy:frontend": "AWS_PROFILE=aws-af-south-1-dev cdk destroy PashashaPayFrontendDevStack"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",

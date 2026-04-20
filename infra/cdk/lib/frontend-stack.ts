@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
 import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as route53 from 'aws-cdk-lib/aws-route53';
@@ -22,6 +23,8 @@ export interface PashashaPayFrontendStackProps extends cdk.StackProps {
   readonly frontendSecretsArn?: string;
   readonly hostedZoneDomainName?: string;
   readonly manageDnsRecords?: boolean;
+  readonly certificateArn?: string;
+  readonly domainNames?: string[];
 }
 
 export class PashashaPayFrontendStack extends cdk.Stack {
@@ -67,8 +70,15 @@ function handler(event) {
       ),
     });
 
+    const certificate = props.certificateArn
+      ? acm.Certificate.fromCertificateArn(this, 'FrontendCertificate', props.certificateArn)
+      : undefined;
+    const customDomainNames = (props.domainNames ?? []).filter(Boolean);
+
     const distribution = new cloudfront.Distribution(this, 'FrontendDistribution', {
       defaultRootObject: 'index.html',
+      certificate,
+      domainNames: customDomainNames.length > 0 ? customDomainNames : undefined,
       defaultBehavior: {
         origin: new origins.S3Origin(siteBucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
@@ -147,6 +157,12 @@ function handler(event) {
     new cdk.CfnOutput(this, 'FrontendUrl', {
       value: `https://${distribution.distributionDomainName}`,
     });
+
+    if (customDomainNames.length > 0) {
+      new cdk.CfnOutput(this, 'FrontendCustomDomains', {
+        value: customDomainNames.join(','),
+      });
+    }
 
     this.siteBucket = siteBucket;
     this.distribution = distribution;

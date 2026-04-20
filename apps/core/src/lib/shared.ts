@@ -7,8 +7,12 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
 import {
-  CognitoIdentityProviderClient,
+  AdminAddUserToGroupCommand,
+  AdminCreateUserCommand,
+  AdminDeleteUserCommand,
   GetUserCommand,
+  CognitoIdentityProviderClient,
+  ListUsersInGroupCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 import { randomUUID, timingSafeEqual } from 'crypto';
 import type { APIGatewayProxyEventV2 } from 'aws-lambda';
@@ -247,6 +251,122 @@ export const getBearerToken = (event: APIGatewayProxyEventV2): string | null => 
   const [scheme, token] = raw.split(' ');
   if (scheme?.toLowerCase() !== 'bearer' || !token) return null;
   return token.trim();
+};
+
+export const decodeJwtPayload = (token: string): Record<string, any> => {
+  const [, payload = ''] = token.split('.');
+  const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - (normalized.length % 4 || 4)) % 4);
+  return JSON.parse(Buffer.from(padded, 'base64').toString('utf8')) as Record<string, any>;
+};
+
+export const requireAdministratorUser = async (event: APIGatewayProxyEventV2) => {
+  const accessToken = getBearerToken(event);
+  if (!accessToken) {
+    throw new Error('Missing bearer token.');
+  }
+  const payload = decodeJwtPayload(accessToken);
+  const groups = Array.isArray(payload['cognito:groups'])
+    ? payload['cognito:groups'].map(String)
+    : payload['cognito:groups']
+      ? [String(payload['cognito:groups'])]
+      : [];
+  if (!groups.includes('Administrators')) {
+    throw new Error('Forbidden');
+  }
+  return getCurrentCognitoUser(event);
+};
+
+export const listAdministratorUsers = async () => {
+  const response = await cognito.send(
+    new ListUsersInGroupCommand({
+      UserPoolId: requireEnv('USER_POOL_ID'),
+      GroupName: 'Administrators',
+      Limit: 60,
+    })
+  );
+
+  return (response.Users ?? []).map((user) => {
+    const attributes = Object.fromEntries(
+      (user.Attributes ?? []).map((attribute) => [attribute.Name ?? '', attribute.Value ?? ''])
+    );
+    return {
+      username: user.Username ?? attributes.email ?? '',
+      firstName: attributes.given_name ?? '',
+      familyName: attributes.family_name ?? '',
+      emailLower: (attributes.email ?? '').toLowerCase(),
+      phoneNumber: attributes.phone_number ?? '',
+      createdAt: user.UserCreateDate?.toISOString?.(),
+      status: user.UserStatus,
+      enabled: user.Enabled,
+    };
+  });
+};
+
+export const createAdministratorUser = async (input: {
+  firstName: string;
+  familyName: string;
+  email: string;
+  phoneNumber?: string;
+  password?: string;
+}) => {
+  const username = input.email.trim().toLowerCase();
+  if (!username) {
+    throw new Error('Email is required.');
+  }
+  const temporaryPassword =
+    input.password?.trim() ||
+    `${Math.random().toString(36).slice(2, 8)}A!9${Date.now().toString().slice(-4)}`;
+
+  const attributes = [
+    { Name: 'email', Value: username },
+    { Name: 'email_verified', Value: 'true' },
+    { Name: 'given_name', Value: input.firstName },
+    { Name: 'family_name', Value: input.familyName },
+  ];
+  if (input.phoneNumber?.trim()) {
+    attributes.push({ Name: 'phone_number', Value: input.phoneNumber.trim() });
+  }
+
+  const created = await cognito.send(
+    new AdminCreateUserCommand({
+      UserPoolId: requireEnv('USER_POOL_ID'),
+      Username: username,
+      TemporaryPassword: temporaryPassword,
+      MessageAction: 'SUPPRESS',
+      UserAttributes: attributes,
+    })
+  );
+
+  await cognito.send(
+    new AdminAddUserToGroupCommand({
+      UserPoolId: requireEnv('USER_POOL_ID'),
+      Username: username,
+      GroupName: 'Administrators',
+    })
+  );
+
+  const attributesMap = Object.fromEntries(
+    (created.User?.Attributes ?? []).map((attribute) => [
+      attribute.Name ?? '',
+      attribute.Value ?? '',
+    ])
+  );
+
+  return {
+    username,
+    temporaryPassword,
+    sub: attributesMap.sub ?? '',
+  };
+};
+
+export const deleteAdministratorUser = async (username: string) => {
+  await cognito.send(
+    new AdminDeleteUserCommand({
+      UserPoolId: requireEnv('USER_POOL_ID'),
+      Username: username,
+    })
+  );
 };
 
 export const getCurrentCognitoUser = async (event: APIGatewayProxyEventV2) => {

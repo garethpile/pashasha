@@ -179,10 +179,10 @@ export const adminApi = {
     const query = new URLSearchParams();
     if (params?.limit !== undefined) query.set('limit', String(params.limit));
     const suffix = query.toString() ? `?${query.toString()}` : '';
-    return request<AdminVoucher[]>(`/admin/vouchers${suffix}`);
+    return request<AdminVoucher[]>(`/api/admin/vouchers/inventory${suffix}`);
   },
   ingestShopriteCheckersVoucher: (payload: { smsText: string }) =>
-    request<AdminVoucher>(`/admin/vouchers/suppliers/shoprite-checkers/ingest`, {
+    request<AdminVoucher>(`/api/admin/vouchers/suppliers/shoprite-checkers/ingest`, {
       method: 'POST',
       body: JSON.stringify(payload),
     }),

@@ -10,7 +10,9 @@ type Stage = 'login' | 'forceChange' | 'forgotRequest' | 'forgotConfirm';
 
 function normalizeChallengeAttributes(attributes: Record<string, string>) {
   const next = { ...attributes };
+  delete next.email;
   delete next.email_verified;
+  delete next.phone_number;
   delete next.phone_number_verified;
   delete next.sub;
   return next;

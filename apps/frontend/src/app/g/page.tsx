@@ -30,23 +30,33 @@ const formatMoney = (amount: number) =>
     maximumFractionDigits: 2,
   }).format(amount);
 
-const normalizePaymentStatus = (status?: string | null) => (status ?? '').trim().toLowerCase();
+const normalizePaymentStatus = (status?: string | null) => {
+  const normalized = (status ?? '').trim().toLowerCase();
+  if (['success', 'successful', 'paid', 'completed'].includes(normalized)) return 'successful';
+  if (['cancelled', 'canceled'].includes(normalized)) return 'cancelled';
+  if (['failed', 'failure', 'error'].includes(normalized)) return 'failed';
+  if (normalized === 'abandoned') return 'abandoned';
+  if (
+    ['pending-investigation', 'pending investigation', 'pending_investigation'].includes(normalized)
+  ) {
+    return 'pending-investigation';
+  }
+  if (['pending', 'pending-payment'].includes(normalized)) return 'pending';
+  return normalized;
+};
 const isTerminalPaymentStatus = (status?: string | null) =>
-  ['paid', 'completed', 'successful', 'failed', 'cancelled', 'abandoned', 'error'].includes(
+  ['successful', 'failed', 'cancelled', 'abandoned', 'pending-investigation'].includes(
     normalizePaymentStatus(status)
   );
 
 const getStatusTone = (status: string | null) => {
-  switch ((status ?? '').toLowerCase()) {
-    case 'completed':
+  switch (normalizePaymentStatus(status)) {
     case 'successful':
-    case 'paid':
       return 'border-emerald-200 bg-emerald-50 text-emerald-900';
     case 'pending-investigation':
       return 'border-amber-200 bg-amber-50 text-amber-900';
     case 'pending':
-    case 'pending-payment':
-      return 'border-amber-200 bg-amber-50 text-amber-900';
+      return 'border-sky-200 bg-sky-50 text-sky-900';
     case 'abandoned':
     case 'failed':
     case 'cancelled':
@@ -138,7 +148,7 @@ export default function CivilServantPublicPage() {
         });
 
         setPaymentIntent(result);
-        setPaymentStatus(result.status);
+        setPaymentStatus(normalizePaymentStatus(result.status));
 
         if (result.redirectUrl) {
           if (checkoutWindow) {
@@ -171,7 +181,7 @@ export default function CivilServantPublicPage() {
     try {
       const data = await corePublicApi.getPaymentIntent(paymentIntentId);
       setPaymentIntent(data);
-      setPaymentStatus(data.status);
+      setPaymentStatus(normalizePaymentStatus(data.status));
     } catch {
       // ignore
     }
@@ -370,7 +380,7 @@ export default function CivilServantPublicPage() {
             )}
             <p className="text-xs text-slate-700">
               {feedback ??
-                'Payment opens in a new tab. This page will keep polling the transaction status.'}
+                'Payment opens in a new tab. This page will keep polling the transaction status until OZOW confirms, cancels, abandons, or flags the payment for investigation.'}
             </p>
           </div>
 
@@ -390,6 +400,18 @@ export default function CivilServantPublicPage() {
                   >
                     refresh now
                   </button>
+                </p>
+              )}
+              {paymentStatus === 'pending-investigation' && (
+                <p className="mt-2 text-xs text-amber-900">
+                  OZOW has flagged this payment for review. Voucher fulfilment stays on hold until
+                  the payment is cleared.
+                </p>
+              )}
+              {paymentStatus === 'pending' && (
+                <p className="mt-2 text-xs text-sky-900">
+                  OZOW has not finalised this payment yet. Keep this page open or refresh again
+                  shortly.
                 </p>
               )}
             </div>
