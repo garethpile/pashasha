@@ -27,15 +27,48 @@
   },
   "devDependencies": {
     "husky": "^9.0.11",
-    "lint-staged": "^15.2.10",
+    "lint-staged": "^16.4.0",
     "npm-run-all": "^4.1.5",
-    "prettier": "^3.4.2",
-    "puppeteer": "^24.32.1",
+    "prettier": "^3.8.3",
+    "puppeteer": "^24.42.0",
     "typescript": "5.6.3"
   },
   "overrides": {
     "typescript": "5.6.3",
     "@nestjs/common": "11.1.11",
-    "@nestjs/core": "11.1.11"
+    "@nestjs/core": "11.1.11",
+    "flatted": "3.4.2",
+    "yaml": "2.8.3",
+    "picomatch": "4.0.4",
+    "anymatch": {
+      "picomatch": "2.3.2"
+    },
+    "micromatch": {
+      "picomatch": "2.3.2"
+    },
+    "readdirp": {
+      "picomatch": "2.3.2"
+    },
+    "npm-run-all": {
+      "minimatch": "3.1.5"
+    },
+    "eslint-plugin-import": {
+      "minimatch": "3.1.5"
+    },
+    "eslint-plugin-jsx-a11y": {
+      "minimatch": "3.1.5"
+    },
+    "eslint-plugin-react": {
+      "minimatch": "3.1.5"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "9.0.7"
+    },
+    "minimatch@3": {
+      "brace-expansion": "1.1.13"
+    },
+    "minimatch@9": {
+      "brace-expansion": "2.0.3"
+    }
   }
 }
