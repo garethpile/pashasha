@@ -24,6 +24,9 @@ jobs:
       CDK_DEFAULT_REGION: af-south-1
       APP_ENV: prod
       FRONTEND_HOSTED_ZONE_DOMAIN_NAME: ${{ vars.FRONTEND_HOSTED_ZONE_DOMAIN_NAME }}
+      FRONTEND_DOMAIN_NAMES: ${{ vars.FRONTEND_DOMAIN_NAMES }}
+      FRONTEND_CERTIFICATE_ARN: ${{ vars.FRONTEND_CERTIFICATE_ARN }}
+      FRONTEND_MANAGE_DNS_RECORDS: ${{ vars.FRONTEND_MANAGE_DNS_RECORDS }}
       FRONTEND_BRANCH_NAME: ${{ vars.FRONTEND_BRANCH_NAME }}
       FRONTEND_REPOSITORY_OWNER: ${{ vars.FRONTEND_REPOSITORY_OWNER }}
       FRONTEND_REPOSITORY_NAME: ${{ vars.FRONTEND_REPOSITORY_NAME }}
@@ -75,7 +78,7 @@ jobs:
         run: |
           FRONTEND_URL=$(aws cloudformation describe-stacks \
             --region af-south-1 \
-            --stack-name PashashaPayFrontendStack \
+            --stack-name PashashaPayFrontendProdStack \
             --query "Stacks[0].Outputs[?OutputKey=='FrontendUrl'].OutputValue" \
             --output text)
           curl -fsSL "${FRONTEND_URL%/}" >/dev/null
